@@ -50,11 +50,11 @@ public class MainObjectInternals {
                 } catch (IllegalAccessException e) {
                     out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
                     out.println();
-                    out.println(ClassLayout.parseClass(klass));
+                    out.println(ClassLayout.parseClass(klass).toPrintable());
                 } catch (InstantiationException e) {
                     out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
                     out.println();
-                    out.println(ClassLayout.parseClass(klass));
+                    out.println(ClassLayout.parseClass(klass).toPrintable());
                 }
             } catch (Throwable t) {
                 t.printStackTrace(System.err);
