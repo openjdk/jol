@@ -101,7 +101,7 @@ public class JOLSample_18_Layouts {
 
         @Override
         public int compareTo(Dummy o) {
-            return Integer.compare(id, o.id);
+            return (id < o.id) ? -1 : ((id == o.id) ? 0 : 1);
         }
     }
 

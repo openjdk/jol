@@ -28,7 +28,7 @@ import org.openjdk.jol.info.GraphLayout;
 import org.openjdk.jol.util.VMSupport;
 
 import java.io.PrintWriter;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 import static java.lang.System.out;
 
@@ -121,7 +121,8 @@ public class JOLSample_20_Roots {
                 pw.println(GraphLayout.parseInstance(r).toPrintable());
 
                 // select another link
-                for (int c = 0; c < ThreadLocalRandom.current().nextInt(100); c++) {
+                Random random = new Random();
+                for (int c = 0; c < random.nextInt(100); c++) {
                     r = r.link();
                 }
 
