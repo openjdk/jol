@@ -1,0 +1,161 @@
+Java Object Layout (JOL)
+---------------------------------------------------------------------
+
+These are the tiny tools to analyze object layout schemes in JVMs.
+These tools are using Unsafe heavily to deduce the *actual* object
+layout and footprint. This makes the tools much more accurate than
+others relying on heap dumps, specification assumptions, etc.
+
+Source compile:
+  $ mvn clean install
+
+The project workspace is arranged as follows:
+
+  a) jol-core:    the core functionality, which is suitable to
+                  be used as the dependency for the headless tools
+
+  b) jol-cli:     the command line utilities using the core, generally
+                  suitable for end users, see the usages below
+
+  c) jol-samples: sample programs showing off the kinds of information
+                  available with the help of JOL
+
+Command line tools:
+
+*) Get the object internals, that is, the field layout within the object,
+   header information, field values, the data on alignment losses.
+
+    $ java -jar jol-cli/target/jol-internals.jar java.util.HashMap
+        Running 64-bit HotSpot VM.
+        Using compressed references with 3-bit shift.
+        Objects are 8 bytes aligned.
+
+        java.util.HashMap object internals:
+         OFFSET  SIZE       TYPE DESCRIPTION                    VALUE
+              0     4            (object header)                01 00 00 00 (00000001 00000000 00000000 00000000)
+              4     4            (object header)                00 00 00 00 (00000000 00000000 00000000 00000000)
+              8     4            (object header)                0f 0f 3e e0 (00001111 00001111 00111110 11100000)
+             12     4        Set AbstractMap.keySet             null
+             16     4 Collection AbstractMap.values             null
+             20     4        int HashMap.size                   0
+             24     4        int HashMap.threshold              16
+             28     4      float HashMap.loadFactor             0.75
+             32     4        int HashMap.modCount               0
+             36     4        int HashMap.hashSeed               0
+             40     4    Entry[] HashMap.table                  []
+             44     4        Set HashMap.entrySet               null
+        Instance size: 48 bytes (estimated, add this JAR via -javaagent: to get accurate result)
+        Space losses: 0 bytes internal + 0 bytes external = 0 bytes total
+
+*) Get the object externals, that is, the objects reachable from the instance,
+   their addresses, paths through the reachability grapsh, etc (is is more
+   convenient with API though):
+
+    $ java -jar jol-cli/target/jol-externals.jar java.util.concurrent.ConcurrentHashMap
+        Running 64-bit HotSpot VM.
+        Using compressed references with 3-bit shift.
+        Objects are 8 bytes aligned.
+
+        java.util.concurrent.ConcurrentHashMap@1436183764 object externals:
+                  ADDRESS       SIZE TYPE                                                 PATH
+                7ad137ff8         48 java.util.concurrent.ConcurrentHashMap
+                7ad138028         40 java.util.concurrent.ConcurrentHashMap$Segment       .segments[0]
+                7ad138050         24 [Ljava.util.concurrent.ConcurrentHashMap$HashEntry;  .segments[0].table
+                7ad138068         32 java.util.concurrent.locks.ReentrantLock$NonfairSync .segments[0].sync
+                7ad138088         80 [Ljava.util.concurrent.ConcurrentHashMap$Segment;    .segments
+
+
+*) Get the object footprint estimate, same as the object externals, but tabulated:
+
+    $ java -jar jol-cli/target/jol-footprint.jar java.lang.Thread
+        Running 64-bit HotSpot VM.
+        Using compressed references with 3-bit shift.
+        Objects are 8 bytes aligned.
+
+        java.lang.Thread instance footprint:
+         COUNT   AVG   SUM DESCRIPTION
+             4    22    88 [B
+           155    69 10720 [C
+             2    24    48 [Ljava.lang.Class;
+             (.................)
+             1    24    24 sun.nio.cs.UTF_8
+             1    40    40 sun.nio.cs.UTF_8$Decoder
+             2    48    96 sun.nio.cs.UTF_8$Encoder
+           952       37464 (total)
+
+
+*) Get the estimated object layout in different VM modes (EXPERIMENTAL):
+
+    $ java -jar jol-cli/target/jol-estimates.jar java.math.BigInteger
+        ***** 32-bit VM: **********************************************************
+        java.math.BigInteger object internals:
+         OFFSET  SIZE  TYPE DESCRIPTION                    VALUE
+              0     8       (object header)                N/A
+              8     4   int BigInteger.signum              N/A
+             12     4 int[] BigInteger.mag                 N/A
+             16     4   int BigInteger.bitCount            N/A
+             20     4   int BigInteger.bitLength           N/A
+             24     4   int BigInteger.lowestSetBit        N/A
+             28     4   int BigInteger.firstNonzeroIntNum  N/A
+        Instance size: 32 bytes (estimated, the sample instance is not available)
+        Space losses: 0 bytes internal + 0 bytes external = 0 bytes total
+
+        ***** 64-bit VM: **********************************************************
+        java.math.BigInteger object internals:
+         OFFSET  SIZE  TYPE DESCRIPTION                    VALUE
+              0    16       (object header)                N/A
+             16     8 int[] BigInteger.mag                 N/A
+             24     4   int BigInteger.signum              N/A
+             28     4   int BigInteger.bitCount            N/A
+             32     4   int BigInteger.bitLength           N/A
+             36     4   int BigInteger.lowestSetBit        N/A
+             40     4   int BigInteger.firstNonzeroIntNum  N/A
+             44     4       (loss due to the next object alignment)
+        Instance size: 48 bytes (estimated, the sample instance is not available)
+        Space losses: 0 bytes internal + 4 bytes external = 4 bytes total
+
+        ***** 64-bit VM, compressed references enabled: ***************************
+        java.math.BigInteger object internals:
+         OFFSET  SIZE  TYPE DESCRIPTION                    VALUE
+              0    12       (object header)                N/A
+             12     4   int BigInteger.signum              N/A
+             16     4 int[] BigInteger.mag                 N/A
+             20     4   int BigInteger.bitCount            N/A
+             24     4   int BigInteger.bitLength           N/A
+             28     4   int BigInteger.lowestSetBit        N/A
+             32     4   int BigInteger.firstNonzeroIntNum  N/A
+             36     4       (loss due to the next object alignment)
+        Instance size: 40 bytes (estimated, the sample instance is not available)
+        Space losses: 0 bytes internal + 4 bytes external = 4 bytes total
+
+
+*) Consume the heap dump and figure the perceived footprint in different VM
+   modes (EXPERIMENTAL):
+
+    $ java -jar jol-cli/target/jol-heapdump.jar heapdump.hprof
+        Heap Dump: heapdump.hprof
+        Estimated heap consumed, bytes:
+                    173,564,985: Raw data (X32 model)
+                    179,480,339: VM Layout Simulation (X32 model)
+        -0.000%     179,480,067: VM Layout Simulation (X32 model, hierarchy gaps)
+        -0.000%     179,480,043: VM Layout Simulation (X32 model, super gaps)
+        -2.692%     174,649,167: VM Layout Simulation (X32 model, autoalign)
+        -2.693%     174,647,815: VM Layout Simulation (X32 model, hierarchy gaps, autoalign)
+        -2.693%     174,647,803: VM Layout Simulation (X32 model, super gaps, autoalign)
+
+                    232,120,233: Raw data (X64 model)
+                    237,629,451: VM Layout Simulation (X64 model)
+        -0.000%     237,629,155: VM Layout Simulation (X64 model, hierarchy gaps)
+        -0.001%     237,626,779: VM Layout Simulation (X64 model, super gaps)
+        -0.059%     237,488,735: VM Layout Simulation (X64 model, autoalign)
+        -0.059%     237,488,439: VM Layout Simulation (X64 model, hierarchy gaps, autoalign)
+        -0.060%     237,486,063: VM Layout Simulation (X64 model, super gaps, autoalign)
+
+                    190,397,793: Raw data (X64 model (compressed oops))
+                    199,205,031: VM Layout Simulation (X64 model (compressed oops))
+        -0.001%     199,202,303: VM Layout Simulation (X64 model (compressed oops), hierarchy gaps)
+        -0.014%     199,177,791: VM Layout Simulation (X64 model (compressed oops), super gaps)
+        -3.845%     191,544,859: VM Layout Simulation (X64 model (compressed oops), autoalign)
+        -3.846%     191,543,211: VM Layout Simulation (X64 model (compressed oops), hierarchy gaps, autoalign)
+        -3.859%     191,518,687: VM Layout Simulation (X64 model (compressed oops), super gaps, autoalign)
+
