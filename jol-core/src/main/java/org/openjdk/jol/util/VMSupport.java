@@ -96,6 +96,14 @@ public class VMSupport {
                 }
         );
 
+        OBJECT_ARRAY_BASE = U.arrayBaseOffset(Object[].class);
+        BUFFERS = new ThreadLocal<Object[]>() {
+            @Override
+            protected Object[] initialValue() {
+                return new Object[1];
+            }
+        };
+
         int headerSize;
         try {
             long off1 = U.objectFieldOffset(HeaderClass.class.getField("b1"));
@@ -122,15 +130,6 @@ public class VMSupport {
         INT_SIZE = opts.sizeInt;
         LONG_SIZE = opts.sizeLong;
         SHORT_SIZE = opts.sizeShort;
-
-        OBJECT_ARRAY_BASE = U.arrayBaseOffset(Object[].class);
-
-        BUFFERS = new ThreadLocal<Object[]>() {
-            @Override
-            protected Object[] initialValue() {
-                return new Object[1];
-            }
-        };
     }
 
     public static long toNativeAddress(long address) {
