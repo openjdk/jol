@@ -345,6 +345,14 @@ public class VMSupport {
             this.compressRefShift = MathUtil.log2p(align);
         }
 
+        public VMOptions(String name, int align, int compRefShift) {
+            this.name = name;
+            this.sizeReference = 4;
+            this.objectAlignment = align;
+            this.compressedRef = true;
+            this.compressRefShift = compRefShift;
+        }
+
         private static VMOptions getOptions() {
             // try Hotspot
             VMOptions hsOpts = getHotspotSpecifics();
@@ -424,9 +432,9 @@ public class VMSupport {
                         Pattern pattern = Pattern.compile("(.*?)References are compressed, with heap base (.*?) and shift (.*?)\\.");
                         Matcher matcher = pattern.matcher(s);
                         if (matcher.matches()) {
-                            return new VMOptions("JRockit", Integer.valueOf(matcher.group(3)));
+                            return new VMOptions("JRockit (experimental)", 8, Integer.valueOf(matcher.group(3)));
                         } else {
-                            return new VMOptions("JRockit");
+                            return new VMOptions("JRockit (experimental)");
                         }
                     }
                 }

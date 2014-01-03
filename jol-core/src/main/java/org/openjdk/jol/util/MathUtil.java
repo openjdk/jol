@@ -54,4 +54,11 @@ public class MathUtil {
         return a;
     }
 
+    public static int pow2(int power) {
+        int p = 1;
+        for (int i = 0; i < power; i++) {
+            p *= 2;
+        }
+        return p;
+    }
 }
