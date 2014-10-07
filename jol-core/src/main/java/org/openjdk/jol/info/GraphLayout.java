@@ -207,13 +207,13 @@ public class GraphLayout {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         pw.println(name + " instance footprint:");
-        pw.printf(" %5s %5s %5s %s%n", "COUNT", "AVG", "SUM", "DESCRIPTION");
+        pw.printf(" %9s %9s %9s   %s%n", "COUNT", "AVG", "SUM", "DESCRIPTION");
         for (Class<?> key : getClasses()) {
             int count = getClassCounts().count(key);
             int size = getClassSizes().count(key);
-            pw.printf(" %5d %5d %5d %s%n", count, size / count, size, key.getName());
+            pw.printf(" %9d %9d %9d   %s%n", count, size / count, size, key.getName());
         }
-        pw.printf(" %5d %5s %5d %s%n", totalCount(), "", totalSize(), "(total)");
+        pw.printf(" %9d %9s %9d   %s%n", totalCount(), "", totalSize(), "(total)");
         pw.println();
         pw.close();
         return sw.toString();
