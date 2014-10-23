@@ -73,7 +73,6 @@ public class FieldData {
     }
 
     private static int computeOffset(Field field) {
-        field.setAccessible(true);
         if (Modifier.isStatic(field.getModifiers())) {
             return (int) VMSupport.U.staticFieldOffset(field);
         } else {
@@ -120,6 +119,13 @@ public class FieldData {
             try {
                 return VMSupport.safeToString(refField.get(object));
             } catch (IllegalAccessException iae) {
+                // exception, try again
+            }
+
+            try {
+                refField.setAccessible(true);
+                return VMSupport.safeToString(refField.get(object));
+            } catch (Exception e) {
                 return "(access denied)";
             }
         } else {
