@@ -48,13 +48,13 @@ public class MainObjectEstimates {
                 Class<?> klass = Class.forName(klassName);
 
                 out.println("***** 32-bit VM: **********************************************************");
-                out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_32_DataModel(), false, false, false)));
+                out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_32_DataModel(), false, false, false)).toPrintable());
 
                 out.println("***** 64-bit VM: **********************************************************");
-                out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_DataModel(), false, false, false)));
+                out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_DataModel(), false, false, false)).toPrintable());
 
                 out.println("***** 64-bit VM, compressed references enabled: ***************************");
-                out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel(), false, false, false)));
+                out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel(), false, false, false)).toPrintable());
             } catch (Throwable t) {
                 t.printStackTrace(System.err);
             }
