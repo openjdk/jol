@@ -40,9 +40,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -191,62 +189,37 @@ public class VMSupport {
         return sw.toString();
     }
 
+    private static Object instantiateType(int type) {
+        switch (type) {
+            case 0: return new MyObject1();
+            case 1: return new MyObject2();
+            case 2: return new MyObject3();
+            case 3: return new MyObject4();
+            case 4: return new MyObject5();
+            default:
+                throw new IllegalStateException();
+        }
+    }
+
     private static int guessAlignment(int oopSize) {
-        final int COUNT = 10000;
-        Object[] array = new Object[COUNT];
-        long[] offsets = new long[COUNT];
+        final int COUNT = 100000;
 
         Random r = new Random();
 
-        int min = -1;
-        for (int t = 0; t < 100; t++) {
-            for (int c = 0; c < COUNT; c++) {
-                int s = r.nextInt(5);
-                switch (s) {
-                    case 0:
-                        array[c] = new MyObject1();
-                        break;
-                    case 1:
-                        array[c] = new MyObject2();
-                        break;
-                    case 2:
-                        array[c] = new MyObject3();
-                        break;
-                    case 3:
-                        array[c] = new MyObject4();
-                        break;
-                    case 4:
-                        array[c] = new MyObject5();
-                        break;
-                    default:
-                        throw new IllegalStateException("Error while selecting the object type: type = " + s);
-                }
-            }
+        long min = -1;
+        for (int c = 0; c < COUNT; c++) {
+            Object o1 = instantiateType(r.nextInt(5));
+            Object o2 = instantiateType(r.nextInt(5));
 
-            System.gc();
-
-            for (int c = 0; c < COUNT; c++) {
-                offsets[c] = addressOf(array[c], oopSize);
-            }
-
-            Arrays.sort(offsets);
-
-            List<Integer> sizes = new ArrayList<Integer>();
-            for (int c = 1; c < COUNT; c++) {
-                sizes.add((int) (offsets[c] - offsets[c - 1]));
-            }
-
-            for (int s : sizes) {
-                if (s <= 0) continue;
-                if (min == -1) {
-                    min = s;
-                } else {
-                    min = MathUtil.gcd(min, s);
-                }
+            long diff = Math.abs(addressOf(o2, oopSize) - addressOf(o1, oopSize));
+            if (min == -1) {
+                min = diff;
+            } else {
+                min = MathUtil.gcd(min, diff);
             }
         }
 
-        return min;
+        return (int) min;
     }
 
     public static long addressOf(Object o) {

@@ -45,9 +45,9 @@ public class MathUtil {
         return min;
     }
 
-    public static int gcd(int a, int b) {
+    public static long gcd(long a, long b) {
         while (b > 0) {
-            int temp = b;
+            long temp = b;
             b = a % b;
             a = temp;
         }
