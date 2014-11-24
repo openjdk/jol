@@ -58,7 +58,7 @@ public class MainHeapDump {
         HeapDumpReader reader = new HeapDumpReader(new File(path));
         Multiset<ClassData> data = reader.parse();
 
-        for (DataModel model : new DataModel[]{new X86_32_DataModel(), new X86_64_DataModel(), new X86_64_COOPS_DataModel()}) {
+        for (DataModel model : new DataModel[]{new X86_32_DataModel(), new X86_64_DataModel(), new X86_64_COOPS_DataModel(), new X86_64_COOPS_DataModel(16)}) {
 
             Layouter l = new RawLayouter(model);
             long rawData = process(data, l);

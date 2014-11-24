@@ -29,7 +29,7 @@ import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.info.FieldData;
 import org.openjdk.jol.info.FieldLayout;
-import org.openjdk.jol.util.VMSupport;
+import org.openjdk.jol.util.MathUtil;
 
 import java.util.BitSet;
 import java.util.Collection;
@@ -70,8 +70,8 @@ public class HotSpotLayouter implements Layouter {
 
             int instanceSize = base + cd.arrayLength() * scale;
 
-            instanceSize = VMSupport.align(instanceSize, autoAlign ? Math.max(4, scale) : 8);
-            base = VMSupport.align(base, Math.max(4, scale));
+            instanceSize = MathUtil.align(instanceSize, autoAlign ? Math.max(model.objectAlignment(), scale) : model.objectAlignment());
+            base = MathUtil.align(base, Math.max(4, scale));
 
             result.add(new FieldLayout(FieldData.create(cd.arrayClass(), "length", "int"), model.headerSize(), model.sizeOf("int")));
             result.add(new FieldLayout(FieldData.create(cd.arrayClass(), "<elements>", cd.arrayComponentType()), base, scale * cd.arrayLength()));
@@ -114,7 +114,7 @@ public class HotSpotLayouter implements Layouter {
             } else {
                 // claim the entire class body, plus some alignment
                 int lastSet = claimed.length() - 1;
-                claimed.set(0, VMSupport.align(lastSet, 4));
+                claimed.set(0, MathUtil.align(lastSet, 4));
             }
         }
 
@@ -124,9 +124,9 @@ public class HotSpotLayouter implements Layouter {
             for (FieldLayout f : result) {
                 a = Math.max(a, model.sizeOf(f.typeClass()));
             }
-            instanceSize = VMSupport.align(claimed.length(), a);
+            instanceSize = MathUtil.align(claimed.length(), a);
         } else {
-            instanceSize = VMSupport.align(claimed.length());
+            instanceSize = MathUtil.align(claimed.length(), model.objectAlignment());
         }
 
         return new ClassLayout(cd, result, model.headerSize(), instanceSize, true);

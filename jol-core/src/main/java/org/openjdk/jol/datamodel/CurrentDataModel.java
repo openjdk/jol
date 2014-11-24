@@ -49,4 +49,9 @@ public class CurrentDataModel implements DataModel {
         if (klass.equals("double"))  return VMSupport.DOUBLE_SIZE;
         return VMSupport.REF_SIZE;
     }
+
+    @Override
+    public int objectAlignment() {
+        return VMSupport.OBJ_ALIGNMENT;
+    }
 }

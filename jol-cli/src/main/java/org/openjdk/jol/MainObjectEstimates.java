@@ -55,6 +55,9 @@ public class MainObjectEstimates {
 
                 out.println("***** 64-bit VM, compressed references enabled: ***************************");
                 out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel(), false, false, false)).toPrintable());
+
+                out.println("***** 64-bit VM, compressed references enabled, 16-byte align: ************");
+                out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel(16), false, false, false)).toPrintable());
             } catch (Throwable t) {
                 t.printStackTrace(System.err);
             }

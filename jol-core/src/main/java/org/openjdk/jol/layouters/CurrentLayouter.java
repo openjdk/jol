@@ -29,6 +29,7 @@ import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.info.FieldData;
 import org.openjdk.jol.info.FieldLayout;
+import org.openjdk.jol.util.MathUtil;
 import org.openjdk.jol.util.VMSupport;
 
 import java.util.Collection;
@@ -52,7 +53,7 @@ public class CurrentLayouter implements Layouter {
                 int base = VMSupport.U.arrayBaseOffset(Class.forName(data.arrayClass()));
                 int scale = VMSupport.U.arrayIndexScale(Class.forName(data.arrayClass()));
 
-                int instanceSize = VMSupport.align(base + (data.arrayLength()) * scale, 8);
+                int instanceSize = MathUtil.align(base + (data.arrayLength()) * scale, model.objectAlignment());
 
                 SortedSet<FieldLayout> result = new TreeSet<FieldLayout>();
                 result.add(new FieldLayout(FieldData.create(data.arrayClass(), "length", "int"), model.headerSize(), model.sizeOf("int")));
@@ -72,11 +73,12 @@ public class CurrentLayouter implements Layouter {
 
         int instanceSize;
         if (result.isEmpty()) {
-            instanceSize = VMSupport.align(model.headerSize());
+            instanceSize = model.headerSize();
         } else {
             FieldLayout f = result.last();
-            instanceSize = VMSupport.align(f.offset() + f.size());
+            instanceSize = f.offset() + f.size();
         }
+        instanceSize = MathUtil.align(instanceSize, model.objectAlignment());
         return new ClassLayout(data, result, model.headerSize(), instanceSize, true);
     }
 

@@ -30,6 +30,17 @@ package org.openjdk.jol.datamodel;
  * @author Aleksey Shipilev
  */
 public class X86_64_DataModel implements DataModel {
+
+    private final int align;
+
+    public X86_64_DataModel() {
+        this(8);
+    }
+
+    public X86_64_DataModel(int align) {
+        this.align = align;
+    }
+
     @Override
     public int headerSize() {
         // 8 byte mark + 8 byte class
@@ -50,8 +61,13 @@ public class X86_64_DataModel implements DataModel {
     }
 
     @Override
+    public int objectAlignment() {
+        return align;
+    }
+
+    @Override
     public String toString() {
-        return "X64 model";
+        return "X64 model, " + align + "-byte aligned";
     }
 
 }

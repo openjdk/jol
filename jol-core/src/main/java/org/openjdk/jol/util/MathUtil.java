@@ -61,4 +61,12 @@ public class MathUtil {
         }
         return p;
     }
+
+    public static int align(int addr, int align) {
+        if ((addr % align) == 0) {
+            return addr;
+        } else {
+            return ((addr / align) + 1) * align;
+        }
+    }
 }

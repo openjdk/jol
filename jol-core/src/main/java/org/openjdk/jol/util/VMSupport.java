@@ -139,15 +139,7 @@ public class VMSupport {
     }
 
     public static int align(int addr) {
-        return align(addr, OBJ_ALIGNMENT);
-    }
-
-    public static int align(int addr, int align) {
-        if ((addr % align) == 0) {
-            return addr;
-        } else {
-            return ((addr / align) + 1) * align;
-        }
+        return MathUtil.align(addr, OBJ_ALIGNMENT);
     }
 
     public static String vmDetails() {

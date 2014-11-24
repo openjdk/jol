@@ -46,4 +46,12 @@ public interface DataModel {
      * @return size in bytes.
      */
     int sizeOf(String klass);
+
+    /**
+     * Return the object alignment.
+     *
+     * @return minimal object alignment
+     */
+    int objectAlignment();
+
 }
