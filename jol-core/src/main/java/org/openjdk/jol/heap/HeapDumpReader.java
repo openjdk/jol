@@ -29,6 +29,7 @@ import org.openjdk.jol.info.FieldData;
 import org.openjdk.jol.util.Multiset;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,7 +37,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -58,6 +61,9 @@ public class HeapDumpReader {
 
     private final byte[] buf;
     private final ByteBuffer wrapBuf;
+
+    private boolean emptyPrimArray;
+    private boolean emptyInstance;
 
     public HeapDumpReader(File file) throws FileNotFoundException {
         this.is = new BufferedInputStream(new FileInputStream(file));
@@ -192,13 +198,19 @@ public class HeapDumpReader {
     }
 
     private void digestPrimArray() throws IOException {
-        read_ID(); // array id
+        long id = read_ID(); // array id
         read_U4(); // stack trace
         int elements = read_U4();
         int typeClass = read_U1();
-        read_null(elements * getSize(typeClass));
 
-        classCounts.add(new ClassData(getTypeString(typeClass) + "[]", getTypeString(typeClass), elements));
+        int len = elements * getSize(typeClass);
+        byte[] bytes = emptyPrimArray ? read_null(len) : read_contents(len);
+
+        String typeString = getTypeString(typeClass);
+
+        classCounts.add(new ClassData(typeString + "[]", typeString, elements));
+
+        visitPrimArray(id, typeString, elements, bytes);
     }
 
     private void digestObjArray() throws IOException {
@@ -213,14 +225,17 @@ public class HeapDumpReader {
     }
 
     private void digestInstance() throws IOException {
-        read_ID(); // object id
+        long id = read_ID(); // object id
         read_U4(); // stack trace
         long klassID = read_ID();
 
         classCounts.add(classDatas.get(klassID));
 
         int instanceBytes = read_U4();
-        read_null(instanceBytes);
+
+        byte[] bytes = emptyInstance ? read_null(instanceBytes) : read_contents(instanceBytes);
+
+        visitInstance(id, klassID, bytes);
     }
 
     private void digestClass() throws IOException {
@@ -260,15 +275,24 @@ public class HeapDumpReader {
             readValue(type); // value
         }
 
+        int offset = 0;
+        List<Integer> oopIdx = new ArrayList<Integer>();
+
         int cpInstance = read_U2();
         for (int c = 0; c < cpInstance; c++) {
             long index = read_ID();
             int type = read_U1();
 
             cd.addField(FieldData.create(name, strings.get(index), getTypeString(type)));
+            if (type == 2) {
+                oopIdx.add(offset);
+            }
+            offset += getSize(type);
         }
 
         classDatas.put(klassID, cd);
+
+        visitClass(klassID, name, oopIdx, idSize);
     }
 
     private long readValue(int type) throws IOException {
@@ -343,23 +367,33 @@ public class HeapDumpReader {
 
     private long read_ID() throws IOException {
         int read = read(buf, idSize);
-        if (read == idSize) {
-            if (idSize <= 4) {
-                return wrapBuf.get(0);
-            } else {
-                return wrapBuf.getLong(0);
-            }
-        }
-        throw new IllegalStateException("Unable to read 1 bytes");
+        if (read == 4)
+            return wrapBuf.getInt(0);
+        if (read == 8)
+            return wrapBuf.getLong(0);
+        throw new IllegalStateException("Unable to read " + idSize + " bytes");
     }
 
-    void read_null(int len) throws IOException {
+    byte[] read_null(int len) throws IOException {
         int rem = len;
         int read;
         do {
             read = read(buf, Math.min(buf.length, rem));
             rem -= read;
         } while (rem > 0);
+        return new byte[0];
+    }
+
+    byte[] read_contents(int len) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        int rem = len;
+        int read;
+        do {
+            read = read(buf, Math.min(buf.length, rem));
+            bos.write(buf, 0, read);
+            rem -= read;
+        } while (rem > 0);
+        return bos.toByteArray();
     }
 
     String readNullTerminated() throws IOException {
@@ -414,5 +448,16 @@ public class HeapDumpReader {
         throw new IllegalStateException("Unable to read 1 bytes");
     }
 
+    protected void visitInstance(long id, long klassID, byte[] bytes) {
+        emptyInstance = true;
+    }
+
+    protected void visitClass(long id, String name, List<Integer> oopIdx, int oopSize) {
+
+    }
+
+    protected void visitPrimArray(long id, String componentType, int count, byte[] bytes) {
+        emptyPrimArray = true;
+    }
 
 }
