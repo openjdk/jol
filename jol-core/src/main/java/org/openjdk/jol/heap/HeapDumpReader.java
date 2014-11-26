@@ -66,7 +66,7 @@ public class HeapDumpReader {
     private boolean emptyInstance;
 
     public HeapDumpReader(File file) throws FileNotFoundException {
-        this.is = new BufferedInputStream(new FileInputStream(file));
+        this.is = new BufferedInputStream(new FileInputStream(file), 256*1024);
         this.strings = new HashMap<Long, String>();
         this.classNames = new HashMap<Long, String>();
         this.classCounts = new Multiset<ClassData>();
