@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -55,6 +56,8 @@ import static java.lang.System.out;
  * @author Aleksey Shipilev
  */
 public class MainStringCompress {
+
+    static final String DO_MODE = System.getProperty("mode", "estimates");
 
     static final DataModel[] DATA_MODELS = new DataModel[]{
             new X86_32_DataModel(),
@@ -70,9 +73,14 @@ public class MainStringCompress {
             System.exit(1);
         }
 
-        out.printf("%15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %s, %s%n",
-                "\"total\"", "\"String\"", "\"String+bool\"", "\"String+oop\"", "\"char[]-2b\"",
-                "\"char[]-1b\"", "\"char[]-1b-comp\"", "\"savings(bool)\"", "\"savings(oop)\"", "\"hprof file\"", "\"model\"");
+        if (DO_MODE.equalsIgnoreCase("histo")) {
+            out.printf("%15s, %15s, %15s, %s%n",
+                    "\"size\"", "\"compressible\"", "\"non-compressible\"", "\"hprof file\"");
+        } else if (DO_MODE.equalsIgnoreCase("estimates")) {
+            out.printf("%15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %s, %s%n",
+                    "\"total\"", "\"String\"", "\"String+bool\"", "\"String+oop\"", "\"char[]-2b\"",
+                    "\"char[]-1b\"", "\"char[]-1b-comp\"", "\"savings(bool)\"", "\"savings(oop)\"", "\"hprof file\"", "\"model\"");
+        }
 
         List<Future<?>> res = new ArrayList<Future<?>>();
         ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -155,15 +163,31 @@ public class MainStringCompress {
             Multiset<ClassData> data = reader.parse();
 
             for (Long id : referencedArrays) {
-                if (isCompressible.get(id)) {
+                Boolean compressible = isCompressible.get(id);
+                if (compressible == null) {
+                    // assume the byte[] array in the heap dump
+                    continue;
+                }
+
+                if (compressible) {
                     compressibleCharArrays.add(size.get(id));
                 } else {
                     nonCompressibleCharArrays.add(size.get(id));
                 }
             }
 
-            for (DataModel model : DATA_MODELS) {
-                printLine(data, new HotSpotLayouter(model, false, false, false));
+            if (DO_MODE.equalsIgnoreCase("histo")) {
+                TreeSet<Integer> sizes = new TreeSet<Integer>();
+                sizes.addAll(compressibleCharArrays.keys());
+                sizes.addAll(nonCompressibleCharArrays.keys());
+
+                for (Integer s : sizes) {
+                    out.printf("%15d, %15d, %15d, \"%s\"%n", s, compressibleCharArrays.count(s), nonCompressibleCharArrays.count(s), path);
+                }
+            } else if (DO_MODE.equalsIgnoreCase("estimates")) {
+                for (DataModel model : DATA_MODELS) {
+                    printLine(data, new HotSpotLayouter(model, false, false, false));
+                }
             }
 
             return null;
