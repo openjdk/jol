@@ -30,7 +30,6 @@ import org.openjdk.jol.datamodel.X86_64_COOPS_DataModel;
 import org.openjdk.jol.datamodel.X86_64_DataModel;
 import org.openjdk.jol.heap.HeapDumpReader;
 import org.openjdk.jol.info.ClassData;
-import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.info.FieldData;
 import org.openjdk.jol.layouters.HotSpotLayouter;
 import org.openjdk.jol.layouters.Layouter;
@@ -113,9 +112,9 @@ public class MainStringCompress {
             protected void visitPrimArray(long id, String typeClass, int count, byte[] bytes) {
                 if (referencedArrays.contains(id)) {
                     if (isCompressible(bytes)) {
-                        compressibleCharArrays.add(bytes.length);
+                        compressibleCharArrays.add(count);
                     } else {
-                        nonCompressibleCharArrays.add(bytes.length);
+                        nonCompressibleCharArrays.add(count);
                     }
                 }
             }
@@ -123,9 +122,9 @@ public class MainStringCompress {
 
         Multiset<ClassData> data = reader.parse();
 
-        out.printf("\"%12s\", \"%12s\", \"%12s\", \"%12s\", \"%12s\", \"%12s\", \"%12s\", \"%12s\", \"%s\", \"%s\"%n",
-                "total", "String", "String+bool", "String+oop", "1-byte char[]",
-                "2-byte char[]", "savings(bool)", "savings(oop)", "hprof file", "model");
+        out.printf("%15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %s, %s%n",
+                "\"total\"", "\"String\"", "\"String+bool\"", "\"String+oop\"", "\"char[]-2b\"",
+                "\"char[]-1b\"", "\"char[]-1b-comp\"", "\"savings(bool)\"", "\"savings(oop)\"", "\"hprof file\"", "\"model\"");
 
         for (DataModel model : DATA_MODELS) {
             printLine(data, new HotSpotLayouter(model, false, false, false));
@@ -157,7 +156,7 @@ public class MainStringCompress {
             }
         }
 
-        int savings = 0;
+        int compressedBytes = 0;
         int compressibleBytes = 0;
         for (Integer len : compressibleCharArrays.keys()) {
             int count = compressibleCharArrays.count(len);
@@ -165,7 +164,7 @@ public class MainStringCompress {
             ClassData charArr = new ClassData("char[]", "char", len);
             ClassData byteArr = new ClassData("byte[]", "byte", len);
 
-            savings += (l.layout(charArr).instanceSize() - l.layout(byteArr).instanceSize()) * count;
+            compressedBytes += l.layout(byteArr).instanceSize() * count;
             compressibleBytes += l.layout(charArr).instanceSize() * count;
         }
 
@@ -177,10 +176,10 @@ public class MainStringCompress {
 
         totalFootprint += strings;
 
-        double savingBool = 100.0 * (savings - (stringsBool - strings)) / totalFootprint;
-        double savingOop  = 100.0 * (savings - (stringsOop  - strings)) / totalFootprint;
-        out.printf("%14d, %14d, %14d, %14d, %14d, %14d, %14.3f, %14.3f, \"%s\", \"%s\"%n",
-                totalFootprint, strings, stringsBool, stringsOop, compressibleBytes, nonCompressibleBytes,
+        double savingBool = 100.0 * ((compressibleBytes - compressedBytes) - (stringsBool - strings)) / totalFootprint;
+        double savingOop  = 100.0 * ((compressibleBytes - compressedBytes) - (stringsOop  - strings)) / totalFootprint;
+        out.printf("%15d, %15d, %15d, %15d, %15d, %15d, %15d, %15.3f, %15.3f, \"%s\", \"%s\"%n",
+                totalFootprint, strings, stringsBool, stringsOop, nonCompressibleBytes, compressibleBytes, compressedBytes,
                 savingBool, savingOop, path, l);
     }
 
