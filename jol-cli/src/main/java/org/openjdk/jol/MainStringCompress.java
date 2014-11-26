@@ -38,8 +38,10 @@ import org.openjdk.jol.util.Multiset;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -108,7 +110,10 @@ public class MainStringCompress {
         public Object call() throws Exception {
             final Set<Long> referencedArrays = new HashSet<Long>();
 
-            HeapDumpReader preReader = new HeapDumpReader(new File(path)) {
+            final Map<Long, Boolean> isCompressible = new HashMap<Long, Boolean>();
+            final Map<Long, Integer> size = new HashMap<Long, Integer>();
+
+            HeapDumpReader reader = new HeapDumpReader(new File(path)) {
                 @Override
                 protected void visitClass(long id, String name, List<Integer> oopIdx, int oopSize) {
                     if (name.equals("java/lang/String")) {
@@ -137,23 +142,25 @@ public class MainStringCompress {
                         }
                     }
                 }
-            };
-            preReader.parse();
 
-            HeapDumpReader reader = new HeapDumpReader(new File(path)) {
                 @Override
                 protected void visitPrimArray(long id, String typeClass, int count, byte[] bytes) {
-                    if (referencedArrays.contains(id)) {
-                        if (isCompressible(bytes)) {
-                            compressibleCharArrays.add(count);
-                        } else {
-                            nonCompressibleCharArrays.add(count);
-                        }
+                    if (typeClass.equals("char")) {
+                        isCompressible.put(id, isCompressible(bytes));
+                        size.put(id, count);
                     }
                 }
             };
 
             Multiset<ClassData> data = reader.parse();
+
+            for (Long id : referencedArrays) {
+                if (isCompressible.get(id)) {
+                    compressibleCharArrays.add(size.get(id));
+                } else {
+                    nonCompressibleCharArrays.add(size.get(id));
+                }
+            }
 
             for (DataModel model : DATA_MODELS) {
                 printLine(data, new HotSpotLayouter(model, false, false, false));

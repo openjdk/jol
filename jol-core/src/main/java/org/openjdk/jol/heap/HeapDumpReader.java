@@ -62,11 +62,8 @@ public class HeapDumpReader {
     private final byte[] buf;
     private final ByteBuffer wrapBuf;
 
-    private boolean emptyPrimArray;
-    private boolean emptyInstance;
-
     public HeapDumpReader(File file) throws FileNotFoundException {
-        this.is = new BufferedInputStream(new FileInputStream(file), 256*1024);
+        this.is = new BufferedInputStream(new FileInputStream(file), 16*1024*1024);
         this.strings = new HashMap<Long, String>();
         this.classNames = new HashMap<Long, String>();
         this.classCounts = new Multiset<ClassData>();
@@ -204,7 +201,7 @@ public class HeapDumpReader {
         int typeClass = read_U1();
 
         int len = elements * getSize(typeClass);
-        byte[] bytes = emptyPrimArray ? read_null(len) : read_contents(len);
+        byte[] bytes = read_contents(len);
 
         String typeString = getTypeString(typeClass);
 
@@ -233,7 +230,7 @@ public class HeapDumpReader {
 
         int instanceBytes = read_U4();
 
-        byte[] bytes = emptyInstance ? read_null(instanceBytes) : read_contents(instanceBytes);
+        byte[] bytes = read_contents(instanceBytes);
 
         visitInstance(id, klassID, bytes);
     }
@@ -449,7 +446,7 @@ public class HeapDumpReader {
     }
 
     protected void visitInstance(long id, long klassID, byte[] bytes) {
-        emptyInstance = true;
+
     }
 
     protected void visitClass(long id, String name, List<Integer> oopIdx, int oopSize) {
@@ -457,7 +454,7 @@ public class HeapDumpReader {
     }
 
     protected void visitPrimArray(long id, String componentType, int count, byte[] bytes) {
-        emptyPrimArray = true;
+
     }
 
 }
