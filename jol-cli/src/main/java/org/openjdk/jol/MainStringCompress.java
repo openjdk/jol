@@ -205,7 +205,7 @@ public class MainStringCompress {
 
             long totalFootprint = 0;
             for (ClassData cd : data.keys()) {
-                int count = data.count(cd);
+                long count = data.count(cd);
 
                 if (cd.name().equals("java/lang/String")) {
                     ClassData mcd = ClassData.parseClass(String.class);
@@ -223,10 +223,10 @@ public class MainStringCompress {
                 }
             }
 
-            int compressedBytes = 0;
-            int compressibleBytes = 0;
+            long compressedBytes = 0;
+            long compressibleBytes = 0;
             for (Integer len : compressibleCharArrays.keys()) {
-                int count = compressibleCharArrays.count(len);
+                long count = compressibleCharArrays.count(len);
 
                 ClassData charArr = new ClassData("char[]", "char", len);
                 ClassData byteArr = new ClassData("byte[]", "byte", len);
@@ -235,10 +235,12 @@ public class MainStringCompress {
                 compressibleBytes += l.layout(charArr).instanceSize() * count;
             }
 
-            int nonCompressibleBytes = 0;
+            long nonCompressibleBytes = 0;
             for (Integer len : nonCompressibleCharArrays.keys()) {
+                long count = nonCompressibleCharArrays.count(len);
+
                 ClassData charArr = new ClassData("char[]", "char", len);
-                nonCompressibleBytes += l.layout(charArr).instanceSize() * nonCompressibleCharArrays.count(len);
+                nonCompressibleBytes += l.layout(charArr).instanceSize() * count;
             }
 
             totalFootprint += strings;

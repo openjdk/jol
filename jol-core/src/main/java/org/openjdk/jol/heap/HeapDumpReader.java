@@ -73,7 +73,7 @@ public class HeapDumpReader {
         this.classNames = new HashMap<Long, String>();
         this.classCounts = new Multiset<ClassData>();
         this.classDatas = new HashMap<Long, ClassData>();
-        this.buf = new byte[4096];
+        this.buf = new byte[32*1024];
         this.wrapBuf = ByteBuffer.wrap(buf);
     }
 
@@ -305,18 +305,30 @@ public class HeapDumpReader {
     }
 
     private long readValue(int type) throws HeapDumpException {
-        int size = getSize(type);
-        switch (size) {
-            case 1:
-                return read_U1();
-            case 2:
-                return read_U2();
-            case 4:
-                return read_U4();
-            case 8:
+        switch (type) {
+            case 2: // object
+                if (idSize == 4)
+                    return read_U4();
+                if (idSize == 8)
+                    return read_U8();
+                throw new HeapDumpException("Illegal ID size");
+
+            case 4: // boolean
+            case 8: // byte
+                return (byte) read_U1();
+            case 9: // short
+            case 5: // char
+                return (short) read_U2();
+            case 10: // int
+            case 6: // float
+                return (int) read_U4();
+
+            case 7: // double
+            case 11: // long
                 return read_U8();
+
             default:
-                throw new HeapDumpException("Unknown size: " + size);
+                throw new HeapDumpException("Unknown type: " + type);
         }
     }
 
