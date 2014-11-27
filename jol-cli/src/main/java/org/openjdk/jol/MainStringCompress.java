@@ -28,6 +28,7 @@ import org.openjdk.jol.datamodel.DataModel;
 import org.openjdk.jol.datamodel.X86_32_DataModel;
 import org.openjdk.jol.datamodel.X86_64_COOPS_DataModel;
 import org.openjdk.jol.datamodel.X86_64_DataModel;
+import org.openjdk.jol.heap.HeapDumpException;
 import org.openjdk.jol.heap.HeapDumpReader;
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.FieldData;
@@ -88,11 +89,12 @@ public class MainStringCompress {
             res.add(service.submit(new Worker(arg)));
         }
 
-        for (Future<?> f : res) {
+        for (int i = 0; i < res.size(); i++) {
+            Future<?> f = res.get(i);
             try {
                 f.get();
             } catch (ExecutionException e) {
-                e.printStackTrace();
+                e.getCause().printStackTrace(System.err);
                 // and then ignore
             }
         }
@@ -120,6 +122,7 @@ public class MainStringCompress {
 
             final Map<Long, Boolean> isCompressible = new HashMap<Long, Boolean>();
             final Map<Long, Integer> size = new HashMap<Long, Integer>();
+            final Map<Long, String> component = new HashMap<Long, String>();
 
             HeapDumpReader reader = new HeapDumpReader(new File(path)) {
                 @Override
@@ -134,19 +137,23 @@ public class MainStringCompress {
                 @Override
                 protected void visitInstance(long id, long klassID, byte[] bytes) {
                     if (stringID == 0) {
-                        throw new IllegalStateException("java/lang/String was not discovered yet");
+                        throw new IllegalStateException("java/lang/String was not discovered yet in " + path);
                     }
                     if (klassID == stringID) {
                         ByteBuffer wrap = ByteBuffer.wrap(bytes);
+                        long arrayId;
                         switch (stringValueSize) {
                             case 4:
-                                referencedArrays.add((long) wrap.getInt(stringValueIdx));
+                                arrayId = wrap.getInt(stringValueIdx);
                                 break;
                             case 8:
-                                referencedArrays.add(wrap.getLong(stringValueIdx));
+                                arrayId = wrap.getLong(stringValueIdx);
                                 break;
                             default:
                                 throw new IllegalStateException();
+                        }
+                        if (arrayId != 0) {
+                            referencedArrays.add(arrayId);
                         }
                     }
                 }
@@ -157,6 +164,7 @@ public class MainStringCompress {
                         isCompressible.put(id, isCompressible(bytes));
                         size.put(id, count);
                     }
+                    component.put(id, typeClass);
                 }
             };
 
@@ -165,8 +173,7 @@ public class MainStringCompress {
             for (Long id : referencedArrays) {
                 Boolean compressible = isCompressible.get(id);
                 if (compressible == null) {
-                    // assume the byte[] array in the heap dump
-                    continue;
+                    throw new HeapDumpException("String.value array " + id + " of component type \"" + component.get(id) + "\" in " + path + ", skipping");
                 }
 
                 if (compressible) {

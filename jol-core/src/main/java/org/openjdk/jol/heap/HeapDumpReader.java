@@ -55,14 +55,17 @@ public class HeapDumpReader {
     private final Map<Long, String> classNames;
     private final Multiset<ClassData> classCounts;
     private final Map<Long, ClassData> classDatas;
+    private final File file;
 
     private int idSize;
     private int readBytes;
 
     private final byte[] buf;
     private final ByteBuffer wrapBuf;
+    private String header;
 
     public HeapDumpReader(File file) throws FileNotFoundException {
+        this.file = file;
         this.is = new BufferedInputStream(new FileInputStream(file), 16*1024*1024);
         this.strings = new HashMap<Long, String>();
         this.classNames = new HashMap<Long, String>();
@@ -72,24 +75,32 @@ public class HeapDumpReader {
         this.wrapBuf = ByteBuffer.wrap(buf);
     }
 
-    private int read() throws IOException {
-        int v = is.read();
-        if (v != -1) {
-            readBytes++;
-            return v;
-        } else {
-            throw new EOFException();
+    private int read() throws HeapDumpException {
+        try {
+            int v = is.read();
+            if (v != -1) {
+                readBytes++;
+                return v;
+            } else {
+                throw new HeapDumpException(errorMessage("EOF"));
+            }
+        } catch (IOException e) {
+            throw new HeapDumpException(errorMessage(e.getMessage()));
         }
     }
 
-    private int read(byte[] b, int size) throws IOException {
-        int read = is.read(b, 0, size);
-        readBytes += read;
-        return read;
+    private int read(byte[] b, int size) throws HeapDumpException {
+        try {
+            int read = is.read(b, 0, size);
+            readBytes += read;
+            return read;
+        } catch (IOException e) {
+            throw new HeapDumpException(errorMessage(e.getMessage()));
+        }
     }
 
-    public Multiset<ClassData> parse() throws IOException {
-        readNullTerminated(); // header
+    public Multiset<ClassData> parse() throws IOException, HeapDumpException {
+        header = readNullTerminated();
 
         idSize = read_U4();
 
@@ -134,14 +145,14 @@ public class HeapDumpReader {
             }
 
             if (readBytes - lastCount != len) {
-                throw new IllegalStateException("Expected to read " + len + " bytes, but read " + (readBytes - lastCount) + " bytes");
+                throw new HeapDumpException(errorMessage("Expected to read " + len + " bytes, but read " + (readBytes - lastCount) + " bytes"));
             }
         }
 
         return classCounts;
     }
 
-    private void digestHeapDump() throws IOException {
+    private void digestHeapDump() throws HeapDumpException {
         int subTag = read_U1();
         switch (subTag) {
             case 0x01:
@@ -190,11 +201,11 @@ public class HeapDumpReader {
                 digestPrimArray();
                 return;
             default:
-                throw new IllegalStateException("Unknown subtag: " + subTag);
+                throw new HeapDumpException(errorMessage(String.format("Unknown heap dump subtag 0x%x", subTag)));
         }
     }
 
-    private void digestPrimArray() throws IOException {
+    private void digestPrimArray() throws HeapDumpException {
         long id = read_ID(); // array id
         read_U4(); // stack trace
         int elements = read_U4();
@@ -210,7 +221,7 @@ public class HeapDumpReader {
         visitPrimArray(id, typeString, elements, bytes);
     }
 
-    private void digestObjArray() throws IOException {
+    private void digestObjArray() throws HeapDumpException {
         read_ID(); // array id
         read_U4(); // stack trace
         int elements = read_U4();
@@ -221,7 +232,7 @@ public class HeapDumpReader {
         classCounts.add(new ClassData("Object[]", "Object", elements));
     }
 
-    private void digestInstance() throws IOException {
+    private void digestInstance() throws HeapDumpException {
         long id = read_ID(); // object id
         read_U4(); // stack trace
         long klassID = read_ID();
@@ -235,7 +246,7 @@ public class HeapDumpReader {
         visitInstance(id, klassID, bytes);
     }
 
-    private void digestClass() throws IOException {
+    private void digestClass() throws HeapDumpException {
         long klassID = read_ID();
 
         String name = classNames.get(klassID);
@@ -292,7 +303,7 @@ public class HeapDumpReader {
         visitClass(klassID, name, oopIdx, idSize);
     }
 
-    private long readValue(int type) throws IOException {
+    private long readValue(int type) throws HeapDumpException {
         int size = getSize(type);
         switch (size) {
             case 1:
@@ -304,18 +315,18 @@ public class HeapDumpReader {
             case 8:
                 return read_U8();
             default:
-                throw new IllegalStateException("Unknown size: " + size);
+                throw new HeapDumpException("Unknown size: " + size);
         }
     }
 
-    private int getSize(int type) throws IOException {
+    private int getSize(int type) throws HeapDumpException {
         switch (type) {
             case 2: // object
                 if (idSize == 4)
                     return 4;
                 if (idSize == 8)
                     return 8;
-                throw new IllegalStateException();
+                throw new HeapDumpException("Illegal ID size");
             case 4: // boolean
             case 8: // byte
                 return 1;
@@ -333,11 +344,11 @@ public class HeapDumpReader {
                 return 8;
 
             default:
-                throw new IllegalStateException("Unknown type: " + type);
+                throw new HeapDumpException("Unknown type: " + type);
         }
     }
 
-    private String getTypeString(int type) throws IOException {
+    private String getTypeString(int type) throws HeapDumpException {
         switch (type) {
             case 2:
                 return "Object"; // TODO: Read the exact type;
@@ -358,30 +369,30 @@ public class HeapDumpReader {
             case 11:
                 return "long";
             default:
-                throw new IllegalStateException("Unknown type: " + type);
+                throw new HeapDumpException("Unknown type: " + type);
         }
     }
 
-    private long read_ID() throws IOException {
+    private long read_ID() throws HeapDumpException {
         int read = read(buf, idSize);
         if (read == 4)
             return wrapBuf.getInt(0);
         if (read == 8)
             return wrapBuf.getLong(0);
-        throw new IllegalStateException("Unable to read " + idSize + " bytes");
+        throw new HeapDumpException("Unable to read " + idSize + " bytes");
     }
 
-    byte[] read_null(int len) throws IOException {
-        int rem = len;
+    byte[] read_null(long len) throws HeapDumpException {
+        long rem = len;
         int read;
         do {
-            read = read(buf, Math.min(buf.length, rem));
+            read = read(buf, Math.min(buf.length, (int)rem));
             rem -= read;
         } while (rem > 0);
         return new byte[0];
     }
 
-    byte[] read_contents(int len) throws IOException {
+    byte[] read_contents(int len) throws HeapDumpException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         int rem = len;
         int read;
@@ -393,7 +404,7 @@ public class HeapDumpReader {
         return bos.toByteArray();
     }
 
-    String readNullTerminated() throws IOException {
+    String readNullTerminated() throws HeapDumpException {
         int r;
         StringBuilder sb = new StringBuilder();
         while ((r = read()) != -1) {
@@ -403,7 +414,7 @@ public class HeapDumpReader {
         return sb.toString();
     }
 
-    String readString(int len) throws IOException {
+    String readString(int len) throws HeapDumpException {
         StringBuilder sb = new StringBuilder();
         for (int l = 0; l < len; l++) {
             int r = read();
@@ -413,36 +424,40 @@ public class HeapDumpReader {
         return sb.toString();
     }
 
-    long read_U8() throws IOException {
+    long read_U8() throws HeapDumpException {
         int read = read(buf, 8);
         if (read == 8) {
             return wrapBuf.getLong(0);
         }
-        throw new IllegalStateException("Unable to read 8 bytes");
+        throw new HeapDumpException(errorMessage("Unable to read 8 bytes"));
     }
 
-    int read_U4() throws IOException {
+    int read_U4() throws HeapDumpException {
         int read = read(buf, 4);
         if (read == 4) {
             return wrapBuf.getInt(0);
         }
-        throw new IllegalStateException("Unable to read 4 bytes");
+        throw new HeapDumpException(errorMessage("Unable to read 4 bytes"));
     }
 
-    int read_U2() throws IOException {
+    int read_U2() throws HeapDumpException {
         int read = read(buf, 2);
         if (read == 2) {
             return wrapBuf.getShort(0);
         }
-        throw new IllegalStateException("Unable to read 2 bytes");
+        throw new HeapDumpException(errorMessage("Unable to read 2 bytes"));
     }
 
-    int read_U1() throws IOException {
+    int read_U1() throws HeapDumpException {
         int read = read(buf, 1);
         if (read == 1) {
             return wrapBuf.get(0);
         }
-        throw new IllegalStateException("Unable to read 1 bytes");
+        throw new HeapDumpException(errorMessage("Unable to read 1 bytes"));
+    }
+
+    private String errorMessage(String message) throws HeapDumpException {
+        return String.format("%s at offset 0x%x in %s (%s)", message, readBytes, file, header);
     }
 
     protected void visitInstance(long id, long klassID, byte[] bytes) {
