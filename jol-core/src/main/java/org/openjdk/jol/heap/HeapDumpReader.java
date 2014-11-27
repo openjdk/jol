@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Experimental heap dump reader
@@ -56,7 +57,6 @@ public class HeapDumpReader {
     private final Multiset<ClassData> classCounts;
     private final Map<Long, ClassData> classDatas;
     private final File file;
-    private final long length;
 
     private int idSize;
     private long readBytes;
@@ -65,10 +65,13 @@ public class HeapDumpReader {
     private final ByteBuffer wrapBuf;
     private String header;
 
-    public HeapDumpReader(File file) throws FileNotFoundException {
+    public HeapDumpReader(File file) throws IOException {
         this.file = file;
-        this.length = file.length();
-        this.is = new BufferedInputStream(new FileInputStream(file), 16*1024*1024);
+        if (file.getName().endsWith(".gz")) {
+            this.is = new BufferedInputStream(new GZIPInputStream(new FileInputStream(file)), 16 * 1024 * 1024);
+        } else {
+            this.is = new BufferedInputStream(new FileInputStream(file), 16 * 1024 * 1024);
+        }
         this.strings = new HashMap<Long, String>();
         this.classNames = new HashMap<Long, String>();
         this.classCounts = new Multiset<ClassData>();
@@ -109,9 +112,16 @@ public class HeapDumpReader {
         read_U4(); // timestamp, lo
         read_U4(); // timestamp, hi
 
-        while (readBytes < length) {
+        while (true) {
 
-            int tag = read_U1();
+            int tag;
+            try {
+                tag = read_U1();
+            } catch (HeapDumpException e) {
+                // EOF, break out
+                break;
+            }
+
             read_U4(); // relative time
             long len = read_U4();
 
