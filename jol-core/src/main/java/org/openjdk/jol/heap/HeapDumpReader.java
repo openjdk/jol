@@ -56,6 +56,7 @@ public class HeapDumpReader {
     private final Multiset<ClassData> classCounts;
     private final Map<Long, ClassData> classDatas;
     private final File file;
+    private final long length;
 
     private int idSize;
     private long readBytes;
@@ -66,6 +67,7 @@ public class HeapDumpReader {
 
     public HeapDumpReader(File file) throws FileNotFoundException {
         this.file = file;
+        this.length = file.length();
         this.is = new BufferedInputStream(new FileInputStream(file), 16*1024*1024);
         this.strings = new HashMap<Long, String>();
         this.classNames = new HashMap<Long, String>();
@@ -107,8 +109,7 @@ public class HeapDumpReader {
         read_U4(); // timestamp, lo
         read_U4(); // timestamp, hi
 
-        while (true) {
-            if (is.available() == 0) break;
+        while (readBytes < length) {
 
             int tag = read_U1();
             read_U4(); // relative time

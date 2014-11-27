@@ -122,7 +122,6 @@ public class MainStringCompress {
 
             final Map<Long, Boolean> isCompressible = new HashMap<Long, Boolean>();
             final Map<Long, Integer> size = new HashMap<Long, Integer>();
-            final Map<Long, String> component = new HashMap<Long, String>();
 
             HeapDumpReader reader = new HeapDumpReader(new File(path)) {
                 @Override
@@ -164,7 +163,6 @@ public class MainStringCompress {
                         isCompressible.put(id, isCompressible(bytes));
                         size.put(id, count);
                     }
-                    component.put(id, typeClass);
                 }
             };
 
@@ -173,7 +171,7 @@ public class MainStringCompress {
             for (Long id : referencedArrays) {
                 Boolean compressible = isCompressible.get(id);
                 if (compressible == null) {
-                    throw new HeapDumpException("String.value array " + id + " of component type \"" + component.get(id) + "\" in " + path + ", skipping");
+                    throw new HeapDumpException("String.value array " + id + " is not char[] in " + path + ", skipping");
                 }
 
                 if (compressible) {
