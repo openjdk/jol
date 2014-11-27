@@ -58,7 +58,7 @@ public class HeapDumpReader {
     private final File file;
 
     private int idSize;
-    private int readBytes;
+    private long readBytes;
 
     private final byte[] buf;
     private final ByteBuffer wrapBuf;
@@ -102,7 +102,7 @@ public class HeapDumpReader {
     public Multiset<ClassData> parse() throws IOException, HeapDumpException {
         header = readNullTerminated();
 
-        idSize = read_U4();
+        idSize = (int) read_U4(); // always fits
 
         read_U4(); // timestamp, lo
         read_U4(); // timestamp, hi
@@ -112,9 +112,9 @@ public class HeapDumpReader {
 
             int tag = read_U1();
             read_U4(); // relative time
-            int len = read_U4();
+            long len = read_U4();
 
-            int lastCount = readBytes;
+            long lastCount = readBytes;
 
             switch (tag) {
                 case 0x01: {
@@ -208,7 +208,7 @@ public class HeapDumpReader {
     private void digestPrimArray() throws HeapDumpException {
         long id = read_ID(); // array id
         read_U4(); // stack trace
-        int elements = read_U4();
+        int elements = (int) read_U4(); // always fits
         int typeClass = read_U1();
 
         int len = elements * getSize(typeClass);
@@ -224,7 +224,7 @@ public class HeapDumpReader {
     private void digestObjArray() throws HeapDumpException {
         read_ID(); // array id
         read_U4(); // stack trace
-        int elements = read_U4();
+        int elements = (int) read_U4(); // always fits
         read_ID(); // type class
         read_null(elements * idSize);
 
@@ -239,7 +239,7 @@ public class HeapDumpReader {
 
         classCounts.add(classDatas.get(klassID));
 
-        int instanceBytes = read_U4();
+        int instanceBytes = (int) read_U4(); // always fits
 
         byte[] bytes = read_contents(instanceBytes);
 
@@ -376,7 +376,7 @@ public class HeapDumpReader {
     private long read_ID() throws HeapDumpException {
         int read = read(buf, idSize);
         if (read == 4)
-            return wrapBuf.getInt(0);
+            return ((long)wrapBuf.getInt(0) & 0xFFFFFFFFL);
         if (read == 8)
             return wrapBuf.getLong(0);
         throw new HeapDumpException("Unable to read " + idSize + " bytes");
@@ -386,18 +386,20 @@ public class HeapDumpReader {
         long rem = len;
         int read;
         do {
-            read = read(buf, Math.min(buf.length, (int)rem));
+            int toRead = (int) Math.min(buf.length, rem); // always fits into buf.length
+            read = read(buf, toRead);
             rem -= read;
         } while (rem > 0);
         return new byte[0];
     }
 
-    byte[] read_contents(int len) throws HeapDumpException {
+    byte[] read_contents(long len) throws HeapDumpException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        int rem = len;
+        long rem = len;
         int read;
         do {
-            read = read(buf, Math.min(buf.length, rem));
+            int toRead = (int) Math.min(buf.length, rem); // always fits into buf.length
+            read = read(buf, toRead);
             bos.write(buf, 0, read);
             rem -= read;
         } while (rem > 0);
@@ -414,9 +416,9 @@ public class HeapDumpReader {
         return sb.toString();
     }
 
-    String readString(int len) throws HeapDumpException {
+    String readString(long len) throws HeapDumpException {
         StringBuilder sb = new StringBuilder();
-        for (int l = 0; l < len; l++) {
+        for (long l = 0; l < len; l++) {
             int r = read();
             if (r == -1) break;
             sb.append((char) (r & 0xFF));
@@ -432,10 +434,10 @@ public class HeapDumpReader {
         throw new HeapDumpException(errorMessage("Unable to read 8 bytes"));
     }
 
-    int read_U4() throws HeapDumpException {
+    long read_U4() throws HeapDumpException {
         int read = read(buf, 4);
         if (read == 4) {
-            return wrapBuf.getInt(0);
+            return ((long)wrapBuf.getInt(0) & 0xFFFFFFFFL);
         }
         throw new HeapDumpException(errorMessage("Unable to read 4 bytes"));
     }
@@ -443,7 +445,7 @@ public class HeapDumpReader {
     int read_U2() throws HeapDumpException {
         int read = read(buf, 2);
         if (read == 2) {
-            return wrapBuf.getShort(0);
+            return ((int)wrapBuf.getShort(0) & 0xFFFF);
         }
         throw new HeapDumpException(errorMessage("Unable to read 2 bytes"));
     }
@@ -451,7 +453,7 @@ public class HeapDumpReader {
     int read_U1() throws HeapDumpException {
         int read = read(buf, 1);
         if (read == 1) {
-            return wrapBuf.get(0);
+            return ((int)wrapBuf.get(0) & 0xFF);
         }
         throw new HeapDumpException(errorMessage("Unable to read 1 bytes"));
     }
