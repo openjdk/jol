@@ -80,7 +80,7 @@ public class MainStringCompress {
         } else if (DO_MODE.equalsIgnoreCase("estimates")) {
             out.printf("%15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %s, %s%n",
                     "\"total\"", "\"String\"", "\"String+bool\"", "\"String+oop\"", "\"char[]-2b\"",
-                    "\"char[]-1b\"", "\"char[]-1b-comp\"", "\"savings(bool)\"", "\"savings(oop)\"", "\"hprof file\"", "\"model\"");
+                    "\"char[]-1b\"", "\"char[]-1b-comp\"", "\"savings(same)\"",  "\"savings(bool)\"", "\"savings(oop)\"", "\"hprof file\"", "\"model\"");
         }
 
         List<Future<?>> res = new ArrayList<Future<?>>();
@@ -245,11 +245,12 @@ public class MainStringCompress {
 
             totalFootprint += strings;
 
+            double savingSame = 100.0 * ((compressibleBytes - compressedBytes)) / totalFootprint;
             double savingBool = 100.0 * ((compressibleBytes - compressedBytes) - (stringsBool - strings)) / totalFootprint;
             double savingOop  = 100.0 * ((compressibleBytes - compressedBytes) - (stringsOop - strings))  / totalFootprint;
-            out.printf("%15d, %15d, %15d, %15d, %15d, %15d, %15d, %15.3f, %15.3f, \"%s\", \"%s\"%n",
+            out.printf("%15d, %15d, %15d, %15d, %15d, %15d, %15d, %15.3f, %15.3f, %15.3f, \"%s\", \"%s\"%n",
                     totalFootprint, strings, stringsBool, stringsOop, nonCompressibleBytes, compressibleBytes, compressedBytes,
-                    savingBool, savingOop, path, l);
+                    savingSame, savingBool, savingOop, path, l);
         }
 
         public static boolean isCompressible(byte[] bytes) {
