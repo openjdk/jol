@@ -208,15 +208,21 @@ public class MainStringCompress {
                 long count = data.count(cd);
 
                 if (cd.name().equals("java/lang/String")) {
-                    ClassData mcd = ClassData.parseClass(String.class);
+                    ClassData mcd = ClassData.parseClass(Object.class);
+                    mcd.addField(FieldData.create("Object", "value", "char[]"));
+                    mcd.addField(FieldData.create("Object", "hash", "int"));
                     strings += l.layout(mcd).instanceSize() * count;
 
-                    ClassData mcdBool = ClassData.parseClass(String.class);
-                    mcdBool.addField(FieldData.create("String", "isCompressed", "boolean"));
+                    ClassData mcdBool = ClassData.parseClass(Object.class);
+                    mcdBool.addField(FieldData.create("Object", "value", "char[]"));
+                    mcdBool.addField(FieldData.create("Object", "hash", "int"));
+                    mcdBool.addField(FieldData.create("Object", "isCompressed", "boolean"));
                     stringsBool += l.layout(mcdBool).instanceSize() * count;
 
-                    ClassData mcdOop = ClassData.parseClass(String.class);
-                    mcdOop.addField(FieldData.create("String", "coder", "java/lang/Object"));
+                    ClassData mcdOop = ClassData.parseClass(Object.class);
+                    mcdOop.addField(FieldData.create("Object", "value", "char[]"));
+                    mcdOop.addField(FieldData.create("Object", "hash", "int"));
+                    mcdOop.addField(FieldData.create("Object", "coder", "java/lang/Object"));
                     stringsOop += l.layout(mcdOop).instanceSize() * count;
                 } else {
                     totalFootprint += l.layout(cd).instanceSize() * count;
