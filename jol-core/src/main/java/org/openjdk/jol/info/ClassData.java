@@ -79,6 +79,11 @@ public class ClassData {
      * @return class data instance
      */
     public static ClassData parseClass(Class klass) {
+        // If this is an array, do the array parsing, instead of ordinary class.
+        if (klass.isArray()) {
+            return parseArray(klass, 0);
+        }
+
         ClassData cd = new ClassData(klass.getCanonicalName());
 
         do {
