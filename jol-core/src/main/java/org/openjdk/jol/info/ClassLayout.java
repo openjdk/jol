@@ -216,7 +216,7 @@ public class ClassLayout {
         }
 
         if (info.exactSize()) {
-            pw.printf("Instance size: %d bytes (reported by VM agent)%n", info.instanceSize());
+            pw.printf("Instance size: %d bytes (reported by Instrumentation API)%n", info.instanceSize());
         } else {
             if (instance != null) {
                 pw.printf("Instance size: %d bytes (estimated, add this JAR via -javaagent: to get accurate result)%n", info.instanceSize());

@@ -100,7 +100,7 @@ questions.
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.openjdk.jol.MainObjectInternals</mainClass>
                                     <manifestEntries>
-                                        <Premain-Class>org.openjdk.jol.util.VMSupport</Premain-Class>
+                                        <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -119,7 +119,7 @@ questions.
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.openjdk.jol.MainObjectFootprint</mainClass>
                                     <manifestEntries>
-                                        <Premain-Class>org.openjdk.jol.util.VMSupport</Premain-Class>
+                                        <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -138,7 +138,7 @@ questions.
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.openjdk.jol.MainObjectIdealPacking</mainClass>
                                     <manifestEntries>
-                                        <Premain-Class>org.openjdk.jol.util.VMSupport</Premain-Class>
+                                        <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -157,7 +157,7 @@ questions.
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.openjdk.jol.MainObjectExternals</mainClass>
                                     <manifestEntries>
-                                        <Premain-Class>org.openjdk.jol.util.VMSupport</Premain-Class>
+                                        <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -176,7 +176,7 @@ questions.
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.openjdk.jol.MainObjectEstimates</mainClass>
                                     <manifestEntries>
-                                        <Premain-Class>org.openjdk.jol.util.VMSupport</Premain-Class>
+                                        <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -195,7 +195,7 @@ questions.
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.openjdk.jol.MainHeapDump</mainClass>
                                     <manifestEntries>
-                                        <Premain-Class>org.openjdk.jol.util.VMSupport</Premain-Class>
+                                        <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -214,7 +214,7 @@ questions.
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.openjdk.jol.MainStringCompress</mainClass>
                                     <manifestEntries>
-                                        <Premain-Class>org.openjdk.jol.util.VMSupport</Premain-Class>
+                                        <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>

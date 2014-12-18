@@ -35,7 +35,6 @@ import javax.management.RuntimeMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.security.AccessController;
@@ -52,8 +51,6 @@ import java.util.regex.Pattern;
  * @author Aleksey Shipilev
  */
 public class VMSupport {
-
-    private static Instrumentation INSTRUMENTATION;
 
     public static final Unsafe U;
 
@@ -240,10 +237,6 @@ public class VMSupport {
         return toNativeAddress(objectAddress);
     }
 
-    public static void premain(String agentArgs, Instrumentation inst) {
-        INSTRUMENTATION = inst;
-    }
-
     public static SizeInfo tryExactObjectSize(Object o, ClassLayout layout) {
         return new SizeInfo(o, layout);
     }
@@ -253,8 +246,8 @@ public class VMSupport {
         private final boolean exactSizeAvail;
 
         public SizeInfo(Object o, ClassLayout layout) {
-            exactSizeAvail = VMSupport.INSTRUMENTATION != null && o != null;
-            size = exactSizeAvail ? (int) VMSupport.INSTRUMENTATION.getObjectSize(o) : layout.instanceSize();
+            exactSizeAvail = InstrumentationSupport.instance() != null && o != null;
+            size = exactSizeAvail ? (int) InstrumentationSupport.instance().getObjectSize(o) : layout.instanceSize();
         }
 
         public int instanceSize() {
@@ -418,8 +411,8 @@ public class VMSupport {
     }
 
     public static int sizeOf(Object o) {
-        if (VMSupport.INSTRUMENTATION != null) {
-            return VMSupport.align((int) VMSupport.INSTRUMENTATION.getObjectSize(o));
+        if (InstrumentationSupport.instance() != null) {
+            return VMSupport.align((int) InstrumentationSupport.instance().getObjectSize(o));
         }
 
         return new CurrentLayouter().layout(ClassData.parseInstance(o)).instanceSize();
