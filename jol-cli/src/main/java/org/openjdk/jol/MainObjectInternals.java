@@ -24,6 +24,8 @@
  */
 package org.openjdk.jol;
 
+import java.lang.reflect.Constructor;
+
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.util.VMSupport;
 
@@ -45,8 +47,14 @@ public class MainObjectInternals {
             try {
                 Class<?> klass = Class.forName(klassName);
                 try {
+                    Constructor<?> ctor = klass.getDeclaredConstructor();
+                    ctor.setAccessible(true);
                     Object o = klass.newInstance();
                     out.println(ClassLayout.parseClass(klass).toPrintable(o));
+                } catch (NoSuchMethodException e) {
+                    out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
+                    out.println();
+                    out.println(ClassLayout.parseClass(klass).toPrintable());
                 } catch (IllegalAccessException e) {
                     out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
                     out.println();

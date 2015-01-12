@@ -24,6 +24,9 @@
  */
 package org.openjdk.jol;
 
+import java.lang.reflect.Constructor;
+
+import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.info.GraphLayout;
 import org.openjdk.jol.util.VMSupport;
 
@@ -43,8 +46,12 @@ public class MainObjectFootprint {
 
         Class<?> klass = Class.forName(args[0]);
         try {
-            Object o = klass.newInstance();
+            Constructor<?> ctor = klass.getDeclaredConstructor();
+            ctor.setAccessible(true);
+            Object o = ctor.newInstance();
             out.println(GraphLayout.parseInstance(o).toFootprint());
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException("Instantiation exception, does the class have the default constructor?", e);
         } catch (InstantiationException e) {
             throw new IllegalStateException("Instantiation exception, does the class have the default constructor?", e);
         } catch (IllegalAccessException e) {

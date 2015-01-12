@@ -24,6 +24,8 @@
  */
 package org.openjdk.jol;
 
+import java.lang.reflect.Constructor;
+
 import org.openjdk.jol.info.GraphLayout;
 import org.openjdk.jol.util.VMSupport;
 
@@ -43,8 +45,12 @@ public class MainObjectExternals {
 
         Class<?> k = Class.forName(args[0]);
         try {
-            Object o = k.newInstance();
+            Constructor<?> ctor = k.getDeclaredConstructor();
+            ctor.setAccessible(true);
+            Object o = ctor.newInstance();
             out.println(GraphLayout.parseInstance(o).toPrintable());
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException("Instantiation exception, does the class have the default constructor?", e);
         } catch (InstantiationException e) {
             throw new IllegalStateException("Instantiation exception, does the class have the default constructor?", e);
         } catch (IllegalAccessException e) {
