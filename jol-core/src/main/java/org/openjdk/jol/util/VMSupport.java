@@ -27,12 +27,15 @@ package org.openjdk.jol.util;
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.layouters.CurrentLayouter;
+import org.openjdk.jol.util.sa.impl.compressedrefs.HS_SA_CompressedReferencesResult;
+
 import sun.misc.Unsafe;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.RuntimeMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
@@ -56,12 +59,24 @@ public class VMSupport {
 
     public static final String VM_NAME;
     public static final int ADDRESS_SIZE;
+    public static final int REF_SIZE;
     public static final int OBJ_ALIGNMENT;
     public static final int OBJ_HEADER_SIZE;
+
     public static final boolean USE_COMPRESSED_REFS;
+    public static final long COMPRESSED_REF_BASE;
     public static final int COMPRESSED_REF_SHIFT;
 
-    public static final int REF_SIZE;
+    public static final int OOP_SIZE;
+    public static final boolean USE_COMPRESSED_OOP;
+    public static final long COMPRESSED_OOP_BASE;
+    public static final int COMPRESSED_OOP_SHIFT;
+
+    public static final int KLASS_OOP_SIZE;
+    public static final boolean USE_COMPRESSED_KLASS;
+    public static final long COMPRESSED_KLASS_BASE;
+    public static final int COMPRESSED_KLASS_SHIFT;
+
     public static final int BOOLEAN_SIZE;
     public static final int BYTE_SIZE;
     public static final int CHAR_SIZE;
@@ -107,16 +122,36 @@ public class VMSupport {
             headerSize = -1;
         }
 
+        ADDRESS_SIZE = U.addressSize();
+
         VMOptions opts = VMOptions.getOptions();
 
-        ADDRESS_SIZE = U.addressSize();
+        VM_NAME = opts.name;
+        REF_SIZE = opts.sizeReference;
+        OBJ_ALIGNMENT = opts.objectAlignment;
         OBJ_HEADER_SIZE = headerSize;
 
-        VM_NAME = opts.name;
-        USE_COMPRESSED_REFS = opts.compressedRef;
-        COMPRESSED_REF_SHIFT = opts.compressRefShift;
-        OBJ_ALIGNMENT = opts.objectAlignment;
-        REF_SIZE = opts.sizeReference;
+        /*
+         * There are two different compressed references (OOP and Klass) information since Java 8.
+         * For Java 6 and 7, there is only one (OOP) compressed reference and this one is used both of OOP and Klass instances.
+         * So we can assume compressed-oop information as compressed-reference information
+         * for "USE_COMPRESSED_REFS", COMPRESSED_REF_BASE" and "COMPRESSED_REF_SHIFT" properties as default.
+         */
+
+        USE_COMPRESSED_REFS = opts.compressedOopRef;
+        COMPRESSED_REF_BASE = opts.compressedOopBase;
+        COMPRESSED_REF_SHIFT = opts.compressedOopShift;
+
+        OOP_SIZE = opts.oopSize;
+        USE_COMPRESSED_OOP = opts.compressedOopRef;
+        COMPRESSED_OOP_BASE = opts.compressedOopBase;
+        COMPRESSED_OOP_SHIFT = opts.compressedOopShift;
+
+        KLASS_OOP_SIZE = opts.klassOopSize;
+        USE_COMPRESSED_KLASS = opts.compressedKlassRef;
+        COMPRESSED_KLASS_BASE = opts.compressedKlassBase;
+        COMPRESSED_KLASS_SHIFT = opts.compressedKlassShift;
+
         BOOLEAN_SIZE = opts.sizeBoolean;
         BYTE_SIZE = opts.sizeByte;
         CHAR_SIZE = opts.sizeChar;
@@ -129,7 +164,47 @@ public class VMSupport {
 
     public static long toNativeAddress(long address) {
         if (USE_COMPRESSED_REFS) {
-            return address << COMPRESSED_REF_SHIFT;
+            return COMPRESSED_REF_BASE + (address << COMPRESSED_REF_SHIFT);
+        } else {
+            return address;
+        }
+    }
+
+    public static long toJvmAddress(long address) {
+        if (USE_COMPRESSED_REFS) {
+            return (address >> COMPRESSED_REF_SHIFT) - COMPRESSED_REF_BASE;
+        } else {
+            return address;
+        }
+    }
+
+    public static long toNativeOopAddress(long address) {
+        if (USE_COMPRESSED_OOP) {
+            return COMPRESSED_OOP_BASE + (address << COMPRESSED_OOP_SHIFT);
+        } else {
+            return address;
+        }
+    }
+
+    public static long toJvmOopAddress(long address) {
+        if (USE_COMPRESSED_OOP) {
+            return (address >> COMPRESSED_OOP_SHIFT) - COMPRESSED_OOP_BASE;
+        } else {
+            return address;
+        }
+    }
+
+    public static long toNativeKlassAddress(long address) {
+        if (USE_COMPRESSED_KLASS) {
+            return COMPRESSED_KLASS_BASE + (address << COMPRESSED_KLASS_SHIFT);
+        } else {
+            return address;
+        }
+    }
+
+    public static long toJvmKlassAddress(long address) {
+        if (USE_COMPRESSED_KLASS) {
+            return (address >> COMPRESSED_KLASS_SHIFT) - COMPRESSED_KLASS_BASE;
         } else {
             return address;
         }
@@ -144,8 +219,39 @@ public class VMSupport {
         PrintWriter out = new PrintWriter(sw);
 
         out.println("Running " + (ADDRESS_SIZE * 8) + "-bit " + VM_NAME + " VM.");
-        if (USE_COMPRESSED_REFS)
-            out.println("Using compressed references with " + COMPRESSED_REF_SHIFT + "-bit shift.");
+
+        String javaSpecVersion = System.getProperty("java.specification.version");
+        // Since Java 8 (Java 8 and Java 9) has different compressed reference configuration for OOP and Klass
+        if (javaSpecVersion.equals("1.8") || javaSpecVersion.equals("1.9")) {
+            if (USE_COMPRESSED_OOP) {
+                if (COMPRESSED_OOP_BASE != 0) {
+                    out.println("Using compressed oop with " +
+                                formatAddressAsHexByAddressSize(COMPRESSED_OOP_BASE) + " base address and " +
+                                COMPRESSED_OOP_SHIFT + "-bit shift.");
+                } else {
+                    out.println("Using compressed oop with " + COMPRESSED_OOP_SHIFT + "-bit shift.");
+                }
+            }
+            if (USE_COMPRESSED_KLASS) {
+                if (COMPRESSED_KLASS_BASE != 0) {
+                    out.println("Using compressed klass with " +
+                                formatAddressAsHexByAddressSize(COMPRESSED_KLASS_BASE) + " base address and " +
+                                COMPRESSED_KLASS_SHIFT + "-bit shift.");
+                } else {
+                    out.println("Using compressed klass with " + COMPRESSED_KLASS_SHIFT + "-bit shift.");
+                }
+            }
+        } else {
+            if (USE_COMPRESSED_REFS) {
+                if (COMPRESSED_REF_BASE != 0) {
+                    out.println("Using compressed references with " +
+                            formatAddressAsHexByAddressSize(COMPRESSED_REF_BASE) + " base address and " +
+                            COMPRESSED_REF_SHIFT + "-bit shift.");
+                } else {
+                    out.println("Using compressed references with " + COMPRESSED_REF_SHIFT + "-bit shift.");
+                }
+            }
+        }
         out.println("Objects are " + OBJ_ALIGNMENT + " bytes aligned.");
 
         out.printf("%-19s: %d, %d, %d, %d, %d, %d, %d, %d, %d [bytes]%n",
@@ -176,6 +282,11 @@ public class VMSupport {
 
         out.close();
         return sw.toString();
+    }
+
+    private static String formatAddressAsHexByAddressSize(long address) {
+        return "0x" + String.format("%" + (ADDRESS_SIZE * 2) + "s",
+                                    Long.toHexString(address).toUpperCase()).replace(' ', '0');
     }
 
     private static Object instantiateType(int type) {
@@ -261,9 +372,15 @@ public class VMSupport {
 
     private static class VMOptions {
         private final String name;
-        private final boolean compressedRef;
-        private final int compressRefShift;
         private final int objectAlignment;
+        private final int oopSize;
+        private final boolean compressedOopRef;
+        private final long compressedOopBase;
+        private final int compressedOopShift;
+        private final int klassOopSize;
+        private final boolean compressedKlassRef;
+        private final long compressedKlassBase;
+        private final int compressedKlassShift;
 
         private final int sizeReference;
         private final int sizeBoolean = getMinDiff(MyBooleans4.class);
@@ -291,24 +408,58 @@ public class VMSupport {
             this.name = name;
             this.sizeReference = U.addressSize();
             this.objectAlignment = guessAlignment(this.sizeReference);
-            this.compressedRef = false;
-            this.compressRefShift = 1;
+            this.oopSize = sizeReference;
+            this.compressedOopRef = false;
+            this.compressedOopBase = 0L;
+            this.compressedOopShift = 0;
+            this.klassOopSize = sizeReference;
+            this.compressedKlassRef = false;
+            this.compressedKlassBase = 0L;
+            this.compressedKlassShift = 0;
         }
 
         public VMOptions(String name, int align) {
             this.name = name;
             this.sizeReference = 4;
             this.objectAlignment = align;
-            this.compressedRef = true;
-            this.compressRefShift = MathUtil.log2p(align);
+            this.oopSize = sizeReference;
+            this.compressedOopRef = true;
+            this.compressedOopBase = 0L;
+            this.compressedOopShift = MathUtil.log2p(align);
+            this.klassOopSize = sizeReference;
+            this.compressedKlassRef = true;
+            this.compressedKlassBase = 0L;
+            this.compressedKlassShift = MathUtil.log2p(align);
         }
 
         public VMOptions(String name, int align, int compRefShift) {
             this.name = name;
             this.sizeReference = 4;
             this.objectAlignment = align;
-            this.compressedRef = true;
-            this.compressRefShift = compRefShift;
+            this.oopSize = sizeReference;
+            this.compressedOopRef = true;
+            this.compressedOopBase = 0L;
+            this.compressedOopShift = compRefShift;
+            this.klassOopSize = sizeReference;
+            this.compressedKlassRef = true;
+            this.compressedKlassBase = 0L;
+            this.compressedKlassShift = compRefShift;
+        }
+
+        public VMOptions(String name, int align, int oopSize, boolean compOopRef, long compOopBase, int compOopShift,
+                int klassOopSize, boolean compKlassRef, long compKlassBase, int compKlassShift) {
+            this.name = name;
+            // Use OOP size as reference size
+            this.sizeReference = oopSize;
+            this.objectAlignment = align;
+            this.oopSize = oopSize;
+            this.compressedOopRef = compOopRef;
+            this.compressedOopBase = compOopBase;
+            this.compressedOopShift = compOopShift;
+            this.klassOopSize = klassOopSize;
+            this.compressedKlassRef = compKlassRef;
+            this.compressedKlassBase = compKlassBase;
+            this.compressedKlassShift = compKlassShift;
         }
 
         private static VMOptions getOptions() {
@@ -346,6 +497,29 @@ public class VMSupport {
             }
 
             try {
+                try {
+                    HS_SA_CompressedReferencesResult compressedReferencesInfo =
+                            HS_SA_Support.getCompressedReferences();
+                    if (compressedReferencesInfo != null) {
+                        return new VMOptions("HotSpot",
+                                             compressedReferencesInfo.getObjectAlignment(),
+                                             compressedReferencesInfo.getOopSize(),
+                                             compressedReferencesInfo.isCompressedOopsEnabled(),
+                                             compressedReferencesInfo.getNarrowOopBase(),
+                                             compressedReferencesInfo.getNarrowOopShift(),
+                                             compressedReferencesInfo.getKlassOopSize(),
+                                             compressedReferencesInfo.isCompressedKlassOopsEnabled(),
+                                             compressedReferencesInfo.getNarrowKlassBase(),
+                                             compressedReferencesInfo.getNarrowKlassShift());
+                    } else {
+                        System.out.println("Compressed references information couldn't be found via Hotspot SA.");
+                    }
+                } catch (Throwable t) {
+                    System.err.println(t.getMessage());
+                    System.err.println("WARNING: VM details, e.g. object alignment, reference size, compressed references info will be guessed.");
+                    System.err.println();
+                }
+
                 MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 
                 try {
