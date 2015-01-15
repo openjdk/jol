@@ -22,10 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol;
+package org.openjdk.jol.operations;
 
 import java.lang.reflect.Constructor;
 
+import org.openjdk.jol.Operation;
 import org.openjdk.jol.info.GraphLayout;
 import org.openjdk.jol.util.VMSupport;
 
@@ -34,21 +35,31 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class MainObjectExternals {
+public class ObjectFootprint implements Operation {
 
-    public static void main(String[] args) throws Exception {
+    @Override
+    public String label() {
+        return "footprint";
+    }
+
+    @Override
+    public String description() {
+        return "Estimate the footprint of all objects reachable from a given instance";
+    }
+
+    public void run(String... args) throws Exception {
         if (args.length == 0) {
-            System.err.println("Usage: jol-externals.jar [class-name]");
-            System.exit(1);
+            System.err.println("Expected a class name.");
+            return;
         }
         out.println(VMSupport.vmDetails());
 
-        Class<?> k = Class.forName(args[0]);
+        Class<?> klass = Class.forName(args[0]);
         try {
-            Constructor<?> ctor = k.getDeclaredConstructor();
+            Constructor<?> ctor = klass.getDeclaredConstructor();
             ctor.setAccessible(true);
             Object o = ctor.newInstance();
-            out.println(GraphLayout.parseInstance(o).toPrintable());
+            out.println(GraphLayout.parseInstance(o).toFootprint());
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException("Instantiation exception, does the class have the default constructor?", e);
         } catch (InstantiationException e) {

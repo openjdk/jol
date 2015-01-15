@@ -22,8 +22,9 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol;
+package org.openjdk.jol.operations;
 
+import org.openjdk.jol.Operation;
 import org.openjdk.jol.datamodel.DataModel;
 import org.openjdk.jol.datamodel.X86_32_DataModel;
 import org.openjdk.jol.datamodel.X86_64_COOPS_DataModel;
@@ -56,7 +57,7 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class MainStringCompress {
+public class StringCompress implements Operation {
 
     static final String DO_MODE = System.getProperty("mode", "estimates");
 
@@ -68,10 +69,20 @@ public class MainStringCompress {
     };
 
 
-    public static void main(String[] args) throws Exception {
+    @Override
+    public String label() {
+        return "string-compress";
+    }
+
+    @Override
+    public String description() {
+        return "Consume the heap dumps and figures out the savings attainable with compressed strings.";
+    }
+
+    public void run(String... args) throws Exception {
         if (args.length == 0) {
-            System.err.println("Usage: jol-string-compress.jar [heapdump.hprof]*");
-            System.exit(1);
+            System.err.println("Expected one or more heap dump file names.");
+            return;
         }
 
         if (DO_MODE.equalsIgnoreCase("histo")) {

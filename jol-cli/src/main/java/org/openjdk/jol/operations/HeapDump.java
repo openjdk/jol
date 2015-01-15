@@ -22,8 +22,9 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol;
+package org.openjdk.jol.operations;
 
+import org.openjdk.jol.Operation;
 import org.openjdk.jol.datamodel.DataModel;
 import org.openjdk.jol.datamodel.X86_32_DataModel;
 import org.openjdk.jol.datamodel.X86_64_COOPS_DataModel;
@@ -43,12 +44,22 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class MainHeapDump {
+public class HeapDump implements Operation {
 
-    public static void main(String[] args) throws Exception {
+    @Override
+    public String label() {
+        return "heapdump";
+    }
+
+    @Override
+    public String description() {
+        return "Consume the heap dump and estimate the savings in different layout strategies.";
+    }
+
+    public void run(String... args) throws Exception {
         if (args.length == 0) {
-            System.err.println("Usage: jol-heapdump.jar [heapdump.hprof]");
-            System.exit(1);
+            System.err.println("Expected a hprof file name.");
+            return;
         }
         String path = args[0];
 

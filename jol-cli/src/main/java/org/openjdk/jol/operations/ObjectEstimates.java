@@ -22,8 +22,9 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol;
+package org.openjdk.jol.operations;
 
+import org.openjdk.jol.Operation;
 import org.openjdk.jol.datamodel.X86_32_DataModel;
 import org.openjdk.jol.datamodel.X86_64_COOPS_DataModel;
 import org.openjdk.jol.datamodel.X86_64_DataModel;
@@ -35,12 +36,22 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class MainObjectEstimates {
+public class ObjectEstimates implements Operation {
 
-    public static void main(String[] args) throws Exception {
+    @Override
+    public String label() {
+        return "estimates";
+    }
+
+    @Override
+    public String description() {
+        return "Simulate the class layout in different VM modes.";
+    }
+
+    public void run(String... args) throws Exception {
         if (args.length == 0) {
-            System.err.println("Usage: jol-estimates.jar [class-name]*");
-            System.exit(1);
+            System.err.println("Expected one or more class names.");
+            return;
         }
 
         for (String klassName : args) {

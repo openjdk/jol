@@ -22,8 +22,9 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol;
+package org.openjdk.jol.operations;
 
+import org.openjdk.jol.Operation;
 import org.openjdk.jol.datamodel.CurrentDataModel;
 import org.openjdk.jol.datamodel.DataModel;
 import org.openjdk.jol.info.ClassData;
@@ -43,11 +44,21 @@ import java.util.zip.ZipException;
 /**
  * @author Aleksey Shipilev
  */
-public class MainObjectIdealPacking {
+public class ObjectIdealPacking implements Operation {
 
-    public static void main(String[] args) throws Exception {
+    @Override
+    public String label() {
+        return "idealpack";
+    }
+
+    @Override
+    public String description() {
+        return "Compute the object footprint under different field layout strategies.";
+    }
+
+    public void run(String... args) throws Exception {
         if (args.length == 0) {
-            System.err.println("Usage: jol-idealpack.jar [jar-name]*");
+            System.err.println("Expected one or more JAR file names.");
             System.exit(1);
         }
 

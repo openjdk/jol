@@ -88,131 +88,19 @@ questions.
                 <version>2.0</version>
                 <executions>
                     <execution>
-                        <id>java-field-layout</id>
+                        <id>java-cli</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>jol-internals</finalName>
+                            <finalName>jol-cli</finalName>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>full</shadedClassifierName>
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.openjdk.jol.MainObjectInternals</mainClass>
-                                    <manifestEntries>
-                                        <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>java-object-graph</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>jol-footprint</finalName>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.openjdk.jol.MainObjectFootprint</mainClass>
-                                    <manifestEntries>
-                                        <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>java-object-ideal-pack</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>jol-idealpack</finalName>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.openjdk.jol.MainObjectIdealPacking</mainClass>
-                                    <manifestEntries>
-                                        <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>java-object-layout</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>jol-externals</finalName>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.openjdk.jol.MainObjectExternals</mainClass>
-                                    <manifestEntries>
-                                        <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>java-object-estimates</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>jol-estimates</finalName>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.openjdk.jol.MainObjectEstimates</mainClass>
-                                    <manifestEntries>
-                                        <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>java-consume-heapdump</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>jol-heapdump</finalName>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.openjdk.jol.MainHeapDump</mainClass>
-                                    <manifestEntries>
-                                        <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>java-string-compress</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>jol-string-compress</finalName>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.openjdk.jol.MainStringCompress</mainClass>
+                                    <mainClass>org.openjdk.jol.Main</mainClass>
                                     <manifestEntries>
                                         <Premain-Class>org.openjdk.jol.util.InstrumentationSupport</Premain-Class>
                                     </manifestEntries>

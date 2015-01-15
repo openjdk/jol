@@ -22,10 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol;
+package org.openjdk.jol.operations;
 
 import java.lang.reflect.Constructor;
 
+import org.openjdk.jol.Operation;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.util.VMSupport;
 
@@ -34,12 +35,22 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class MainObjectInternals {
+public class ObjectInternals implements Operation {
 
-    public static void main(String[] args) throws Exception {
+    @Override
+    public String label() {
+        return "internals";
+    }
+
+    @Override
+    public String description() {
+        return "Show the object internals: field layout and default contents, object header";
+    }
+
+    public void run(String[] args) throws Exception {
         if (args.length == 0) {
-            System.err.println("Usage: jol-internals.jar [class-name]*");
-            System.exit(1);
+            System.err.println("Expected one or more class names.");
+            return;
         }
         out.println(VMSupport.vmDetails());
 
