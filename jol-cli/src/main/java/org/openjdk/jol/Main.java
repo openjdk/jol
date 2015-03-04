@@ -34,9 +34,29 @@ import org.openjdk.jol.operations.StringCompress;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class Main {
+
+    private static SortedMap<String, Operation> operations = new TreeMap<String, Operation>();
+
+    static {
+        registerOperation(new ObjectInternals());
+        registerOperation(new ObjectExternals());
+        registerOperation(new ObjectEstimates());
+        registerOperation(new ObjectFootprint());
+        registerOperation(new ObjectIdealPacking());
+        registerOperation(new StringCompress());
+        registerOperation(new HeapDump());
+    }
+
+    private static void registerOperation(Operation op) {
+        operations.put(op.label(), op);
+    }
 
     public static void main(String... args) throws Exception {
         if (args.length < 1) {
@@ -47,27 +67,21 @@ public class Main {
 
         String mode = args[0];
 
-        List<Operation> operations = new ArrayList<Operation>();
-        operations.add(new ObjectInternals());
-        operations.add(new ObjectExternals());
-        operations.add(new ObjectEstimates());
-        operations.add(new ObjectFootprint());
-        operations.add(new ObjectIdealPacking());
-        operations.add(new StringCompress());
-        operations.add(new HeapDump());
-
-        if (mode.equals("help")) {
+        Operation op = operations.get(mode);
+        if (op != null) {
+            String[] modeArgs = Arrays.copyOfRange(args, 1, args.length);
+            op.run(modeArgs);
+        } else {
             System.out.println("Available modes: ");
-            for (Operation op : operations) {
-                System.out.printf("  %20s: %s%n", op.label(), op.description());
+            for (Operation lop : operations.values()) {
+                System.out.printf("  %20s: %s%n", lop.label(), lop.description());
             }
-            System.exit(0);
-        }
 
-        String[] modeArgs = Arrays.copyOfRange(args, 1, args.length);
-        for (Operation op : operations) {
-            if (op.label().equals(mode)) {
-                op.run(modeArgs);
+            if (!mode.equals("help")) {
+                System.err.println("Unknown mode: " + mode);
+                System.exit(1);
+            } else {
+                System.exit(0);
             }
         }
     }
