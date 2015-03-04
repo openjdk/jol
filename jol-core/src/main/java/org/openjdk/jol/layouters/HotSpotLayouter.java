@@ -109,12 +109,12 @@ public class HotSpotLayouter implements Layouter {
                 // do nothing
             } else if (takeHierarchyGaps) {
                 // claim only the class body up to the field
-                int lastSet = claimed.length() - 1;
+                int lastSet = claimed.length();
                 claimed.set(0, lastSet);
             } else {
                 // claim the entire class body, plus some alignment
-                int lastSet = claimed.length() - 1;
-                claimed.set(0, MathUtil.align(lastSet, 4));
+                int lastSet = claimed.length();
+                claimed.set(0, MathUtil.align(lastSet, model.sizeOf("java.lang.Object")));
             }
         }
 
