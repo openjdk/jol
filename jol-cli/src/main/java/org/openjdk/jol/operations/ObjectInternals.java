@@ -24,18 +24,16 @@
  */
 package org.openjdk.jol.operations;
 
-import java.lang.reflect.Constructor;
-
-import org.openjdk.jol.Operation;
 import org.openjdk.jol.info.ClassLayout;
-import org.openjdk.jol.util.VMSupport;
+
+import java.lang.reflect.Constructor;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class ObjectInternals implements Operation {
+public class ObjectInternals extends ClasspathedOPeration {
 
     @Override
     public String label() {
@@ -47,37 +45,24 @@ public class ObjectInternals implements Operation {
         return "Show the object internals: field layout and default contents, object header";
     }
 
-    public void run(String[] args) throws Exception {
-        if (args.length == 0) {
-            System.err.println("Expected one or more class names.");
-            return;
-        }
-        out.println(VMSupport.vmDetails());
-
-        for (String klassName : args) {
-            try {
-                Class<?> klass = Class.forName(klassName);
-                try {
-                    Constructor<?> ctor = klass.getDeclaredConstructor();
-                    ctor.setAccessible(true);
-                    Object o = klass.newInstance();
-                    out.println(ClassLayout.parseClass(klass).toPrintable(o));
-                } catch (NoSuchMethodException e) {
-                    out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
-                    out.println();
-                    out.println(ClassLayout.parseClass(klass).toPrintable());
-                } catch (IllegalAccessException e) {
-                    out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
-                    out.println();
-                    out.println(ClassLayout.parseClass(klass).toPrintable());
-                } catch (InstantiationException e) {
-                    out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
-                    out.println();
-                    out.println(ClassLayout.parseClass(klass).toPrintable());
-                }
-            } catch (Throwable t) {
-                t.printStackTrace(System.err);
-            }
+    public void runWith(Class<?> klass) throws Exception {
+        try {
+            Constructor<?> ctor = klass.getDeclaredConstructor();
+            ctor.setAccessible(true);
+            Object o = klass.newInstance();
+            out.println(ClassLayout.parseClass(klass).toPrintable(o));
+        } catch (NoSuchMethodException e) {
+            out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
+            out.println();
+            out.println(ClassLayout.parseClass(klass).toPrintable());
+        } catch (IllegalAccessException e) {
+            out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
+            out.println();
+            out.println(ClassLayout.parseClass(klass).toPrintable());
+        } catch (InstantiationException e) {
+            out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
+            out.println();
+            out.println(ClassLayout.parseClass(klass).toPrintable());
         }
     }
 

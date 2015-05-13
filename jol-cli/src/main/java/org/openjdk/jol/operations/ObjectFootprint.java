@@ -24,18 +24,16 @@
  */
 package org.openjdk.jol.operations;
 
-import java.lang.reflect.Constructor;
-
-import org.openjdk.jol.Operation;
 import org.openjdk.jol.info.GraphLayout;
-import org.openjdk.jol.util.VMSupport;
+
+import java.lang.reflect.Constructor;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class ObjectFootprint implements Operation {
+public class ObjectFootprint extends ClasspathedOPeration {
 
     @Override
     public String label() {
@@ -47,14 +45,7 @@ public class ObjectFootprint implements Operation {
         return "Estimate the footprint of all objects reachable from a given instance";
     }
 
-    public void run(String... args) throws Exception {
-        if (args.length == 0) {
-            System.err.println("Expected a class name.");
-            return;
-        }
-        out.println(VMSupport.vmDetails());
-
-        Class<?> klass = Class.forName(args[0]);
+    public void runWith(Class<?> klass) throws Exception {
         try {
             Constructor<?> ctor = klass.getDeclaredConstructor();
             ctor.setAccessible(true);

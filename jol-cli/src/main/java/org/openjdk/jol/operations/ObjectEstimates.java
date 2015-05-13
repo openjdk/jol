@@ -24,7 +24,6 @@
  */
 package org.openjdk.jol.operations;
 
-import org.openjdk.jol.Operation;
 import org.openjdk.jol.datamodel.X86_32_DataModel;
 import org.openjdk.jol.datamodel.X86_64_COOPS_DataModel;
 import org.openjdk.jol.datamodel.X86_64_DataModel;
@@ -36,7 +35,7 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class ObjectEstimates implements Operation {
+public class ObjectEstimates extends ClasspathedOPeration {
 
     @Override
     public String label() {
@@ -48,31 +47,19 @@ public class ObjectEstimates implements Operation {
         return "Simulate the class layout in different VM modes.";
     }
 
-    public void run(String... args) throws Exception {
-        if (args.length == 0) {
-            System.err.println("Expected one or more class names.");
-            return;
-        }
+    @Override
+    protected void runWith(Class<?> klass) throws Exception {
+        out.println("***** 32-bit VM: **********************************************************");
+        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_32_DataModel(), false, false, false)).toPrintable());
 
-        for (String klassName : args) {
-            try {
-                Class<?> klass = Class.forName(klassName);
+        out.println("***** 64-bit VM: **********************************************************");
+        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_DataModel(), false, false, false)).toPrintable());
 
-                out.println("***** 32-bit VM: **********************************************************");
-                out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_32_DataModel(), false, false, false)).toPrintable());
+        out.println("***** 64-bit VM, compressed references enabled: ***************************");
+        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel(), false, false, false)).toPrintable());
 
-                out.println("***** 64-bit VM: **********************************************************");
-                out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_DataModel(), false, false, false)).toPrintable());
-
-                out.println("***** 64-bit VM, compressed references enabled: ***************************");
-                out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel(), false, false, false)).toPrintable());
-
-                out.println("***** 64-bit VM, compressed references enabled, 16-byte align: ************");
-                out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel(16), false, false, false)).toPrintable());
-            } catch (Throwable t) {
-                t.printStackTrace(System.err);
-            }
-        }
+        out.println("***** 64-bit VM, compressed references enabled, 16-byte align: ************");
+        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel(16), false, false, false)).toPrintable());
     }
 
 }
