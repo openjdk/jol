@@ -32,11 +32,8 @@ import org.openjdk.jol.operations.ObjectIdealPacking;
 import org.openjdk.jol.operations.ObjectInternals;
 import org.openjdk.jol.operations.StringCompress;
 
-import java.util.ArrayList;
+import java.io.PrintStream;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -59,30 +56,32 @@ public class Main {
     }
 
     public static void main(String... args) throws Exception {
-        if (args.length < 1) {
-            System.err.println("Usage: jol-cli.jar <mode> [optional arguments]*");
-            System.err.println("  Use mode \"help\" to get the list of available modes.");
-            System.exit(1);
-        }
-
-        String mode = args[0];
+        String mode = (args.length >= 1) ? args[0] : "help";
 
         Operation op = operations.get(mode);
         if (op != null) {
             String[] modeArgs = Arrays.copyOfRange(args, 1, args.length);
             op.run(modeArgs);
         } else {
-            System.out.println("Available modes: ");
-            for (Operation lop : operations.values()) {
-                System.out.printf("  %20s: %s%n", lop.label(), lop.description());
-            }
-
             if (!mode.equals("help")) {
                 System.err.println("Unknown mode: " + mode);
+                System.err.println();
+                printHelp(System.err);
                 System.exit(1);
             } else {
+                printHelp(System.out);
                 System.exit(0);
             }
+        }
+    }
+
+    private static void printHelp(PrintStream pw) {
+        pw.println("Usage: jol-cli.jar <mode> [optional arguments]*");
+        pw.println();
+
+        pw.println("Available modes: ");
+        for (Operation lop : operations.values()) {
+            pw.printf("  %20s: %s%n", lop.label(), lop.description());
         }
     }
 

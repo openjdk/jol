@@ -57,6 +57,12 @@ public abstract class ClasspathedOPeration implements Operation {
         try {
             OptionSet set = parser.parse(args);
             classes = set.valuesOf(optClasses);
+            if (classes.isEmpty()) {
+                System.err.println("Need class name(s) as the arguments.");
+                System.err.println();
+                parser.printHelpOn(System.err);
+                return;
+            }
 
             List<URL> cp = new ArrayList<URL>();
             for (String cpEntry : set.valuesOf(optClassPath)) {
