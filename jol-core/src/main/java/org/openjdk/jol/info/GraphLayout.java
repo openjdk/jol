@@ -54,8 +54,18 @@ public class GraphLayout {
      * @return object graph
      */
     public static GraphLayout parseInstance(Object root) {
-        GraphWalker walker = new GraphWalker(root);
-        GraphLayout data = new GraphLayout(root);
+        return parseInstance(new Object[] {root});
+    }
+
+    /**
+     * Parse the object graph starting from the given instance.
+     *
+     * @param roots root instances to start from
+     * @return object graph
+     */
+    public static GraphLayout parseInstance(Object... roots) {
+        GraphLayout data = new GraphLayout(roots);
+        GraphWalker walker = new GraphWalker(roots);
         walker.addVisitor(data.visitor());
         walker.walk();
         return data;
@@ -73,16 +83,22 @@ public class GraphLayout {
     private final Multiset<Class<?>> classCounts = new Multiset<Class<?>>();
     private final SortedMap<Long, GraphPathRecord> addresses = new TreeMap<Long, GraphPathRecord>();
 
-    private final String name;
-    private final long rootAddress;
-    private final int rootHC;
+    private final String description;
     private long totalCount;
     private long totalSize;
 
-    public GraphLayout(Object root) {
-        this.rootAddress = VMSupport.addressOf(root);
-        this.rootHC = System.identityHashCode(root);
-        this.name = root.getClass().getName();
+    public GraphLayout(Object... roots) {
+        StringBuilder sb = new StringBuilder();
+        boolean isFirst = true;
+        for (Object root : roots) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                sb.append(", ");
+            }
+            sb.append(String.format("%s@%xd", root.getClass().getName(), System.identityHashCode(root)));
+        }
+        this.description = sb.toString();
     }
 
     private GraphVisitor visitor() {
@@ -206,7 +222,7 @@ public class GraphLayout {
     public String toFootprint() {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
-        pw.println(name + " instance footprint:");
+        pw.println(description + " footprint:");
         pw.printf(" %9s %9s %9s   %s%n", "COUNT", "AVG", "SUM", "DESCRIPTION");
         for (Class<?> key : getClasses()) {
             int count = getClassCounts().count(key);
@@ -236,7 +252,7 @@ public class GraphLayout {
             typeLen = Math.max(typeLen, r.obj().getClass().getName().length());
         }
 
-        pw.println(name + " object externals:");
+        pw.println(description + " object externals:");
         pw.printf(" %16s %10s %-" + typeLen + "s %-30s %s%n", "ADDRESS", "SIZE", "TYPE", "PATH", "VALUE");
         for (long addr : addresses()) {
             Object obj = record(addr).obj();
@@ -349,7 +365,7 @@ public class GraphLayout {
         g.setColor(Color.BLACK);
         g.drawString(labelDense, WIDTH / 2 - 50, 2 * GRAPH_HEIGHT + EXT_PAD + 2 * PAD + 20);
 
-        g.drawString(String.format("0x%x, %s@%d", rootAddress, name, rootHC), SCALE_WIDTH + EXT_PAD, 30);
+        g.drawString(String.format("%s", description), SCALE_WIDTH + EXT_PAD, 30);
 
         AffineTransform orig = g.getTransform();
         g.rotate(-Math.toRadians(90.0), SCALE_WIDTH + EXT_PAD - 5, GRAPH_HEIGHT + EXT_PAD);

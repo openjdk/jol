@@ -41,11 +41,11 @@ import java.util.Set;
 public class GraphWalker {
 
     private final Set<Object> visited;
-    private final Object root;
+    private final Object[] roots;
     private final Collection<GraphVisitor> visitors;
 
-    public GraphWalker(Object root) {
-        this.root = root;
+    public GraphWalker(Object... roots) {
+        this.roots = roots;
         this.visited = Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>());
         this.visitors = new ArrayList<GraphVisitor>();
     }
@@ -58,10 +58,16 @@ public class GraphWalker {
         List<GraphPathRecord> curLayer = new ArrayList<GraphPathRecord>();
         List<GraphPathRecord> newLayer = new ArrayList<GraphPathRecord>();
 
-        GraphPathRecord e = new GraphPathRecord("", root, 0);
-        visited.add(root);
-        visitObject(e);
-        curLayer.add(e);
+        int rootId = 1;
+        boolean single = (roots.length == 1);
+        for (Object root : roots) {
+            String label = single ? "" : ("<r" + rootId + ">");
+            GraphPathRecord e = new GraphPathRecord(label, root, 0);
+            visited.add(root);
+            visitObject(e);
+            curLayer.add(e);
+            rootId++;
+        }
 
         while (!curLayer.isEmpty()) {
             newLayer.clear();
