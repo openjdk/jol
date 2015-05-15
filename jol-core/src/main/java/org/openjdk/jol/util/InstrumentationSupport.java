@@ -84,6 +84,7 @@ public class InstrumentationSupport {
                 Field field = ClassLoader.getSystemClassLoader()
                             .loadClass(Installer.class.getName())
                             .getDeclaredField("INSTRUMENTATION");
+                field.setAccessible(true);
                 INSTRUMENTATION = (Instrumentation) field.get(null);
             } finally {
                 agentFile.delete();
@@ -104,7 +105,7 @@ public class InstrumentationSupport {
             manifest.getMainAttributes().put(new Attributes.Name("Agent-Class"), Installer.class.getName());
             JarOutputStream jos = new JarOutputStream(new FileOutputStream(agentFile), manifest);
             try {
-                jos.putNextEntry(new JarEntry('/' + Installer.class.getName().replace('.', '/') + ".class"));
+                jos.putNextEntry(new JarEntry(Installer.class.getName().replace('.', '/') + ".class"));
                 byte[] buffer = new byte[1024];
                 int index;
                 while ((index = is.read(buffer)) != -1) {
