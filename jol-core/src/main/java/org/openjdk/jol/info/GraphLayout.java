@@ -35,12 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Holds the object graph layout info.
@@ -105,22 +100,71 @@ public class GraphLayout {
         return new GraphVisitor() {
             @Override
             public void visit(GraphPathRecord gpr) {
-                long addr = VMSupport.addressOf(gpr.obj());
-                addresses.put(addr, gpr);
-
-                Class<?> klass = gpr.obj().getClass();
-                classes.add(klass);
-                classCounts.add(klass);
-                totalCount++;
-                try {
-                    int size = VMSupport.sizeOf(gpr.obj());
-                    totalSize += size;
-                    classSizes.add(klass, size);
-                } catch (Exception e) {
-                    classSizes.add(klass, 0);
-                }
+                addRecord(gpr);
             }
         };
+    }
+
+    private void addRecord(GraphPathRecord gpr) {
+        long addr = VMSupport.addressOf(gpr.obj());
+        addresses.put(addr, gpr);
+
+        Class<?> klass = gpr.obj().getClass();
+        classes.add(klass);
+        classCounts.add(klass);
+        totalCount++;
+        try {
+            int size = VMSupport.sizeOf(gpr.obj());
+            totalSize += size;
+            classSizes.add(klass, size);
+        } catch (Exception e) {
+            classSizes.add(klass, 0);
+        }
+    }
+
+    /**
+     * Subtract another layout data from the current one.
+     * This method does not change the current data object, but produces another one.
+     *
+     * Note that the object identity is derived from object addresses: if some objects
+     * move, they will be treated as new/absent. You may want to quiesce the heap
+     * (possibly doing several back-to-back GCs) before taking the snapshots.
+     *
+     * @param another data object
+     * @return new data object, that contains the difference.
+     */
+    public GraphLayout subtract(GraphLayout another) {
+        GraphLayout res = new GraphLayout();
+        for (Map.Entry<Long, GraphPathRecord> e : addresses.entrySet()) {
+            if (!another.addresses.containsKey(e.getKey())) {
+                res.addRecord(e.getValue());
+            }
+        }
+        return res;
+    }
+
+    /**
+     * Add another layout data to the current one.
+     * This method does not change the current data object, but produces another one.
+     *
+     * Note that the object identity is derived from object addresses: if some objects
+     * move, they will be treated as new. You may want to quiesce the heap
+     * (possibly doing several back-to-back GCs) before taking the snapshots.
+     *
+     * @param another data object
+     * @return new data object, that contains the union.
+     */
+    public GraphLayout add(GraphLayout another) {
+        GraphLayout res = new GraphLayout();
+        for (Map.Entry<Long, GraphPathRecord> e : addresses.entrySet()) {
+            addRecord(e.getValue());
+        }
+        for (Map.Entry<Long, GraphPathRecord> e : another.addresses.entrySet()) {
+            if (!addresses.containsKey(e.getKey())) {
+                addRecord(e.getValue());
+            }
+        }
+        return res;
     }
 
     /**
