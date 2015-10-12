@@ -60,18 +60,18 @@ public class JOLSample_13_BiasedLocking {
 
         final A a = new A();
 
-        ClassLayout layout = ClassLayout.parseClass(A.class);
+        ClassLayout layout = ClassLayout.parseInstance(a);
 
         out.println("**** Fresh object");
-        out.println(layout.toPrintable(a));
+        out.println(layout.toPrintable());
 
         synchronized (a) {
             out.println("**** With the lock");
-            out.println(layout.toPrintable(a));
+            out.println(layout.toPrintable());
         }
 
         out.println("**** After the lock");
-        out.println(layout.toPrintable(a));
+        out.println(layout.toPrintable());
     }
 
     public static class A {

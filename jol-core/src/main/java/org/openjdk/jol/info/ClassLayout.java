@@ -39,7 +39,9 @@ public class ClassLayout {
 
     /**
      * Produce the class layout for the given class.
-     * This produces the layout for the current VM.
+     *
+     * This is a shortcut for {@link #parseClass(Class,org.openjdk.jol.layouters.Layouter)},
+     * but with a default layouter.
      *
      * @param klass class to work on
      * @return class layout
@@ -51,12 +53,47 @@ public class ClassLayout {
     /**
      * Produce the class layout for the given class, and given layouter.
      *
+     * Note: this method is usable as the "caching" shortcut for {@link #parseInstance(Object)}.
+     * You can use it to cache the introspection results for a constant-sized
+     * objects, e.g. plain Java objects. It is not recommended to use this method
+     * on arrays, since their lengths differ from instance to instance.
+     *
      * @param klass    class to work on
      * @param layouter class layouter
      * @return class layout
      */
     public static ClassLayout parseClass(Class<?> klass, Layouter layouter) {
         return layouter.layout(ClassData.parseClass(klass));
+    }
+
+    /**
+     * Produce the class layout for the given instance.
+     *
+     * This is a shortcut for {@link #parseInstance(java.lang.Object,org.openjdk.jol.layouters.Layouter)},
+     * but with a default layouter.
+     *
+     * @param instance instance to work on
+     * @return class layout
+     */
+    public static ClassLayout parseInstance(Object instance) {
+        return parseInstance(instance, new CurrentLayouter());
+    }
+
+    /**
+     * Produce the class layout for the given instance, and given layouter.
+     *
+     * These methods, along with {@link #parseInstance(Object)} are recommended
+     * for use when the shape of the object is not known in advance. For example,
+     * variable-sized instances (e.g. Java arrays) would not be parsed by
+     * {@link #parseClass(Class)} properly, because their lengths are encoded in
+     * the instance objects, not in classes.
+     *
+     * @param instance instance to work on
+     * @param layouter class layouter
+     * @return class layout
+     */
+    public static ClassLayout parseInstance(Object instance, Layouter layouter) {
+        return layouter.layout(ClassData.parseInstance(instance));
     }
 
     private final ClassData classData;
@@ -138,12 +175,13 @@ public class ClassLayout {
 
     /**
      * Produce printable stringly representation of class layout.
-     * This method does not require alive instance, just the class.
+     * This method uses the instance originally provided to {@link #parseInstance(Object)},
+     * if that instance is still available.
      *
      * @return human-readable layout info
      */
     public String toPrintable() {
-        return toPrintable(null);
+        return toPrintable(classData.instance());
     }
 
     /**

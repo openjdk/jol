@@ -52,8 +52,8 @@ public class JOLSample_11_ClassWord {
 
     public static void main(String[] args) throws Exception {
         out.println(VMSupport.vmDetails());
-        out.println(ClassLayout.parseClass(A.class).toPrintable(new A()));
-        out.println(ClassLayout.parseClass(B.class).toPrintable(new B()));
+        out.println(ClassLayout.parseInstance(new A()).toPrintable());
+        out.println(ClassLayout.parseInstance(new B()).toPrintable());
     }
 
     public static class A {

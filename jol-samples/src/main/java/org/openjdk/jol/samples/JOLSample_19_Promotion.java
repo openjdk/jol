@@ -64,7 +64,7 @@ public class JOLSample_19_Promotion {
 
         Object o = new Object();
 
-        ClassLayout layout = ClassLayout.parseClass(Object.class);
+        ClassLayout layout = ClassLayout.parseInstance(o);
 
         long lastAddr = VMSupport.addressOf(o);
         pw.printf("Fresh object is at %x%n", lastAddr);
@@ -75,7 +75,7 @@ public class JOLSample_19_Promotion {
             if (cur != lastAddr) {
                 moves++;
                 pw.printf("*** Move %2d, object is at %x%n", moves, cur);
-                out.println(layout.toPrintable(o));
+                out.println(layout.toPrintable());
                 lastAddr = cur;
             }
 

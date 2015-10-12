@@ -24,6 +24,7 @@
  */
 package org.openjdk.jol.info;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -48,28 +49,9 @@ public class ClassData {
     public static ClassData parseInstance(Object o) {
         Class<?> k = o.getClass();
         if (k.isArray()) {
-            if (k == byte[].class) return parseArray(k, ((byte[]) o).length);
-            if (k == boolean[].class) return parseArray(k, ((boolean[]) o).length);
-            if (k == short[].class) return parseArray(k, ((short[]) o).length);
-            if (k == char[].class) return parseArray(k, ((char[]) o).length);
-            if (k == int[].class) return parseArray(k, ((int[]) o).length);
-            if (k == float[].class) return parseArray(k, ((float[]) o).length);
-            if (k == double[].class) return parseArray(k, ((double[]) o).length);
-            if (k == long[].class) return parseArray(k, ((long[]) o).length);
-            return parseArray(k, ((Object[]) o).length);
+            return parseArray(o, k);
         }
-        return parseClass(k);
-    }
-
-    /**
-     * Simulate the array instance.
-     *
-     * @param arrayClass array class, e.g. int[].class
-     * @param length     array length
-     * @return class data instance
-     */
-    public static ClassData parseArray(Class arrayClass, int length) {
-        return new ClassData(arrayClass.getName(), arrayClass.getComponentType().getName(), length);
+        return parse(o, k);
     }
 
     /**
@@ -79,12 +61,41 @@ public class ClassData {
      * @return class data instance
      */
     public static ClassData parseClass(Class klass) {
+        return parse(null, klass);
+    }
+
+    private static int arrayLength(Object o) {
+        Class<?> k = o.getClass();
+        if (k == byte[].class)
+            return ((byte[]) o).length;
+        if (k == boolean[].class)
+            return ((boolean[]) o).length;
+        if (k == short[].class)
+            return ((short[]) o).length;
+        if (k == char[].class)
+            return ((char[]) o).length;
+        if (k == int[].class)
+            return ((int[]) o).length;
+        if (k == float[].class)
+            return ((float[]) o).length;
+        if (k == double[].class)
+            return ((double[]) o).length;
+        if (k == long[].class)
+            return ((long[]) o).length;
+        return ((Object[])o).length;
+    }
+
+    private static ClassData parseArray(Object instance, Class<?> klass) {
+        return new ClassData(instance, klass.getName(), klass.getComponentType().getName(), arrayLength(instance));
+    }
+
+    private static ClassData parse(Object o, Class klass) {
         // If this is an array, do the array parsing, instead of ordinary class.
         if (klass.isArray()) {
-            return parseArray(klass, 0);
+            return parseArray(o, klass);
         }
 
-        ClassData cd = new ClassData(klass.getCanonicalName());
+        ClassData cd = new ClassData(o, klass.getCanonicalName());
 
         do {
             for (Field f : klass.getDeclaredFields()) {
@@ -98,6 +109,7 @@ public class ClassData {
         return cd;
     }
 
+    private final WeakReference<Object> instance;
     private final String name;
     private final List<FieldData> fields;
     private final List<String> classNames;
@@ -110,6 +122,11 @@ public class ClassData {
      * Constructs the empty ClassData, suited for regular class.
      */
     public ClassData(String name) {
+        this(null, name);
+    }
+
+    private ClassData(Object instance, String name) {
+        this.instance = new WeakReference<Object>(instance);
         this.name = name;
         this.fields = new ArrayList<FieldData>();
         this.classNames = new ArrayList<String>();
@@ -127,6 +144,11 @@ public class ClassData {
      * @param length          array length
      */
     public ClassData(String arrayKlass, String componentKlass, int length) {
+        this(null, arrayKlass, componentKlass, length);
+    }
+
+    private ClassData(Object instance, String arrayKlass, String componentKlass, int length) {
+        this.instance = new WeakReference<Object>(instance);
         this.name = arrayKlass;
         this.arrayKlass = arrayKlass;
         this.arrayComponentKlass = componentKlass;
@@ -283,4 +305,10 @@ public class ClassData {
         return result;
     }
 
+    /**
+     * @return the recorded instance, if available
+     */
+    public Object instance() {
+        return instance.get();
+    }
 }

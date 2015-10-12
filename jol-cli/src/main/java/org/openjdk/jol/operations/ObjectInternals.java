@@ -50,7 +50,7 @@ public class ObjectInternals extends ClasspathedOPeration {
             Constructor<?> ctor = klass.getDeclaredConstructor();
             ctor.setAccessible(true);
             Object o = klass.newInstance();
-            out.println(ClassLayout.parseClass(klass).toPrintable(o));
+            out.println(ClassLayout.parseInstance(o).toPrintable());
         } catch (NoSuchMethodException e) {
             out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
             out.println();

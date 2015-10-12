@@ -64,10 +64,10 @@ public class JOLSample_14_FatLocking {
 
         final A a = new A();
 
-        ClassLayout layout = ClassLayout.parseClass(A.class);
+        ClassLayout layout = ClassLayout.parseInstance(a);
 
         out.println("**** Fresh object");
-        out.println(layout.toPrintable(a));
+        out.println(layout.toPrintable());
 
         Thread t = new Thread(new Runnable() {
             @Override
@@ -87,20 +87,20 @@ public class JOLSample_14_FatLocking {
         TimeUnit.SECONDS.sleep(1);
 
         out.println("**** Before the lock");
-        out.println(layout.toPrintable(a));
+        out.println(layout.toPrintable());
 
         synchronized (a) {
             out.println("**** With the lock");
-            out.println(layout.toPrintable(a));
+            out.println(layout.toPrintable());
         }
 
         out.println("**** After the lock");
-        out.println(layout.toPrintable(a));
+        out.println(layout.toPrintable());
 
         System.gc();
 
         out.println("**** After System.gc()");
-        out.println(layout.toPrintable(a));
+        out.println(layout.toPrintable());
     }
 
     public static class A {
