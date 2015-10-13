@@ -47,11 +47,7 @@ public class ClassData {
      * @return class data instance
      */
     public static ClassData parseInstance(Object o) {
-        Class<?> k = o.getClass();
-        if (k.isArray()) {
-            return parseArray(o, k);
-        }
-        return parse(o, k);
+        return parse(o, o.getClass());
     }
 
     /**
@@ -65,7 +61,11 @@ public class ClassData {
     }
 
     private static int arrayLength(Object o) {
+        if (o == null)
+            return 0;
         Class<?> k = o.getClass();
+        if (!k.isArray())
+            throw new IllegalArgumentException(k.getName() + " is not an array class");
         if (k == byte[].class)
             return ((byte[]) o).length;
         if (k == boolean[].class)
@@ -85,14 +85,10 @@ public class ClassData {
         return ((Object[])o).length;
     }
 
-    private static ClassData parseArray(Object instance, Class<?> klass) {
-        return new ClassData(instance, klass.getName(), klass.getComponentType().getName(), arrayLength(instance));
-    }
-
     private static ClassData parse(Object o, Class klass) {
         // If this is an array, do the array parsing, instead of ordinary class.
         if (klass.isArray()) {
-            return parseArray(o, klass);
+            return new ClassData(o, klass.getName(), klass.getComponentType().getName(), arrayLength(o));
         }
 
         ClassData cd = new ClassData(o, klass.getCanonicalName());
