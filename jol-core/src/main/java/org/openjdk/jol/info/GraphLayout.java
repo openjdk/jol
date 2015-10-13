@@ -49,18 +49,23 @@ public class GraphLayout {
      * @return object graph
      */
     public static GraphLayout parseInstance(Object root) {
-        return parseInstance(new Object[] {root});
+        GraphLayout data = new GraphLayout(root);
+        GraphWalker walker = new GraphWalker(root);
+        walker.addVisitor(data.visitor());
+        walker.walk();
+        return data;
     }
 
     /**
      * Parse the object graph starting from the given instance.
      *
+     * @param root the first root to inspect
      * @param roots root instances to start from
      * @return object graph
      */
-    public static GraphLayout parseInstance(Object... roots) {
-        GraphLayout data = new GraphLayout(roots);
-        GraphWalker walker = new GraphWalker(roots);
+    public static GraphLayout parseInstance(Object root, Object... roots) {
+        GraphLayout data = new GraphLayout(root, roots);
+        GraphWalker walker = new GraphWalker(root, roots);
         walker.addVisitor(data.visitor());
         walker.walk();
         return data;
