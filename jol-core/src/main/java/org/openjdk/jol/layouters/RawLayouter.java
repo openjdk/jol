@@ -52,13 +52,12 @@ public class RawLayouter implements Layouter {
 
         if (data.isArray()) {
             // special case of arrays
-            int base = model.headerSize() + model.sizeOf("int");
+            int base = model.arrayHeaderSize();
             int scale = model.sizeOf(data.arrayComponentType());
 
             int instanceSize = base + (data.arrayLength()) * scale;
-            result.add(new FieldLayout(FieldData.create(data.arrayClass(), "length", "int"), model.headerSize(), model.sizeOf("int")));
             result.add(new FieldLayout(FieldData.create(data.arrayClass(), "<elements>", data.arrayComponentType()), base, scale * data.arrayLength()));
-            return new ClassLayout(data, result, model.headerSize(), instanceSize, false);
+            return new ClassLayout(data, result, model.arrayHeaderSize(), instanceSize, false);
         }
 
         int offset = model.headerSize();

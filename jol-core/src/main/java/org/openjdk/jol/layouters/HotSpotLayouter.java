@@ -65,7 +65,7 @@ public class HotSpotLayouter implements Layouter {
 
         if (cd.isArray()) {
             // special case for arrays
-            int base = model.headerSize() + model.sizeOf("int");
+            int base = model.arrayHeaderSize();
             int scale = model.sizeOf(cd.arrayComponentType());
 
             int instanceSize = base + cd.arrayLength() * scale;
@@ -73,9 +73,8 @@ public class HotSpotLayouter implements Layouter {
             instanceSize = MathUtil.align(instanceSize, autoAlign ? Math.max(model.objectAlignment(), scale) : model.objectAlignment());
             base = MathUtil.align(base, Math.max(4, scale));
 
-            result.add(new FieldLayout(FieldData.create(cd.arrayClass(), "length", "int"), model.headerSize(), model.sizeOf("int")));
             result.add(new FieldLayout(FieldData.create(cd.arrayClass(), "<elements>", cd.arrayComponentType()), base, scale * cd.arrayLength()));
-            return new ClassLayout(cd, result, model.headerSize(), instanceSize, false);
+            return new ClassLayout(cd, result, model.arrayHeaderSize(), instanceSize, false);
         }
 
         List<String> hierarchy = cd.classHierarchy();

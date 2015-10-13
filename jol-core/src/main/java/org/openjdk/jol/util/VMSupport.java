@@ -62,6 +62,7 @@ public class VMSupport {
     public static final int REF_SIZE;
     public static final int OBJ_ALIGNMENT;
     public static final int OBJ_HEADER_SIZE;
+    public static final int ARRAY_HEADER_SIZE;
 
     public static final boolean USE_COMPRESSED_REFS;
     public static final long COMPRESSED_REF_BASE;
@@ -130,6 +131,7 @@ public class VMSupport {
         REF_SIZE = opts.sizeReference;
         OBJ_ALIGNMENT = opts.objectAlignment;
         OBJ_HEADER_SIZE = headerSize;
+        ARRAY_HEADER_SIZE = OBJ_HEADER_SIZE + 4;
 
         /*
          * There are two different compressed references (OOP and Klass) information since Java 8.

@@ -38,6 +38,11 @@ public class CurrentDataModel implements DataModel {
     }
 
     @Override
+    public int arrayHeaderSize() {
+        return VMSupport.ARRAY_HEADER_SIZE;
+    }
+
+    @Override
     public int sizeOf(String klass) {
         if (klass.equals("byte"))    return VMSupport.BYTE_SIZE;
         if (klass.equals("boolean")) return VMSupport.BOOLEAN_SIZE;

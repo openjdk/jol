@@ -40,6 +40,13 @@ public interface DataModel {
     int headerSize();
 
     /**
+     * Return the array header size.
+     *
+     * @return object header size in bytes.
+     */
+    int arrayHeaderSize();
+
+    /**
      * Return the size of the type.
      *
      * @param klass string representation of the type.

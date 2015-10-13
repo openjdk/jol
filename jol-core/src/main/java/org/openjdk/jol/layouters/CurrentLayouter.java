@@ -56,9 +56,8 @@ public class CurrentLayouter implements Layouter {
                 int instanceSize = MathUtil.align(base + (data.arrayLength()) * scale, model.objectAlignment());
 
                 SortedSet<FieldLayout> result = new TreeSet<FieldLayout>();
-                result.add(new FieldLayout(FieldData.create(data.arrayClass(), "length", "int"), model.headerSize(), model.sizeOf("int")));
                 result.add(new FieldLayout(FieldData.create(data.arrayClass(), "<elements>", data.arrayComponentType()), base, scale * data.arrayLength()));
-                return new ClassLayout(data, result, model.headerSize(), instanceSize, false);
+                return new ClassLayout(data, result, model.arrayHeaderSize(), instanceSize, false);
             } catch (ClassNotFoundException e) {
                 throw new IllegalStateException("Should not reach here.", e);
             }

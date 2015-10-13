@@ -48,6 +48,11 @@ public class X86_64_COOPS_DataModel implements DataModel {
     }
 
     @Override
+    public int arrayHeaderSize() {
+        return headerSize() + 4;
+    }
+
+    @Override
     public int sizeOf(String klass) {
         if (klass.equals("byte"))    return 1;
         if (klass.equals("boolean")) return 1;
