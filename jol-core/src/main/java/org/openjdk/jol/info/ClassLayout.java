@@ -210,7 +210,7 @@ public class ClassLayout {
         if (instance != null) {
             for (long off = 0; off < headerSize(); off += 4) {
                 pw.printf(" %6d %5d %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n", off, 4, "", "(object header)",
-                        toHex(VMSupport.U.getByte(instance, off + 0) & 0xFF) + " " +
+                                toHex(VMSupport.U.getByte(instance, off + 0) & 0xFF) + " " +
                                 toHex(VMSupport.U.getByte(instance, off + 1) & 0xFF) + " " +
                                 toHex(VMSupport.U.getByte(instance, off + 2) & 0xFF) + " " +
                                 toHex(VMSupport.U.getByte(instance, off + 3) & 0xFF) + " " +
@@ -218,7 +218,10 @@ public class ClassLayout {
                                 toBinary(VMSupport.U.getByte(instance, off + 0) & 0xFF) + " " +
                                 toBinary(VMSupport.U.getByte(instance, off + 1) & 0xFF) + " " +
                                 toBinary(VMSupport.U.getByte(instance, off + 2) & 0xFF) + " " +
-                                toBinary(VMSupport.U.getByte(instance, off + 3) & 0xFF) + ")"
+                                toBinary(VMSupport.U.getByte(instance, off + 3) & 0xFF) + ") " +
+                                "(" +
+                                VMSupport.U.getInt(instance, off) +
+                                ")"
                 );
             }
         } else {
@@ -277,8 +280,7 @@ public class ClassLayout {
         for (int c = 0; c < deficit; c++) {
             s = "0" + s;
         }
-
-        return s.substring(0, 4) + " " + s.substring(4);
+        return s;
     }
 
     // very ineffective, so what?
