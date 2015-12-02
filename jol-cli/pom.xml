@@ -30,7 +30,7 @@ questions.
     <parent>
         <groupId>org.openjdk.jol</groupId>
         <artifactId>jol-parent</artifactId>
-        <version>0.4</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>jol-cli</artifactId>
