@@ -57,6 +57,7 @@ public class JOLSample_25_ArrayAlignment {
 
     public static void main(String[] args) throws Exception {
         out.println(VMSupport.vmDetails());
+        out.println(ClassLayout.parseInstance(new long[0]).toPrintable());
         for (int size = 0; size <= 8; size++) {
             out.println(ClassLayout.parseInstance(new byte[size]).toPrintable());
         }
