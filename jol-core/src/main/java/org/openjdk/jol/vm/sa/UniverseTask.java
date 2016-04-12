@@ -22,27 +22,26 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol.util.sa.impl.compressedrefs;
+package org.openjdk.jol.vm.sa;
 
 import java.lang.reflect.Method;
 
-import org.openjdk.jol.util.sa.HS_SA_Processor;
-import org.openjdk.jol.util.sa.impl.HS_SA_Util;
+import static org.openjdk.jol.vm.sa.Constants.*;
 
 /**
- * {@link HS_SA_Processor} implementation to find compressed reference informations.
+ * {@link Task} implementation to find compressed reference informations.
  *
  * @author Serkan Ozal
  */
 @SuppressWarnings("serial")
-public class HS_SA_CompressedReferencesProcessor implements HS_SA_Processor {
+class UniverseTask implements Task {
 
     @Override
-    public HS_SA_CompressedReferencesResult process() {
+    public UniverseData process() {
         try {
-            Class<?> universeClass = HS_SA_Util.getUniverseClass();
-            Class<?> vmClass = HS_SA_Util.getVmClass();
-            Object vm = HS_SA_Util.getVMInstance();
+            Class<?> universeClass = Class.forName(UNIVERSE_CLASSNAME);
+            Class<?> vmClass = Class.forName(VM_CLASSNAME);
+            Object vm = Class.forName(VM_CLASSNAME).getMethod("getVM").invoke(null);
 
             Method getOopSizeMethod = vmClass.getMethod("getOopSize");
             Method getObjectAlignmentInBytesMethod = vmClass.getMethod("getObjectAlignmentInBytes");
@@ -88,7 +87,7 @@ public class HS_SA_CompressedReferencesProcessor implements HS_SA_Processor {
             int narrowKlassShift = getNarrowKlassShiftMethod != null ?
                     (Integer) getNarrowKlassShiftMethod.invoke(null) : narrowOopShift;
 
-            return new HS_SA_CompressedReferencesResult(addressSize,
+            return new UniverseData(addressSize,
                                                         objectAlignment,
                                                         oopSize,
                                                         compressedOopsEnabled,

@@ -25,7 +25,8 @@
 package org.openjdk.jol.info;
 
 import org.openjdk.jol.util.Multiset;
-import org.openjdk.jol.util.VMSupport;
+import org.openjdk.jol.util.ObjectUtils;
+import org.openjdk.jol.vm.VM;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -110,7 +111,7 @@ public class GraphLayout {
     }
 
     private void addRecord(GraphPathRecord gpr) {
-        long addr = VMSupport.addressOf(gpr.obj());
+        long addr = VM.current().addressOf(gpr.obj());
         addresses.put(addr, gpr);
 
         Class<?> klass = gpr.obj().getClass();
@@ -118,7 +119,7 @@ public class GraphLayout {
         classCounts.add(klass);
         totalCount++;
         try {
-            long size = VMSupport.sizeOf(gpr.obj());
+            long size = VM.current().sizeOf(gpr.obj());
             totalSize += size;
             classSizes.add(klass, size);
         } catch (Exception e) {
@@ -304,7 +305,7 @@ public class GraphLayout {
         pw.printf(" %16s %10s %-" + typeLen + "s %-30s %s%n", "ADDRESS", "SIZE", "TYPE", "PATH", "VALUE");
         for (long addr : addresses()) {
             Object obj = record(addr).obj();
-            long size = VMSupport.sizeOf(obj);
+            long size = VM.current().sizeOf(obj);
 
             if (addr > last && last != 0L) {
                 pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", last, addr - last, "(something else)", "(somewhere else)", "(something else)");
@@ -313,7 +314,7 @@ public class GraphLayout {
                 pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", last, addr - last, "**** OVERLAP ****", "**** OVERLAP ****", "**** OVERLAP ****");
             }
 
-            pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", addr, size, obj.getClass().getName(), record(addr).path(), VMSupport.safeToString(obj));
+            pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", addr, size, obj.getClass().getName(), record(addr).path(), ObjectUtils.safeToString(obj));
             last = addr + size;
         }
         pw.println();
@@ -357,13 +358,13 @@ public class GraphLayout {
         Multiset<Integer> depths = new Multiset<Integer>();
         for (long addr : addresses()) {
             GraphPathRecord r = record(addr);
-            depths.add(r.depth(), VMSupport.sizeOf(r.obj()));
+            depths.add(r.depth(), VM.current().sizeOf(r.obj()));
         }
 
         int lastX = 0;
         for (long addr : addresses()) {
             Object obj = record(addr).obj();
-            long size = VMSupport.sizeOf(obj);
+            long size = VM.current().sizeOf(obj);
 
             int x1 = SCALE_WIDTH + EXT_PAD + (int) ((WIDTH - SCALE_WIDTH - EXT_PAD * 2) * (addr - start) / (end - start));
             int x2 = SCALE_WIDTH + EXT_PAD + (int) ((WIDTH - SCALE_WIDTH - EXT_PAD * 2) * (addr + size - start) / (end - start));

@@ -26,7 +26,8 @@ package org.openjdk.jol.info;
 
 import org.openjdk.jol.layouters.CurrentLayouter;
 import org.openjdk.jol.layouters.Layouter;
-import org.openjdk.jol.util.VMSupport;
+import org.openjdk.jol.vm.VM;
+import org.openjdk.jol.vm.VirtualMachine;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -208,20 +209,21 @@ public class ClassLayout {
         pw.println(classData.name() + " object internals:");
         pw.printf(" %6s %5s %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n", "OFFSET", "SIZE", "TYPE", "DESCRIPTION", "VALUE");
         if (instance != null) {
+            VirtualMachine vm = VM.current();
+
             for (long off = 0; off < headerSize(); off += 4) {
+                int word = vm.getInt(instance, off);
                 pw.printf(" %6d %5d %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n", off, 4, "", "(object header)",
-                                toHex(VMSupport.U.getByte(instance, off + 0) & 0xFF) + " " +
-                                toHex(VMSupport.U.getByte(instance, off + 1) & 0xFF) + " " +
-                                toHex(VMSupport.U.getByte(instance, off + 2) & 0xFF) + " " +
-                                toHex(VMSupport.U.getByte(instance, off + 3) & 0xFF) + " " +
+                                toHex((word >> 0)  & 0xFF) + " " +
+                                toHex((word >> 8)  & 0xFF) + " " +
+                                toHex((word >> 16) & 0xFF) + " " +
+                                toHex((word >> 24) & 0xFF) + " " +
                                 "(" +
-                                toBinary(VMSupport.U.getByte(instance, off + 0) & 0xFF) + " " +
-                                toBinary(VMSupport.U.getByte(instance, off + 1) & 0xFF) + " " +
-                                toBinary(VMSupport.U.getByte(instance, off + 2) & 0xFF) + " " +
-                                toBinary(VMSupport.U.getByte(instance, off + 3) & 0xFF) + ") " +
-                                "(" +
-                                VMSupport.U.getInt(instance, off) +
-                                ")"
+                                toBinary((word >> 0)  & 0xFF) + " " +
+                                toBinary((word >> 8)  & 0xFF) + " " +
+                                toBinary((word >> 16) & 0xFF) + " " +
+                                toBinary((word >> 24) & 0xFF) + ") " +
+                                "(" + word + ")"
                 );
             }
         } else {
@@ -249,23 +251,14 @@ public class ClassLayout {
             nextFree = f.offset() + f.size();
         }
 
-        VMSupport.SizeInfo info = VMSupport.tryExactObjectSize(instance, this);
+        long sizeOf = VM.current().sizeOf(instance);
 
-        if (info.instanceSize() != nextFree) {
-            exterLoss = info.instanceSize() - nextFree;
+        if (sizeOf != nextFree) {
+            exterLoss = sizeOf - nextFree;
             pw.printf(" %6d %5s %" + maxTypeLen + "s %s%n", nextFree, exterLoss, "", "(loss due to the next object alignment)");
         }
 
-        if (info.exactSize()) {
-            pw.printf("Instance size: %d bytes (reported by Instrumentation API)%n", info.instanceSize());
-        } else {
-            if (instance != null) {
-                pw.printf("Instance size: %d bytes (estimated, add this JAR via -javaagent: to get accurate result)%n", info.instanceSize());
-            } else {
-                pw.printf("Instance size: %d bytes (estimated, the sample instance is not available)%n", info.instanceSize());
-            }
-        }
-
+        pw.printf("Instance size: %d bytes%n", sizeOf);
         pw.printf("Space losses: %d bytes internal + %d bytes external = %d bytes total%n", interLoss, exterLoss, interLoss + exterLoss);
 
         pw.close();

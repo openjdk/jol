@@ -22,32 +22,15 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol.util.sa;
+package org.openjdk.jol.vm.sa;
 
-import java.io.Serializable;
+@SuppressWarnings("serial")
+class SASupportException extends RuntimeException {
+    SASupportException(String msg, Throwable exc) {
+        super(msg, exc);
+    }
 
-/**
- * <p>
- * Interface for processors which do some stuff via Hotspot Serviceability Agent API on Hotspot internals.
- * </p>
- *
- * <p>
- * {@link HS_SA_Processor} implementations must be fully (including its fields) serializable.
- * So if there is any field will not be serialized, it must be ignored or serialization logic must be customized.
- * Please see <a href="http://www.oracle.com/technetwork/articles/java/javaserial-1536170.html">http://www.oracle.com/technetwork/articles/java/javaserial-1536170.html</a> for more details.
- * </p>
- *
- * @see HS_SA_Result
- *
- * @author Serkan Ozal
- */
-public interface HS_SA_Processor extends Serializable {
-
-    /**
-     * Processes {@link HS_SA_Processor}'s own logic over Hotspot Serviceability Agent.
-     *
-     * @return the {@link HS_SA_Result} instance as result
-     */
-    HS_SA_Result process();
-
+    SASupportException(String msg) {
+        super(msg);
+    }
 }

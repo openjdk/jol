@@ -31,7 +31,7 @@
 package org.openjdk.jol.samples;
 
 import org.openjdk.jol.info.ClassLayout;
-import org.openjdk.jol.util.VMSupport;
+import org.openjdk.jol.vm.VM;
 
 import java.io.PrintWriter;
 
@@ -58,7 +58,7 @@ public class JOLSample_19_Promotion {
     static volatile Object sink;
 
     public static void main(String[] args) throws Exception {
-        out.println(VMSupport.vmDetails());
+        out.println(VM.current().details());
 
         PrintWriter pw = new PrintWriter(System.out, true);
 
@@ -66,12 +66,12 @@ public class JOLSample_19_Promotion {
 
         ClassLayout layout = ClassLayout.parseInstance(o);
 
-        long lastAddr = VMSupport.addressOf(o);
+        long lastAddr = VM.current().addressOf(o);
         pw.printf("Fresh object is at %x%n", lastAddr);
 
         int moves = 0;
         for (int i = 0; i < 100000; i++) {
-            long cur = VMSupport.addressOf(o);
+            long cur = VM.current().addressOf(o);
             if (cur != lastAddr) {
                 moves++;
                 pw.printf("*** Move %2d, object is at %x%n", moves, cur);

@@ -31,13 +31,10 @@
 package org.openjdk.jol.samples;
 
 import org.openjdk.jol.info.GraphLayout;
-import org.openjdk.jol.util.VMSupport;
+import org.openjdk.jol.vm.VM;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static java.lang.System.out;
 
@@ -63,7 +60,7 @@ public class JOLSample_24_Difference {
      */
 
     public static void main(String[] args) throws Exception {
-        out.println(VMSupport.vmDetails());
+        out.println(VM.current().details());
 
         Map<String, String> chm = new ConcurrentHashMap<String, String>();
 

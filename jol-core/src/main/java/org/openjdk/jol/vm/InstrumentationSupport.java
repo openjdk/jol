@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol.util;
+package org.openjdk.jol.vm;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,7 +43,7 @@ import java.util.jar.Manifest;
  * @author Aleksey Shipilev (original code, refactoring)
  * @author Rafael Winterhalter (dynamic attach)
  */
-public class InstrumentationSupport {
+class InstrumentationSupport {
 
     private static Instrumentation INSTRUMENTATION;
 
@@ -54,18 +54,17 @@ public class InstrumentationSupport {
     }
 
     static Instrumentation instance() {
-        if (INSTRUMENTATION == null && TRY_DYNAMIC_ATTACH) {
-            synchronized (InstrumentationSupport.class) {
-                if (TRY_DYNAMIC_ATTACH) {
-                    TRY_DYNAMIC_ATTACH = false;
-                    try {
-                        tryDynamicAttach();
-                    } catch (Exception ignored) {
-                    }
-                }
+        if (INSTRUMENTATION != null) return INSTRUMENTATION;
+
+        if (TRY_DYNAMIC_ATTACH) {
+            try {
+                tryDynamicAttach();
+                return INSTRUMENTATION;
+            } catch (Exception ignored) {
+                throw new InstrumentationException("Dynamic Attach failed: " + ignored.getMessage() + ". You may add this JAR as -javaagent manually.");
             }
         }
-        return INSTRUMENTATION;
+        throw new InstrumentationException("No instrumentation. Add this JAR as -javaagent manually.");
     }
 
     private static void tryDynamicAttach() throws Exception {

@@ -31,7 +31,7 @@
 package org.openjdk.jol.samples;
 
 import org.openjdk.jol.info.ClassLayout;
-import org.openjdk.jol.util.VMSupport;
+import org.openjdk.jol.vm.VM;
 
 import java.util.concurrent.TimeUnit;
 
@@ -60,7 +60,7 @@ public class JOLSample_14_FatLocking {
      */
 
     public static void main(String[] args) throws Exception {
-        out.println(VMSupport.vmDetails());
+        out.println(VM.current().details());
 
         final A a = new A();
 

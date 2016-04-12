@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,33 +22,35 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol.datamodel;
+package org.openjdk.jol.vm.sa;
 
-import org.openjdk.jol.vm.VM;
+import java.io.Serializable;
 
 /**
- * Current data model as detected by JVM.
- *
- * @author Aleksey Shipilev
+ * Represents response from HotSpot agent process by holding result and error if occurred.
  */
-public class CurrentDataModel implements DataModel {
-    @Override
-    public int headerSize() {
-        return VM.current().objectHeaderSize();
+@SuppressWarnings("serial")
+class Response implements Serializable {
+
+    private final Result result;
+    private final Throwable error;
+
+    Response(Result result) {
+        this.result = result;
+        this.error = null;
     }
 
-    @Override
-    public int arrayHeaderSize() {
-        return VM.current().arrayHeaderSize();
+    Response(Throwable error) {
+        this.result = null;
+        this.error = error;
     }
 
-    @Override
-    public int sizeOf(String klass) {
-        return (int) VM.current().sizeOfField(klass);
+    Result getResult() {
+        return result;
     }
 
-    @Override
-    public int objectAlignment() {
-        return VM.current().objectAlignment();
+    Throwable getError() {
+        return error;
     }
+
 }

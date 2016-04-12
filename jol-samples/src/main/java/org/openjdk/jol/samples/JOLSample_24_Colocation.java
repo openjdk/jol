@@ -31,7 +31,7 @@
 package org.openjdk.jol.samples;
 
 import org.openjdk.jol.info.GraphLayout;
-import org.openjdk.jol.util.VMSupport;
+import org.openjdk.jol.vm.VM;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,7 +59,7 @@ public class JOLSample_24_Colocation {
     public static volatile Object sink;
 
     public static void main(String[] args) throws Exception {
-        out.println(VMSupport.vmDetails());
+        out.println(VM.current().details());
 
         // allocate some objects to beef up generations
         for (int c = 0; c < 1000000; c++) {

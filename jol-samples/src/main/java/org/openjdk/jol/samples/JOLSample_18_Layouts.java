@@ -31,7 +31,7 @@
 package org.openjdk.jol.samples;
 
 import org.openjdk.jol.info.GraphLayout;
-import org.openjdk.jol.util.VMSupport;
+import org.openjdk.jol.vm.VM;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -53,7 +53,7 @@ public class JOLSample_18_Layouts {
      */
 
     public static void main(String[] args) throws Exception {
-        out.println(VMSupport.vmDetails());
+        out.println(VM.current().details());
 
         PrintWriter pw = new PrintWriter(System.out, true);
 

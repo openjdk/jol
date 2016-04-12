@@ -31,7 +31,7 @@
 package org.openjdk.jol.samples;
 
 import org.openjdk.jol.info.GraphLayout;
-import org.openjdk.jol.util.VMSupport;
+import org.openjdk.jol.vm.VM;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class JOLSample_16_AL_LL {
      */
 
     public static void main(String[] args) throws Exception {
-        out.println(VMSupport.vmDetails());
+        out.println(VM.current().details());
 
         List<Integer> al = new ArrayList<Integer>();
         List<Integer> ll = new LinkedList<Integer>();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,33 +22,23 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol.datamodel;
+package org.openjdk.jol.vm.sa;
 
-import org.openjdk.jol.vm.VM;
+import java.io.Serializable;
 
 /**
- * Current data model as detected by JVM.
+ * <p>
+ * Interface for types of {@link Task#process()} return. It is designed to hold all results under a hierarchy.
+ * </p>
  *
- * @author Aleksey Shipilev
+ * <p>
+ * {@link Result} implementations must be fully (including its fields) serializable.
+ * So if there is any field will not be serialized, it must be ignored or serialization logic must be customized.
+ * Please see <a href="http://www.oracle.com/technetwork/articles/java/javaserial-1536170.html">http://www.oracle.com/technetwork/articles/java/javaserial-1536170.html</a> for more details.
+ * </p>
+ *
+ * @author Serkan Ozal
  */
-public class CurrentDataModel implements DataModel {
-    @Override
-    public int headerSize() {
-        return VM.current().objectHeaderSize();
-    }
+interface Result extends Serializable {
 
-    @Override
-    public int arrayHeaderSize() {
-        return VM.current().arrayHeaderSize();
-    }
-
-    @Override
-    public int sizeOf(String klass) {
-        return (int) VM.current().sizeOfField(klass);
-    }
-
-    @Override
-    public int objectAlignment() {
-        return VM.current().objectAlignment();
-    }
 }

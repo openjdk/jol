@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,33 +22,15 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol.datamodel;
+package org.openjdk.jol.vm;
 
-import org.openjdk.jol.vm.VM;
-
-/**
- * Current data model as detected by JVM.
- *
- * @author Aleksey Shipilev
- */
-public class CurrentDataModel implements DataModel {
-    @Override
-    public int headerSize() {
-        return VM.current().objectHeaderSize();
+@SuppressWarnings("serial")
+class InstrumentationException extends RuntimeException {
+    InstrumentationException(String msg, Throwable exc) {
+        super(msg, exc);
     }
 
-    @Override
-    public int arrayHeaderSize() {
-        return VM.current().arrayHeaderSize();
-    }
-
-    @Override
-    public int sizeOf(String klass) {
-        return (int) VM.current().sizeOfField(klass);
-    }
-
-    @Override
-    public int objectAlignment() {
-        return VM.current().objectAlignment();
+    InstrumentationException(String msg) {
+        super(msg);
     }
 }

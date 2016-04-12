@@ -30,7 +30,9 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.util.VMSupport;
+
+
+import org.openjdk.jol.vm.VM;
 
 import java.io.PrintWriter;
 
@@ -53,13 +55,13 @@ public class JOLSample_17_Allocation {
      */
 
     public static void main(String[] args) throws Exception {
-        out.println(VMSupport.vmDetails());
+        out.println(VM.current().details());
 
         PrintWriter pw = new PrintWriter(out, true);
 
-        long last = VMSupport.addressOf(new Object());
+        long last = VM.current().addressOf(new Object());
         for (int l = 0; l < 1000 * 1000 * 1000; l++) {
-            long current = VMSupport.addressOf(new Object());
+            long current = VM.current().addressOf(new Object());
 
             long distance = Math.abs(current - last);
             if (distance > 16 * 1024) {

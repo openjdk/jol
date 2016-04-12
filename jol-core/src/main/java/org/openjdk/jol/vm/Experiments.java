@@ -22,23 +22,68 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol.util.sa;
+package org.openjdk.jol.vm;
 
-import java.io.Serializable;
+class Experiments {
 
-/**
- * <p>
- * Interface for types of {@link HS_SA_Processor#process()} return. It is designed to hold all results under a hierarchy.
- * </p>
- *
- * <p>
- * {@link HS_SA_Result} implementations must be fully (including its fields) serializable.
- * So if there is any field will not be serialized, it must be ignored or serialization logic must be customized.
- * Please see <a href="http://www.oracle.com/technetwork/articles/java/javaserial-1536170.html">http://www.oracle.com/technetwork/articles/java/javaserial-1536170.html</a> for more details.
- * </p>
- *
- * @author Serkan Ozal
- */
-public interface HS_SA_Result extends Serializable {
+    public static class CompressedOopsClass {
+        public Object obj1;
+        public Object obj2;
+    }
 
+    public static class HeaderClass {
+        public boolean b1;
+    }
+
+    public static class MyObject1 {
+
+    }
+
+    public static class MyObject2 {
+        private boolean b;
+    }
+
+    public static class MyObject3 {
+        private int i;
+    }
+
+    public static class MyObject4 {
+        private long l;
+    }
+
+    public static class MyObject5 {
+        private Object o;
+    }
+
+    public static class MyBooleans4 {
+        private boolean f1, f2, f3, f4;
+    }
+
+    public static class MyBytes4 {
+        private byte f1, f2, f3, f4;
+    }
+
+    public static class MyShorts4 {
+        private short f1, f2, f3, f4;
+    }
+
+    public static class MyChars4 {
+        private char f1, f2, f3, f4;
+    }
+
+    public static class MyInts4 {
+        private int f1, f2, f3, f4;
+    }
+
+    public static class MyFloats4 {
+        private float f1, f2, f3, f4;
+    }
+
+    public static class MyLongs4 {
+        private long f1, f2, f3, f4;
+    }
+
+    public static class MyDoubles4 {
+        private double f1, f2, f3, f4;
+    }
 }

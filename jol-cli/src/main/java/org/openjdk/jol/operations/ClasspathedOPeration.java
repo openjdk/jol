@@ -30,7 +30,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.openjdk.jol.Operation;
 import org.openjdk.jol.OptionFormatter;
-import org.openjdk.jol.util.VMSupport;
+import org.openjdk.jol.vm.VM;
 
 import java.io.File;
 import java.net.URL;
@@ -74,7 +74,7 @@ public abstract class ClasspathedOPeration implements Operation {
             return;
         }
 
-        out.println(VMSupport.vmDetails());
+        out.println(VM.current().details());
 
         URLClassLoader cl = new URLClassLoader(classPath, ClassLoader.getSystemClassLoader());
 

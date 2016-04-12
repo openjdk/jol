@@ -32,7 +32,7 @@ package org.openjdk.jol.info;
 public class FieldLayout implements Comparable<FieldLayout> {
     private final FieldData f;
     private final long size;
-    private final int offset;
+    private final long offset;
 
     /**
      * Construct field layout with discovered offset and field size.
@@ -41,7 +41,7 @@ public class FieldLayout implements Comparable<FieldLayout> {
      * @param offset    discovered offset
      * @param size      discovered field size
      */
-    public FieldLayout(FieldData fieldData, int offset, long size) {
+    public FieldLayout(FieldData fieldData, long offset, long size) {
         this.f = fieldData;
         this.size = size;
         this.offset = offset;
@@ -52,7 +52,7 @@ public class FieldLayout implements Comparable<FieldLayout> {
      *
      * @return field offset
      */
-    public int offset() {
+    public long offset() {
         return offset;
     }
 
@@ -117,12 +117,12 @@ public class FieldLayout implements Comparable<FieldLayout> {
 
     @Override
     public int hashCode() {
-        return offset;
+        return (int)(offset ^ (offset >>> 32));
     }
 
     @Override
     public int compareTo(FieldLayout o) {
-        return Integer.valueOf(offset).compareTo(o.offset);
+        return Long.valueOf(offset).compareTo(o.offset);
     }
 
     @Override

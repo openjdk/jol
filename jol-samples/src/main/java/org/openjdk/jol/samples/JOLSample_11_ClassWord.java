@@ -31,7 +31,7 @@
 package org.openjdk.jol.samples;
 
 import org.openjdk.jol.info.ClassLayout;
-import org.openjdk.jol.util.VMSupport;
+import org.openjdk.jol.vm.VM;
 
 import static java.lang.System.out;
 
@@ -51,7 +51,7 @@ public class JOLSample_11_ClassWord {
      */
 
     public static void main(String[] args) throws Exception {
-        out.println(VMSupport.vmDetails());
+        out.println(VM.current().details());
         out.println(ClassLayout.parseInstance(new A()).toPrintable());
         out.println(ClassLayout.parseInstance(new B()).toPrintable());
     }

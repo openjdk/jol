@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,33 +22,19 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol.datamodel;
+package org.openjdk.jol.vm.sa;
 
-import org.openjdk.jol.vm.VM;
+class Constants {
 
-/**
- * Current data model as detected by JVM.
- *
- * @author Aleksey Shipilev
- */
-public class CurrentDataModel implements DataModel {
-    @Override
-    public int headerSize() {
-        return VM.current().objectHeaderSize();
-    }
+    static final String HOTSPOT_AGENT_CLASSNAME = "sun.jvm.hotspot.HotSpotAgent";
+    static final String VM_CLASSNAME = "sun.jvm.hotspot.runtime.VM";
+    static final String UNIVERSE_CLASSNAME = "sun.jvm.hotspot.memory.Universe";
 
-    @Override
-    public int arrayHeaderSize() {
-        return VM.current().arrayHeaderSize();
-    }
+    static final String SKIP_HOTSPOT_SA_ATTACH_FLAG = "jol.skipHotspotSAAttach";
+    static final String TRY_WITH_SUDO_FLAG = "jol.tryWithSudo";
 
-    @Override
-    public int sizeOf(String klass) {
-        return (int) VM.current().sizeOfField(klass);
-    }
+    static final int DEFAULT_TIMEOUT_IN_MSECS = 5000;
+    static final int VM_CHECK_PERIOD_SENSITIVITY_IN_MSECS = 100;
+    static final int PROCESS_ATTACH_FAILED_EXIT_CODE = 128;
 
-    @Override
-    public int objectAlignment() {
-        return VM.current().objectAlignment();
-    }
 }

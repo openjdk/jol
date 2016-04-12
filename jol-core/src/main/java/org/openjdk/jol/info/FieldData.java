@@ -24,10 +24,10 @@
  */
 package org.openjdk.jol.info;
 
-import org.openjdk.jol.util.VMSupport;
+import org.openjdk.jol.util.ObjectUtils;
+import org.openjdk.jol.vm.VM;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 
 /**
  * Holds the field information, without the layout.
@@ -55,29 +55,21 @@ public class FieldData {
      * @return field data
      */
     public static FieldData parse(Field field) {
-        return new FieldData(field, computeOffset(field), field.getDeclaringClass().getSimpleName(), field.getName(), field.getType().getSimpleName());
+        return new FieldData(field, VM.current().fieldOffset(field), field.getDeclaringClass().getSimpleName(), field.getName(), field.getType().getSimpleName());
     }
 
     private final String name;
     private final String type;
     private final String klass;
     private final Field refField;
-    private final int vmOffset;
+    private final long vmOffset;
 
-    private FieldData(Field refField, int vmOffset, String hostKlass, String fieldName, String fieldType) {
+    private FieldData(Field refField, long vmOffset, String hostKlass, String fieldName, String fieldType) {
         this.klass = hostKlass;
         this.name = fieldName;
         this.type = fieldType;
         this.refField = refField;
         this.vmOffset = vmOffset;
-    }
-
-    private static int computeOffset(Field field) {
-        if (Modifier.isStatic(field.getModifiers())) {
-            return (int) VMSupport.U.staticFieldOffset(field);
-        } else {
-            return (int) VMSupport.U.objectFieldOffset(field);
-        }
     }
 
     /**
@@ -117,14 +109,14 @@ public class FieldData {
     public String safeValue(Object object) {
         if (refField != null) {
             try {
-                return VMSupport.safeToString(refField.get(object));
+                return ObjectUtils.safeToString(refField.get(object));
             } catch (IllegalAccessException iae) {
                 // exception, try again
             }
 
             try {
                 refField.setAccessible(true);
-                return VMSupport.safeToString(refField.get(object));
+                return ObjectUtils.safeToString(refField.get(object));
             } catch (Exception e) {
                 return "(access denied)";
             }
@@ -139,7 +131,7 @@ public class FieldData {
      *
      * @return vm offset
      */
-    public int vmOffset() {
+    public long vmOffset() {
         if (vmOffset != -1) {
             return vmOffset;
         } else {

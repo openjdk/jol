@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,33 +22,53 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol.datamodel;
+package org.openjdk.jol.util;
 
-import org.openjdk.jol.vm.VM;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
 
-/**
- * Current data model as detected by JVM.
- *
- * @author Aleksey Shipilev
- */
-public class CurrentDataModel implements DataModel {
-    @Override
-    public int headerSize() {
-        return VM.current().objectHeaderSize();
+public class IOUtils {
+
+    private IOUtils() {
+
     }
 
-    @Override
-    public int arrayHeaderSize() {
-        return VM.current().arrayHeaderSize();
+    public static void safelyClose(OutputStream out) {
+        if (out != null) {
+            try {
+                out.flush();
+            } catch (IOException e) {
+                // ignore
+            }
+            try {
+                out.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
     }
 
-    @Override
-    public int sizeOf(String klass) {
-        return (int) VM.current().sizeOfField(klass);
+    public static void safelyClose(InputStream in) {
+        if (in != null) {
+            try {
+                in.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
     }
 
-    @Override
-    public int objectAlignment() {
-        return VM.current().objectAlignment();
+    public static void safelyClose(Reader reader) {
+        if (reader != null) {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
     }
+
+
 }

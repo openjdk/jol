@@ -1,11 +1,11 @@
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jol.datamodel.CurrentDataModel;
 import org.openjdk.jol.info.ClassLayout;
+import org.openjdk.jol.vm.VM;
 
 import java.lang.reflect.Array;
 
-public class ClassLayoutTest {
+public class ClassLayoutArraysTest {
 
     static final Class<?>[] TYPES = new Class<?>[]{
             boolean.class,
@@ -20,6 +20,8 @@ public class ClassLayoutTest {
     };
 
     static final int SIZE_SLACK = 16;
+
+
 
     @Test
     public void arraySizes_0() {
@@ -58,11 +60,11 @@ public class ClassLayoutTest {
             }
             ClassLayout l = ClassLayout.parseInstance(o);
 
-            int elementSize = new CurrentDataModel().sizeOf(cl.getName());
+            int elementSize = VM.current().arrayIndexScale(cl.getName());
             long expected = l.headerSize() + (long) size * elementSize;
             long actual = l.instanceSize();
 
-            Assert.assertTrue("Array instance size is not within range: actual = " + actual + ", expected = " + expected,
+            Assert.assertTrue(cl + " array instance size is not within range: actual = " + actual + ", expected = " + expected,
                     (actual - SIZE_SLACK <= expected) && (expected <= actual + SIZE_SLACK));
 
             if (l.instanceSize() <= 0) {

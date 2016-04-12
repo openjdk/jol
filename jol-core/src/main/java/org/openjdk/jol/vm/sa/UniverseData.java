@@ -22,17 +22,15 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol.util.sa.impl.compressedrefs;
-
-import org.openjdk.jol.util.sa.HS_SA_Result;
+package org.openjdk.jol.vm.sa;
 
 /**
- * {@link HS_SA_Result} implementation for representing compressed reference informations as result.
+ * {@link Result} implementation for representing compressed reference informations as result.
  *
  * @author Serkan Ozal
  */
 @SuppressWarnings("serial")
-public class HS_SA_CompressedReferencesResult implements HS_SA_Result {
+public class UniverseData implements Result {
 
     private final int addressSize;
     private final int objectAlignment;
@@ -47,23 +45,9 @@ public class HS_SA_CompressedReferencesResult implements HS_SA_Result {
     private final long narrowKlassBase;
     private final int narrowKlassShift;
 
-    public HS_SA_CompressedReferencesResult(int addressSize, int objectAlignment, int refSize,
-            boolean compressedRefsEnabled, long narrowBase, int narrowShift) {
-        this.addressSize = addressSize;
-        this.objectAlignment = objectAlignment;
-        this.oopSize = refSize;
-        this.compressedOopsEnabled = compressedRefsEnabled;
-        this.narrowOopBase = narrowBase;
-        this.narrowOopShift = narrowShift;
-        this.klassOopSize = refSize;
-        this.compressedKlassOopsEnabled = compressedRefsEnabled;
-        this.narrowKlassBase = narrowBase;
-        this.narrowKlassShift = narrowShift;
-    }
-
-    public HS_SA_CompressedReferencesResult(int addressSize, int objectAlignment, int oopSize,
-            boolean compressedOopsEnabled, long narrowOopBase, int narrowOopShift, int klassOopSize,
-            boolean compressedKlassOopsEnabled, long narrowKlassBase, int narrowKlassShift) {
+    public UniverseData(int addressSize, int objectAlignment, int oopSize,
+                        boolean compressedOopsEnabled, long narrowOopBase, int narrowOopShift, int klassOopSize,
+                        boolean compressedKlassOopsEnabled, long narrowKlassBase, int narrowKlassShift) {
         this.addressSize = addressSize;
         this.objectAlignment = objectAlignment;
         this.oopSize = oopSize;

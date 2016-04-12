@@ -24,13 +24,13 @@
  */
 package org.openjdk.jol.layouters;
 
-import org.openjdk.jol.datamodel.CurrentDataModel;
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.info.FieldData;
 import org.openjdk.jol.info.FieldLayout;
 import org.openjdk.jol.util.MathUtil;
-import org.openjdk.jol.util.VMSupport;
+import org.openjdk.jol.vm.VM;
+import org.openjdk.jol.vm.VirtualMachine;
 
 import java.util.Collection;
 import java.util.SortedSet;
@@ -45,40 +45,36 @@ public class CurrentLayouter implements Layouter {
 
     @Override
     public ClassLayout layout(ClassData data) {
-        CurrentDataModel model = new CurrentDataModel();
+        VirtualMachine vm = VM.current();
 
         if (data.isArray()) {
             // special case of arrays
-            try {
-                int base = VMSupport.U.arrayBaseOffset(Class.forName(data.arrayClass()));
-                int scale = VMSupport.U.arrayIndexScale(Class.forName(data.arrayClass()));
+            int base = vm.arrayBaseOffset(data.arrayComponentType());
+            int scale = vm.arrayIndexScale(data.arrayComponentType());
 
-                long instanceSize = MathUtil.align(base + data.arrayLength() * scale, model.objectAlignment());
+            long instanceSize = MathUtil.align(base + data.arrayLength() * scale, vm.objectAlignment());
 
-                SortedSet<FieldLayout> result = new TreeSet<FieldLayout>();
-                result.add(new FieldLayout(FieldData.create(data.arrayClass(), "<elements>", data.arrayComponentType()), base, scale * data.arrayLength()));
-                return new ClassLayout(data, result, model.arrayHeaderSize(), instanceSize, false);
-            } catch (ClassNotFoundException e) {
-                throw new IllegalStateException("Should not reach here.", e);
-            }
+            SortedSet<FieldLayout> result = new TreeSet<FieldLayout>();
+            result.add(new FieldLayout(FieldData.create(data.arrayClass(), "<elements>", data.arrayComponentType()), base, scale * data.arrayLength()));
+            return new ClassLayout(data, result, vm.arrayHeaderSize(), instanceSize, false);
         }
 
         Collection<FieldData> fields = data.fields();
 
         SortedSet<FieldLayout> result = new TreeSet<FieldLayout>();
         for (FieldData f : fields) {
-            result.add(new FieldLayout(f, f.vmOffset(), model.sizeOf(f.typeClass())));
+            result.add(new FieldLayout(f, f.vmOffset(), vm.sizeOfField(f.typeClass())));
         }
 
         long instanceSize;
         if (result.isEmpty()) {
-            instanceSize = model.headerSize();
+            instanceSize = vm.objectHeaderSize();
         } else {
             FieldLayout f = result.last();
             instanceSize = f.offset() + f.size();
         }
-        instanceSize = MathUtil.align(instanceSize, model.objectAlignment());
-        return new ClassLayout(data, result, model.headerSize(), instanceSize, true);
+        instanceSize = MathUtil.align(instanceSize, vm.objectAlignment());
+        return new ClassLayout(data, result, vm.objectHeaderSize(), instanceSize, true);
     }
 
     @Override
