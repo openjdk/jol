@@ -68,8 +68,7 @@ public class HotSpotLayouter implements Layouter {
             int base = model.arrayHeaderSize();
             int scale = model.sizeOf(cd.arrayComponentType());
 
-            int instanceSize = base + cd.arrayLength() * scale;
-
+            long instanceSize = base + cd.arrayLength() * scale;
             instanceSize = MathUtil.align(instanceSize, autoAlign ? Math.max(model.objectAlignment(), scale) : model.objectAlignment());
             base = MathUtil.align(base, Math.max(4, scale));
 

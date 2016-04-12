@@ -53,7 +53,7 @@ public class CurrentLayouter implements Layouter {
                 int base = VMSupport.U.arrayBaseOffset(Class.forName(data.arrayClass()));
                 int scale = VMSupport.U.arrayIndexScale(Class.forName(data.arrayClass()));
 
-                int instanceSize = MathUtil.align(base + (data.arrayLength()) * scale, model.objectAlignment());
+                long instanceSize = MathUtil.align(base + data.arrayLength() * scale, model.objectAlignment());
 
                 SortedSet<FieldLayout> result = new TreeSet<FieldLayout>();
                 result.add(new FieldLayout(FieldData.create(data.arrayClass(), "<elements>", data.arrayComponentType()), base, scale * data.arrayLength()));
@@ -70,7 +70,7 @@ public class CurrentLayouter implements Layouter {
             result.add(new FieldLayout(f, f.vmOffset(), model.sizeOf(f.typeClass())));
         }
 
-        int instanceSize;
+        long instanceSize;
         if (result.isEmpty()) {
             instanceSize = model.headerSize();
         } else {

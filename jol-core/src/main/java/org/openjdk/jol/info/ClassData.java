@@ -111,7 +111,7 @@ public class ClassData {
     private final List<String> classNames;
     private final String arrayKlass;
     private final String arrayComponentKlass;
-    private final int length;
+    private final long length;
     private final boolean isArray;
 
     /**
@@ -255,7 +255,7 @@ public class ClassData {
      *
      * @return array length
      */
-    public int arrayLength() {
+    public long arrayLength() {
         if (!isArray) {
             throw new IllegalStateException("Asking array length for non-array ClassData");
         }
@@ -296,7 +296,7 @@ public class ClassData {
         result = 31 * result + (classNames != null ? classNames.hashCode() : 0);
         result = 31 * result + (arrayKlass != null ? arrayKlass.hashCode() : 0);
         result = 31 * result + (arrayComponentKlass != null ? arrayComponentKlass.hashCode() : 0);
-        result = 31 * result + length;
+        result = 31 * result + (int) (length ^ (length >>> 32));
         result = 31 * result + (isArray ? 1 : 0);
         return result;
     }

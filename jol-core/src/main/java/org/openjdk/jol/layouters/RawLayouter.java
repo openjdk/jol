@@ -55,7 +55,7 @@ public class RawLayouter implements Layouter {
             int base = model.arrayHeaderSize();
             int scale = model.sizeOf(data.arrayComponentType());
 
-            int instanceSize = base + (data.arrayLength()) * scale;
+            long instanceSize = base + data.arrayLength() * scale;
             result.add(new FieldLayout(FieldData.create(data.arrayClass(), "<elements>", data.arrayComponentType()), base, scale * data.arrayLength()));
             return new ClassLayout(data, result, model.arrayHeaderSize(), instanceSize, false);
         }

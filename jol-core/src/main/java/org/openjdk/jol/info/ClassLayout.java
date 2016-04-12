@@ -99,7 +99,7 @@ public class ClassLayout {
     private final ClassData classData;
     private final SortedSet<FieldLayout> fields;
     private final int headerSize;
-    private final int size;
+    private final long size;
 
     /**
      * Builds the class layout.
@@ -110,7 +110,7 @@ public class ClassLayout {
      * @param instanceSize instance size
      * @param check        whether to check important invariants
      */
-    public ClassLayout(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, int instanceSize, boolean check) {
+    public ClassLayout(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, long instanceSize, boolean check) {
         this.classData = classData;
         this.fields = fields;
         this.headerSize = headerSize;
@@ -150,7 +150,7 @@ public class ClassLayout {
      *
      * @return instance size
      */
-    public int instanceSize() {
+    public long instanceSize() {
         return size;
     }
 
@@ -228,10 +228,10 @@ public class ClassLayout {
             pw.printf(" %6d %5d %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n", 0, headerSize(), "", "(object header)", "N/A");
         }
 
-        int nextFree = headerSize();
+        long nextFree = headerSize();
 
-        int interLoss = 0;
-        int exterLoss = 0;
+        long interLoss = 0;
+        long exterLoss = 0;
 
         for (FieldLayout f : fields()) {
             if (f.offset() > nextFree) {

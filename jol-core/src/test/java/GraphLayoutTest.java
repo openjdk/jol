@@ -39,8 +39,8 @@ public class GraphLayoutTest {
         long aSize = GraphLayout.parseInstance(a).totalSize();
         long bSize = GraphLayout.parseInstance(b).totalSize();
 
-        int aSize_insta = ClassLayout.parseInstance(a).instanceSize();
-        int bSize_insta = ClassLayout.parseInstance(b).instanceSize();
+        long aSize_insta = ClassLayout.parseInstance(a).instanceSize();
+        long bSize_insta = ClassLayout.parseInstance(b).instanceSize();
 
         Assert.assertEquals("GraphLayout and ClassLayout sizes agree on A",
                 aSize,

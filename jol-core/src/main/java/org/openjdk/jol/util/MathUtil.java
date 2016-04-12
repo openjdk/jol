@@ -69,4 +69,12 @@ public class MathUtil {
             return ((addr / align) + 1) * align;
         }
     }
+
+    public static long align(long addr, int align) {
+        if ((addr % align) == 0) {
+            return addr;
+        } else {
+            return ((addr / align) + 1) * align;
+        }
+    }
 }

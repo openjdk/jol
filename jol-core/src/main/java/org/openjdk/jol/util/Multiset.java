@@ -36,23 +36,23 @@ import java.util.Map;
  */
 public class Multiset<T> {
 
-    private final Map<T, Integer> map = new HashMap<T, Integer>();
+    private final Map<T, Long> map = new HashMap<T, Long>();
 
     public void add(T t) {
         add(t, 1);
     }
 
-    public void add(T key, int count) {
-        Integer v = map.get(key);
+    public void add(T key, long count) {
+        Long v = map.get(key);
         if (v == null) {
-            v = 0;
+            v = 0L;
         }
         v += count;
         map.put(key, v);
     }
 
-    public int count(T key) {
-        Integer v = map.get(key);
+    public long count(T key) {
+        Long v = map.get(key);
         return (v == null) ? 0 : v;
     }
 

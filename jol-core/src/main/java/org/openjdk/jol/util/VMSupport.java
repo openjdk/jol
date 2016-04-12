@@ -355,15 +355,15 @@ public class VMSupport {
     }
 
     public static class SizeInfo {
-        private final int size;
+        private final long size;
         private final boolean exactSizeAvail;
 
         public SizeInfo(Object o, ClassLayout layout) {
             exactSizeAvail = InstrumentationSupport.instance() != null && o != null;
-            size = exactSizeAvail ? (int) InstrumentationSupport.instance().getObjectSize(o) : layout.instanceSize();
+            size = exactSizeAvail ? InstrumentationSupport.instance().getObjectSize(o) : layout.instanceSize();
         }
 
-        public int instanceSize() {
+        public long instanceSize() {
             return size;
         }
 
@@ -586,7 +586,7 @@ public class VMSupport {
 
     }
 
-    public static int sizeOf(Object o) {
+    public static long sizeOf(Object o) {
         if (InstrumentationSupport.instance() != null) {
             return VMSupport.align((int) InstrumentationSupport.instance().getObjectSize(o));
         }

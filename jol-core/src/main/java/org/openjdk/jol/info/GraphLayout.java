@@ -118,7 +118,7 @@ public class GraphLayout {
         classCounts.add(klass);
         totalCount++;
         try {
-            int size = VMSupport.sizeOf(gpr.obj());
+            long size = VMSupport.sizeOf(gpr.obj());
             totalSize += size;
             classSizes.add(klass, size);
         } catch (Exception e) {
@@ -273,8 +273,8 @@ public class GraphLayout {
         pw.println(description + " footprint:");
         pw.printf(" %9s %9s %9s   %s%n", "COUNT", "AVG", "SUM", "DESCRIPTION");
         for (Class<?> key : getClasses()) {
-            int count = getClassCounts().count(key);
-            int size = getClassSizes().count(key);
+            long count = getClassCounts().count(key);
+            long size = getClassSizes().count(key);
             pw.printf(" %9d %9d %9d   %s%n", count, size / count, size, key.getName());
         }
         pw.printf(" %9d %9s %9d   %s%n", totalCount(), "", totalSize(), "(total)");
@@ -304,7 +304,7 @@ public class GraphLayout {
         pw.printf(" %16s %10s %-" + typeLen + "s %-30s %s%n", "ADDRESS", "SIZE", "TYPE", "PATH", "VALUE");
         for (long addr : addresses()) {
             Object obj = record(addr).obj();
-            int size = VMSupport.sizeOf(obj);
+            long size = VMSupport.sizeOf(obj);
 
             if (addr > last && last != 0L) {
                 pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", last, addr - last, "(something else)", "(somewhere else)", "(something else)");
@@ -363,7 +363,7 @@ public class GraphLayout {
         int lastX = 0;
         for (long addr : addresses()) {
             Object obj = record(addr).obj();
-            int size = VMSupport.sizeOf(obj);
+            long size = VMSupport.sizeOf(obj);
 
             int x1 = SCALE_WIDTH + EXT_PAD + (int) ((WIDTH - SCALE_WIDTH - EXT_PAD * 2) * (addr - start) / (end - start));
             int x2 = SCALE_WIDTH + EXT_PAD + (int) ((WIDTH - SCALE_WIDTH - EXT_PAD * 2) * (addr + size - start) / (end - start));
