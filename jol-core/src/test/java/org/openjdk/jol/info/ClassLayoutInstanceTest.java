@@ -1,3 +1,5 @@
+package org.openjdk.jol.info;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jol.info.ClassLayout;

@@ -35,7 +35,7 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class ObjectEstimates extends ClasspathedOPeration {
+public class ObjectEstimates extends ClasspathedOperation {
 
     @Override
     public String label() {

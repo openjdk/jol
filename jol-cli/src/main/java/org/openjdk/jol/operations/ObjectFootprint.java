@@ -33,7 +33,7 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class ObjectFootprint extends ClasspathedOPeration {
+public class ObjectFootprint extends ClasspathedOperation {
 
     @Override
     public String label() {

@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.openjdk.jol.datamodel.CurrentDataModel;
 import org.openjdk.jol.datamodel.DataModel;
 import org.openjdk.jol.info.ClassLayout;
+import org.openjdk.jol.util.ClassGenerator;
 
 import java.util.Random;
 

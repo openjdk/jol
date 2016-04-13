@@ -33,7 +33,7 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class ObjectInternals extends ClasspathedOPeration {
+public class ObjectInternals extends ClasspathedOperation {
 
     @Override
     public String label() {

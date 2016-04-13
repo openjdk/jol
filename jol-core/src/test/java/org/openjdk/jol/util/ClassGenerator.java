@@ -1,4 +1,4 @@
-package org.openjdk.jol.layouters;
+package org.openjdk.jol.util;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;

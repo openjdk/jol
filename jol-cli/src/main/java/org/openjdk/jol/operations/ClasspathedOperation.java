@@ -41,7 +41,7 @@ import java.util.List;
 import static java.lang.System.getProperty;
 import static java.lang.System.out;
 
-public abstract class ClasspathedOPeration implements Operation {
+public abstract class ClasspathedOperation implements Operation {
 
     public void run(String[] args) throws Exception {
         OptionParser parser = new OptionParser();
