@@ -122,7 +122,7 @@ public class ClassLayout {
     }
 
     private void checkInvariants() {
-        long lastOffset = 0;
+        FieldLayout lastField = null;
         for (FieldLayout f : fields) {
             if (f.offset() % f.size() != 0) {
                 throw new IllegalStateException("Field " + f + " is not aligned");
@@ -130,10 +130,10 @@ public class ClassLayout {
             if (f.offset() + f.size() > instanceSize()) {
                 throw new IllegalStateException("Field " + f + " is overflowing the object of size " + instanceSize());
             }
-            if (f.offset() < lastOffset) {
-                throw new IllegalStateException("Field " + f + " overlaps with the previous field");
+            if (lastField != null && (f.offset() < lastField.offset() + lastField.size())) {
+                throw new IllegalStateException("Field " + f + " overlaps with the previous field "+ lastField);
             }
-            lastOffset = f.offset() + f.size();
+            lastField = f;
         }
     }
 

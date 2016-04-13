@@ -127,7 +127,7 @@ public class FieldLayout implements Comparable<FieldLayout> {
 
     @Override
     public String toString() {
-        return f.hostClass() + "." + f.name() + "@" + offset + "(" + size + ")";
+        return f.hostClass() + "." + f.name() + " @" + offset + " (" + typeClass() + ", " + size + "b)";
     }
 
 }
