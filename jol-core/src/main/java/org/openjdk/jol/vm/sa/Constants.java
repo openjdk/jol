@@ -35,6 +35,5 @@ class Constants {
 
     static final int DEFAULT_TIMEOUT_IN_MSECS = 5000;
     static final int VM_CHECK_PERIOD_SENSITIVITY_IN_MSECS = 100;
-    static final int PROCESS_ATTACH_FAILED_EXIT_CODE = 128;
 
 }

@@ -222,36 +222,22 @@ class HotspotUnsafe implements VirtualMachine {
 
         out.println("# Running " + (addressSize * 8) + "-bit HotSpot VM.");
 
-        String javaSpecVersion = System.getProperty("java.specification.version");
-        // Since Java 8 (Java 8 and Java 9) has different compressed reference configuration for OOP and Klass
-        if (javaSpecVersion.equals("1.8") || javaSpecVersion.equals("1.9")) {
-            if (compressedOopsEnabled) {
-                if (narrowOopBase != 0) {
-                    out.println("# Using compressed oop with " +
-                            formatAddressAsHexByAddressSize(narrowOopBase) + " base address and " +
-                            narrowOopShift + "-bit shift.");
-                } else {
-                    out.println("# Using compressed oop with " + narrowOopShift + "-bit shift.");
-                }
+        if (compressedOopsEnabled) {
+            if (narrowOopBase != 0) {
+                out.println("# Using compressed oop with " +
+                        formatAddressAsHexByAddressSize(narrowOopBase) + " base address and " +
+                        narrowOopShift + "-bit shift.");
+            } else {
+                out.println("# Using compressed oop with " + narrowOopShift + "-bit shift.");
             }
-            if (compressedKlassOopsEnabled) {
-                if (narrowKlassBase != 0) {
-                    out.println("# Using compressed klass with " +
-                            formatAddressAsHexByAddressSize(narrowKlassBase) + " base address and " +
-                            narrowKlassShift + "-bit shift.");
-                } else {
-                    out.println("# Using compressed klass with " + narrowKlassShift + "-bit shift.");
-                }
-            }
-        } else {
-            if (compressedKlassOopsEnabled) {
-                if (narrowOopBase != 0) {
-                    out.println("# Using compressed references with " +
-                            formatAddressAsHexByAddressSize(narrowOopBase) + " base address and " +
-                            narrowOopShift + "-bit shift.");
-                } else {
-                    out.println("# Using compressed references with " + narrowOopShift + "-bit shift.");
-                }
+        }
+        if (compressedKlassOopsEnabled) {
+            if (narrowKlassBase != 0) {
+                out.println("# Using compressed klass with " +
+                        formatAddressAsHexByAddressSize(narrowKlassBase) + " base address and " +
+                        narrowKlassShift + "-bit shift.");
+            } else {
+                out.println("# Using compressed klass with " + narrowKlassShift + "-bit shift.");
             }
         }
         if (!isAccurate && (compressedOopsEnabled || compressedKlassOopsEnabled)) {

@@ -78,37 +78,48 @@ public class ServiceabilityAgentSupport {
         return INSTANCE;
     }
 
-    private final int processId;
+    private final long processId;
     private final String classpathForAgent;
     private final boolean sudoRequired;
+    private final boolean moduleExportsRequired;
 
     private ServiceabilityAgentSupport() {
         processId = getCurrentProcId();
         classpathForAgent = getClassPath();
-        sudoRequired = needSudo();
+        moduleExportsRequired = needModuleExports();
+        sudoRequired = needSudo(moduleExportsRequired);
     }
 
-    private boolean needSudo() {
+    private boolean needModuleExports() {
         try {
-            // First check attempt for HotSpot agent connection without "sudo" command
-            callAgent(null, false);
+            senseAccess(false);
             return false;
-        } catch (ProcessAttachFailedException e1) {
-            // Possibly because of insufficient privilege. So "sudo" is required.
-            // So if "sudo" command is valid on OS and user allows "sudo" usage
+        } catch (Throwable t1) {
+            try {
+                senseAccess(true);
+                return true;
+            } catch (Throwable t2) {
+                throw new SASupportException("Unable to attach even with module exceptions: " + t2.getMessage(), t2);
+            }
+        }
+    }
+
+    private boolean needSudo(boolean moduleExportsRequired) {
+        try {
+            callAgent(null, false, moduleExportsRequired);
+            return false;
+        } catch (Throwable t1) {
             if (isSudoValidOS() && Boolean.getBoolean(TRY_WITH_SUDO_FLAG)) {
                 try {
-                    // Second check attempt for HotSpot agent connection but this time with "sudo" command
-                    callAgent(null, true);
+                    callAgent(null, true, moduleExportsRequired);
                     return true;
-                } catch (Throwable t) {
-                    throw new SASupportException("Unable to attach even with super-user privileges: " + t.getMessage(), t);
+                } catch (Throwable t2) {
+                    throw new SASupportException("Unable to attach even with escalated privileges: " + t2.getMessage(), t2);
                 }
             } else {
-                throw new SASupportException("You can try again with super-user privileges. Use -D" + TRY_WITH_SUDO_FLAG + "=true to try with sudo.");
+                throw new SASupportException("You can try again with escalated privileges. " +
+                        "Two options: a) use -D" + TRY_WITH_SUDO_FLAG + "=true to try with sudo; b) echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope");
             }
-        } catch (Throwable t) {
-            throw new SASupportException(t.getMessage(), t);
         }
     }
 
@@ -144,9 +155,18 @@ public class ServiceabilityAgentSupport {
         return osName.contains("nix") || osName.contains("nux") || osName.contains("aix") || osName.contains("mac");
     }
 
-    private static int getCurrentProcId() {
+    private static long getCurrentProcId() {
+        // Try to use JDK 9 java.lang.ProcessHandle.current().getPid()
         try {
-            // Find current process id to connect via HotSpot agent
+            Class<?> c = Class.forName("java.lang.ProcessHandle");
+            Object current = c.getDeclaredMethod("current").invoke(null);
+            return (Long) c.getDeclaredMethod("getPid").invoke(current);
+        } catch (Throwable t) {
+            // okay, no support yet, falling through
+        }
+
+        // Find current process id to connect via RuntimeMXBean
+        try {
             RuntimeMXBean mxbean = ManagementFactory.getRuntimeMXBean();
 
             Field jvmField = mxbean.getClass().getDeclaredField("jvm");
@@ -163,18 +183,11 @@ public class ServiceabilityAgentSupport {
     }
 
     private Result callAgent(Task processor) {
-        return callAgent(processor, sudoRequired);
+        return callAgent(processor, sudoRequired, moduleExportsRequired);
     }
 
-    private Result callAgent(Task processor, boolean sudoRequired) {
-        // Generate required arguments to create an external Java process
-        List<String> args = new ArrayList<String>();
-        if (sudoRequired) {
-            args.add("sudo");
-        }
-        args.add(normalizePath(System.getProperty("java.home")) + "/" + "bin" + "/" + "java");
-        args.add("-cp");
-        args.add(classpathForAgent);
+    private Result callAgent(Task processor, boolean sudoRequired, boolean moduleExportsRequired) {
+        List<String> args = getArguments(sudoRequired, moduleExportsRequired);
         args.add(AttachMain.class.getName());
 
         ObjectInputStream in = null;
@@ -182,7 +195,6 @@ public class ServiceabilityAgentSupport {
         BufferedReader err = null;
         Process agentProcess = null;
         try {
-            // Create an external Java process to connect this process as HotSpot agent
             agentProcess = new ProcessBuilder(args).start();
 
             Request request = new Request(processId, processor, DEFAULT_TIMEOUT_IN_MSECS);
@@ -199,14 +211,7 @@ public class ServiceabilityAgentSupport {
 
             // At least, for all cases, wait process to finish
             int exitCode = agentProcess.waitFor();
-            // Reset it, it has terminated and no need to destroy at the finally block
             agentProcess = null;
-
-            // If process attach failed,
-            if (exitCode == PROCESS_ATTACH_FAILED_EXIT_CODE) {
-                throw new ProcessAttachFailedException("Attaching as HotSpot SA to current process " +
-                                                       "(id=" + processId + ") from external process failed");
-            }
 
             // At first, check errors
             err = new BufferedReader(new InputStreamReader(es));
@@ -236,8 +241,6 @@ public class ServiceabilityAgentSupport {
             } else {
                 return null;
             }
-        } catch (ProcessAttachFailedException e) {
-            throw e;
         } catch (Throwable t) {
             throw new SASupportException(t.getMessage(), t);
         } finally {
@@ -246,11 +249,48 @@ public class ServiceabilityAgentSupport {
             IOUtils.safelyClose(err);
 
             if (agentProcess != null) {
-                // If process is still in use, destroy it.
-                // When it has terminated, it is set to "null" after "waitFor".
                 agentProcess.destroy();
             }
         }
+    }
+
+    private void senseAccess(boolean moduleExportsRequired) {
+        List<String> args = getArguments(false, moduleExportsRequired);
+        args.add(SenseAccessMain.class.getName());
+
+        Process agentProcess = null;
+        try {
+            agentProcess = new ProcessBuilder(args).start();
+
+            int exitCode = agentProcess.waitFor();
+            agentProcess = null;
+
+            if (exitCode != 0) {
+                throw new SASupportException("Sense failed.");
+            }
+        } catch (Throwable t) {
+            throw new SASupportException(t.getMessage(), t);
+        } finally {
+            if (agentProcess != null) {
+                agentProcess.destroy();
+            }
+        }
+    }
+
+    private List<String> getArguments(boolean sudoRequired, boolean moduleExportsRequired) {
+        List<String> args = new ArrayList<String>();
+        if (sudoRequired) {
+            args.add("sudo");
+        }
+        args.add(normalizePath(System.getProperty("java.home")) + "/" + "bin" + "/" + "java");
+        if (moduleExportsRequired) {
+            args.add("-XaddExports:jdk.hotspot.agent/sun.jvm.hotspot=ALL-UNNAMED");
+            args.add("-XaddExports:jdk.hotspot.agent/sun.jvm.hotspot.runtime=ALL-UNNAMED");
+            args.add("-XaddExports:jdk.hotspot.agent/sun.jvm.hotspot.memory=ALL-UNNAMED");
+        }
+        args.add("-cp");
+        args.add(classpathForAgent);
+        return args;
     }
 
     public UniverseData getUniverseData() {

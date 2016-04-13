@@ -24,12 +24,28 @@
  */
 package org.openjdk.jol.vm.sa;
 
-/**
- * Specific exception type to represent process attach fail cases.
- */
-@SuppressWarnings("serial")
-class ProcessAttachFailedException extends RuntimeException {
-    ProcessAttachFailedException(String message) {
-        super(message);
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import static org.openjdk.jol.vm.sa.Constants.*;
+
+class SenseAccessMain {
+
+    public static void main(final String[] args) {
+        try {
+            System.setProperty("sun.jvm.hotspot.debugger.useProcDebugger", "true");
+            System.setProperty("sun.jvm.hotspot.debugger.useWindbgDebugger", "true");
+
+            Class.forName(VM_CLASSNAME).getMethod("getVM");
+            Class.forName(HOTSPOT_AGENT_CLASSNAME).newInstance();
+            Class.forName(HOTSPOT_AGENT_CLASSNAME).getMethod("attach",int.class);
+            Class.forName(HOTSPOT_AGENT_CLASSNAME).getMethod("detach");
+        } catch (Throwable t) {
+            System.exit(1);
+        }
     }
 }

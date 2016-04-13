@@ -32,17 +32,17 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 class Request implements Serializable {
 
-    private final int processId;
+    private final long processId;
     private final Task processor;
     private final int timeout;
 
-    Request(int processId, Task processor, int timeout) {
+    Request(long processId, Task processor, int timeout) {
         this.processId = processId;
         this.processor = processor;
         this.timeout = timeout;
     }
 
-    int getProcessId() {
+    long getProcessId() {
         return processId;
     }
 

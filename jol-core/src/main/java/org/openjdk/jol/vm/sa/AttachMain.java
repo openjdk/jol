@@ -30,6 +30,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.*;
 
 import static org.openjdk.jol.vm.sa.Constants.*;
 
@@ -58,34 +59,26 @@ class AttachMain {
             final Method attachMethod = hotspotAgentClass.getMethod("attach",int.class);
             detachMethod = hotspotAgentClass.getMethod("detach");
 
-            Object vm = null;
+            // Attach from a separate thread to capture timeouts. Do not block the
+            // main thread waiting for the assert to happen.
 
             final Object agent = hotspotAgent;
-            Thread t = new Thread() {
-                public void run() {
-                    try {
-                        // Attach to the caller process as Hotspot agent
-                        attachMethod.invoke(agent, request.getProcessId());
-                    } catch (Throwable t) {
-                        System.exit(PROCESS_ATTACH_FAILED_EXIT_CODE);
-                    }
-                };
-            };
-            t.start();
+            Future<?> future = Executors.newCachedThreadPool(new MyThreadFactory())
+                    .submit(new Callable<Object>() {
+                                @Override
+                                public Object call() {
+                                    try {
+                                        // Attach to the caller process as Hotspot agent
+                                        attachMethod.invoke(agent, (int) request.getProcessId());
+                                        return Class.forName(VM_CLASSNAME).getMethod("getVM").invoke(null);
+                                    } catch (Exception t) {
+                                        throw new RuntimeException(t);
+                                    }
+                                }
+                            }
+                    );
 
-            // Check until timeout
-            for (int i = 0; i < request.getTimeout(); i += VM_CHECK_PERIOD_SENSITIVITY_IN_MSECS) {
-                try {
-                    if ((vm = Class.forName(VM_CLASSNAME).getMethod("getVM").invoke(null)) != null) {
-                        break;
-                    }
-                } catch (Throwable err) {
-                    // There is nothing to do, try another
-                }
-                Thread.sleep(VM_CHECK_PERIOD_SENSITIVITY_IN_MSECS); // Wait a little before an attempt
-            }
-
-            // Check about if VM is initialized and ready to use
+            Object vm = future.get(request.getTimeout(), TimeUnit.MILLISECONDS);
             if (vm != null) {
                 final Task processor = request.getProcessor();
                 if (processor != null) {
@@ -94,7 +87,7 @@ class AttachMain {
                     response = new Response(result);
                 }
             } else {
-                throw new IllegalStateException("VM couldn't be initialized !");
+                throw new IllegalStateException("VM couldn't be initialized!");
             }
         } catch (Throwable t) {
             // If there is an error, attach it to response
@@ -123,4 +116,16 @@ class AttachMain {
             }
         }
     }
+
+    static class MyThreadFactory implements ThreadFactory {
+        final ThreadFactory f = Executors.defaultThreadFactory();
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = f.newThread(r);
+            t.setDaemon(true);
+            return t;
+        }
+    }
+
 }

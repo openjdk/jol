@@ -24,6 +24,8 @@
  */
 package org.openjdk.jol.vm;
 
+import org.openjdk.jol.util.IOUtils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -68,9 +70,20 @@ class InstrumentationSupport {
     }
 
     private static void tryDynamicAttach() throws Exception {
-        ClassLoader classLoader = new URLClassLoader(new URL[]{new File(System.getProperty("java.home")
-                .replace('\\', '/') + "/../lib/tools.jar").toURI().toURL()}, null);
-        Class<?> vmClass = classLoader.loadClass("com.sun.tools.attach.VirtualMachine");
+        Class<?> vmClass;
+
+        String name = "com.sun.tools.attach.VirtualMachine";
+        try {
+            // JDK 9+ makes this class available on class path
+            vmClass = ClassLoader.getSystemClassLoader().loadClass(name);
+        } catch (Exception e) {
+            // JDK -8 ships this class in tools.jar
+            URL url = new File(System.getProperty("java.home")
+                    .replace('\\', '/') + "/../lib/tools.jar").toURI().toURL();
+            ClassLoader classLoader = new URLClassLoader(new URL[]{url}, null);
+            vmClass = classLoader.loadClass(name);
+        }
+
         String runtimeName = ManagementFactory.getRuntimeMXBean().getName();
         Object vm = vmClass.getDeclaredMethod("attach", String.class)
                 .invoke(null, runtimeName.substring(0, runtimeName.indexOf('@')));
@@ -83,7 +96,6 @@ class InstrumentationSupport {
                 Field field = ClassLoader.getSystemClassLoader()
                             .loadClass(Installer.class.getName())
                             .getDeclaredField("INSTRUMENTATION");
-                field.setAccessible(true);
                 INSTRUMENTATION = (Instrumentation) field.get(null);
             } finally {
                 agentFile.delete();
@@ -112,10 +124,10 @@ class InstrumentationSupport {
                 }
                 jos.closeEntry();
             } finally {
-                jos.close();
+                IOUtils.safelyClose(jos);
             }
         } finally {
-            is.close();
+            IOUtils.safelyClose(is);
         }
     }
 
