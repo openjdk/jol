@@ -91,7 +91,7 @@ public class ClassData {
             return new ClassData(o, klass.getName(), klass.getComponentType().getName(), arrayLength(o));
         }
 
-        ClassData cd = new ClassData(o, klass.getCanonicalName());
+        ClassData cd = new ClassData(o, klass.getName());
 
         do {
             for (Field f : klass.getDeclaredFields()) {

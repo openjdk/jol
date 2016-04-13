@@ -15,16 +15,43 @@ public class ClassLayoutInstanceTest {
         A a = new A();
     }
 
+    static class C extends B {
+
+    }
+
     @Test
     public void testPrint() {
         ClassLayout.parseInstance(new A()).toPrintable();
         ClassLayout.parseInstance(new B()).toPrintable();
 
-        ClassLayout.parseInstance(A.class).toPrintable();
-        ClassLayout.parseInstance(B.class).toPrintable();
+        ClassLayout.parseClass(A.class).toPrintable();
+        ClassLayout.parseClass(B.class).toPrintable();
 
-        ClassLayout.parseInstance(A.class).toPrintable(new A());
-        ClassLayout.parseInstance(B.class).toPrintable(new B());
+        ClassLayout.parseClass(A.class).toPrintable(new A());
+        ClassLayout.parseClass(B.class).toPrintable(new B());
+    }
+
+    @Test
+    public void testInconsistentTypes() {
+        try {
+            ClassLayout.parseClass(A.class).toPrintable(new B());
+            Assert.fail("Trying to pass instance B over the class A succeeded");
+        } catch (Exception e) {
+            // expected
+        }
+
+        try {
+            ClassLayout.parseClass(B.class).toPrintable(new A());
+            Assert.fail("Trying to pass instance A over the class B succeeded");
+        } catch (Exception e) {
+            // expected
+        }
+
+        try {
+            ClassLayout.parseClass(B.class).toPrintable(new C());
+        } catch (Exception e) {
+            Assert.fail("Trying to pass instance C over the class B failed");
+        }
     }
 
     @Test

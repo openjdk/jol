@@ -206,6 +206,17 @@ public class ClassLayout {
             maxDescrLen = Math.max((f.hostClass() + "" + f.name()).length(), maxDescrLen);
         }
 
+        if (instance != null) {
+            try {
+                Class<?> klass = Class.forName(classData.name());
+                if (!klass.isAssignableFrom(instance.getClass())) {
+                    throw new IllegalArgumentException("Passed instance type " + instance.getClass() + " is not assignable from " + klass + ".");
+                }
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("Class is not found: " + classData.name() + ".");
+            }
+        }
+
         pw.println(classData.name() + " object internals:");
         pw.printf(" %6s %5s %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n", "OFFSET", "SIZE", "TYPE", "DESCRIPTION", "VALUE");
         if (instance != null) {
@@ -251,7 +262,7 @@ public class ClassLayout {
             nextFree = f.offset() + f.size();
         }
 
-        long sizeOf = VM.current().sizeOf(instance);
+        long sizeOf = (instance != null) ? VM.current().sizeOf(instance) : instanceSize();;
 
         if (sizeOf != nextFree) {
             exterLoss = sizeOf - nextFree;
