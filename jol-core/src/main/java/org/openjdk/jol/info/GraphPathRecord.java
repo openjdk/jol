@@ -24,6 +24,9 @@
  */
 package org.openjdk.jol.info;
 
+import org.openjdk.jol.util.ObjectUtils;
+import org.openjdk.jol.vm.VM;
+
 /**
  * Object path in object graph.
  *
@@ -31,46 +34,60 @@ package org.openjdk.jol.info;
  */
 public class GraphPathRecord {
     private final String path;
-    private final Object obj;
     private final int depth;
+    private Object obj;
+    private final Class<?> klass;
+    private final long size;
+    private final long address;
+    private final String toString;
 
-    public GraphPathRecord(String path, Object obj, int depth) {
+    GraphPathRecord(String path, int depth, Object obj) {
+        this(path, depth, obj, obj.getClass());
+    }
+
+    GraphPathRecord(String path, int depth, Class<?> klass) {
+        this(path, depth, null, klass);
+    }
+
+    GraphPathRecord(String path, int depth, Object obj, Class<?> klass) {
         this.path = path;
         this.obj = obj;
+        this.klass = klass;
         this.depth = depth;
+
+        if (obj != null) {
+            toString = ObjectUtils.safeToString(obj);
+            size = VM.current().sizeOf(obj);
+            address = VM.current().addressOf(obj);
+        } else {
+            toString = "(access denied)";
+            size = 0;
+            address = 0;
+        }
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        GraphPathRecord that = (GraphPathRecord) o;
-
-        if (!obj.equals(that.obj)) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return obj.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "GraphPathRecord{" +
-                "path='" + path + '\'' +
-                ", obj=" + obj +
-                '}';
+    Object obj() {
+        return obj;
     }
 
     public String path() {
         return path;
     }
 
-    public Object obj() {
-        return obj;
+    public Class<?> klass() {
+        return klass;
+    }
+
+    public long size() {
+        return size;
+    }
+
+    public long address() {
+        return address;
+    }
+
+    public String objToString() {
+        return toString;
     }
 
     public int depth() {

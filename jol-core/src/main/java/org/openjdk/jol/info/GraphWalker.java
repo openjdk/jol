@@ -62,7 +62,7 @@ public class GraphWalker {
         boolean single = (roots.length == 1);
         for (Object root : roots) {
             String label = single ? "" : ("<r" + rootId + ">");
-            GraphPathRecord e = new GraphPathRecord(label, root, 0);
+            GraphPathRecord e = new GraphPathRecord(label, 0, root);
             visited.add(root);
             visitObject(e);
             curLayer.add(e);
@@ -73,11 +73,9 @@ public class GraphWalker {
             newLayer.clear();
             for (GraphPathRecord next : curLayer) {
                 for (GraphPathRecord ref : peelReferences(next)) {
-                    if (ref != null) {
-                        if (visited.add(ref.obj())) {
-                            visitObject(ref);
-                            newLayer.add(ref);
-                        }
+                    if (visited.add(ref.obj())) {
+                        visitObject(ref);
+                        newLayer.add(ref);
                     }
                 }
             }
@@ -93,52 +91,67 @@ public class GraphWalker {
     }
 
     private List<GraphPathRecord> peelReferences(GraphPathRecord r) {
+        Object o = r.obj();
+
+        if (o == null) {
+            // Nothing to do here
+            return Collections.emptyList();
+        }
+
+        if (o.getClass().isArray() && o.getClass().getComponentType().isPrimitive()) {
+            // Nothing to do here
+            return Collections.emptyList();
+        }
+
         List<GraphPathRecord> result = new ArrayList<GraphPathRecord>();
 
-        Object o = r.obj();
-        if (o.getClass().isArray() && !o.getClass().getComponentType().isPrimitive()) {
+        if (o.getClass().isArray()) {
             int c = 0;
             for (Object e : (Object[]) o) {
                 if (e != null) {
-                    result.add(new GraphPathRecord(r.path() + "[" + c + "]", e, r.depth() + 1));
+                    result.add(new GraphPathRecord(r.path() + "[" + c + "]", r.depth() + 1, e));
                 }
                 c++;
             }
-        }
-
-        for (Field f : getAllFields(o.getClass())) {
-            f.setAccessible(true);
-            if (f.getType().isPrimitive()) continue;
-            if (Modifier.isStatic(f.getModifiers())) continue;
-
-            try {
-                Object e = f.get(o);
-                if (e != null) {
-                    result.add(new GraphPathRecord(r.path() + "." + f.getName(), e, r.depth() + 1));
+        } else {
+            for (Field f : getAllReferences(o.getClass())) {
+                try {
+                    f.setAccessible(true);
+                } catch (Exception e) {
+                    // Access denied
+                    result.add(new GraphPathRecord(r.path() + "." + f.getName(), r.depth() + 1, f.getType()));
+                    continue;
                 }
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException(e);
+
+                try {
+                    Object e = f.get(o);
+                    if (e != null) {
+                        result.add(new GraphPathRecord(r.path() + "." + f.getName(), r.depth() + 1, e));
+                    }
+                } catch (IllegalAccessException e) {
+                    throw new IllegalStateException(e);
+                }
             }
         }
 
         return result;
     }
 
-    private Collection<Field> getAllFields(Class<?> klass) {
+    private Collection<Field> getAllReferences(Class<?> klass) {
         List<Field> results = new ArrayList<Field>();
 
         for (Field f : klass.getDeclaredFields()) {
-            if (!Modifier.isStatic(f.getModifiers())) {
-                results.add(f);
-            }
+            if (Modifier.isStatic(f.getModifiers())) continue;
+            if (f.getType().isPrimitive()) continue;
+            results.add(f);
         }
 
         Class<?> superKlass = klass;
         while ((superKlass = superKlass.getSuperclass()) != null) {
             for (Field f : superKlass.getDeclaredFields()) {
-                if (!Modifier.isStatic(f.getModifiers())) {
-                    results.add(f);
-                }
+                if (Modifier.isStatic(f.getModifiers())) continue;
+                if (f.getType().isPrimitive()) continue;
+                results.add(f);
             }
         }
 

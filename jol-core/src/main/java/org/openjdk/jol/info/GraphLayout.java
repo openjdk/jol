@@ -111,15 +111,15 @@ public class GraphLayout {
     }
 
     private void addRecord(GraphPathRecord gpr) {
-        long addr = VM.current().addressOf(gpr.obj());
+        long addr = gpr.address();
         addresses.put(addr, gpr);
 
-        Class<?> klass = gpr.obj().getClass();
+        Class<?> klass = gpr.klass();
         classes.add(klass);
         classCounts.add(klass);
         totalCount++;
         try {
-            long size = VM.current().sizeOf(gpr.obj());
+            long size = gpr.size();
             totalSize += size;
             classSizes.add(klass, size);
         } catch (Exception e) {
@@ -298,14 +298,14 @@ public class GraphLayout {
         int typeLen = 1;
         for (long addr : addresses()) {
             GraphPathRecord r = record(addr);
-            typeLen = Math.max(typeLen, r.obj().getClass().getName().length());
+            typeLen = Math.max(typeLen, r.klass().getName().length());
         }
 
         pw.println(description + " object externals:");
         pw.printf(" %16s %10s %-" + typeLen + "s %-30s %s%n", "ADDRESS", "SIZE", "TYPE", "PATH", "VALUE");
         for (long addr : addresses()) {
-            Object obj = record(addr).obj();
-            long size = VM.current().sizeOf(obj);
+            GraphPathRecord record = record(addr);
+            long size = record.size();
 
             if (addr > last && last != 0L) {
                 pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", last, addr - last, "(something else)", "(somewhere else)", "(something else)");
@@ -314,7 +314,7 @@ public class GraphLayout {
                 pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", last, addr - last, "**** OVERLAP ****", "**** OVERLAP ****", "**** OVERLAP ****");
             }
 
-            pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", addr, size, obj.getClass().getName(), record(addr).path(), ObjectUtils.safeToString(obj));
+            pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", addr, size, record.klass().getName(), record.path(), record.objToString());
             last = addr + size;
         }
         pw.println();
@@ -358,13 +358,12 @@ public class GraphLayout {
         Multiset<Integer> depths = new Multiset<Integer>();
         for (long addr : addresses()) {
             GraphPathRecord r = record(addr);
-            depths.add(r.depth(), VM.current().sizeOf(r.obj()));
+            depths.add(r.depth(), r.size());
         }
 
         int lastX = 0;
         for (long addr : addresses()) {
-            Object obj = record(addr).obj();
-            long size = VM.current().sizeOf(obj);
+            long size = record(addr).size();
 
             int x1 = SCALE_WIDTH + EXT_PAD + (int) ((WIDTH - SCALE_WIDTH - EXT_PAD * 2) * (addr - start) / (end - start));
             int x2 = SCALE_WIDTH + EXT_PAD + (int) ((WIDTH - SCALE_WIDTH - EXT_PAD * 2) * (addr + size - start) / (end - start));
