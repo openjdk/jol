@@ -33,6 +33,7 @@ import org.openjdk.jol.OptionFormatter;
 import org.openjdk.jol.vm.VM;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -85,6 +86,16 @@ public abstract class ClasspathedOperation implements Operation {
                 t.printStackTrace(System.err);
             }
         }
+    }
+
+    protected Object tryInstantiate(Class<?> klass) throws Exception {
+        Constructor<?> ctor = klass.getDeclaredConstructor();
+        try {
+            ctor.setAccessible(true);
+        } catch (Exception e) {
+            // Unable to make it accessible, try to invoke constructor anyway
+        }
+        return ctor.newInstance();
     }
 
     protected abstract void runWith(Class<?> klass) throws Exception;

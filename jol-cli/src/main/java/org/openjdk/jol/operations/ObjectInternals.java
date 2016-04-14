@@ -47,9 +47,7 @@ public class ObjectInternals extends ClasspathedOperation {
 
     public void runWith(Class<?> klass) throws Exception {
         try {
-            Constructor<?> ctor = klass.getDeclaredConstructor();
-            ctor.setAccessible(true);
-            Object o = klass.newInstance();
+            Object o = tryInstantiate(klass);
             out.println(ClassLayout.parseInstance(o).toPrintable());
         } catch (NoSuchMethodException e) {
             out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
@@ -65,5 +63,4 @@ public class ObjectInternals extends ClasspathedOperation {
             out.println(ClassLayout.parseClass(klass).toPrintable());
         }
     }
-
 }

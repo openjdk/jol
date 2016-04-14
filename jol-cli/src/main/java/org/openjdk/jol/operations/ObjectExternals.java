@@ -47,9 +47,7 @@ public class ObjectExternals extends ClasspathedOperation {
 
     public void runWith(Class<?> klass) throws Exception {
         try {
-            Constructor<?> ctor = klass.getDeclaredConstructor();
-            ctor.setAccessible(true);
-            Object o = ctor.newInstance();
+            Object o = tryInstantiate(klass);
             out.println(GraphLayout.parseInstance(o).toPrintable());
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException("Instantiation exception, does the class have the default constructor?", e);
