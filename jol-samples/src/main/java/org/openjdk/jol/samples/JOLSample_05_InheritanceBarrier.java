@@ -50,7 +50,7 @@ public class JOLSample_05_InheritanceBarrier {
      * "inheritance barrier" between super- and sub-class fields blocks.
      *
      * See also:
-     * https://bugs.openjdk.java.net/browse/JDK-8024913
+     *    https://bugs.openjdk.java.net/browse/JDK-8024913
      */
 
     public static void main(String[] args) throws Exception {

@@ -54,6 +54,8 @@ public class JOLSample_24_Colocation {
      * by several threads. We can see that after a few GCs it is
      * densely packed, regardless of the fact it was allocated by
      * multiple threads.
+     *
+     * This example generates PNG images in your current directory.
      */
 
     public static volatile Object sink;

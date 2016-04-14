@@ -48,6 +48,8 @@ public class JOLSample_23_Defragmentation {
      * the dense structure. Then, we randomly purge half of
      * the elements. Now the memory layout is sparse. Subsequent
      * GCs take care of that.
+     *
+     * This example generates PNG images in your current directory.
      */
 
     public static volatile Object sink;
@@ -68,11 +70,13 @@ public class JOLSample_23_Defragmentation {
             array[c] = new Object();
         }
 
-        GraphLayout.parseInstance(array).toImage("array-1-new.png");
+        Object obj = array;
+
+        GraphLayout.parseInstance(obj).toImage("array-1-new.png");
 
         for (int c = 2; c <= 5; c++) {
             System.gc();
-            GraphLayout.parseInstance(array).toImage("array-" + c + "-before.png");
+            GraphLayout.parseInstance(obj).toImage("array-" + c + "-before.png");
         }
 
         for (int c = 0; c < COUNT; c++) {
@@ -81,11 +85,11 @@ public class JOLSample_23_Defragmentation {
             }
         }
 
-        GraphLayout.parseInstance(array).toImage("array-6-after.png");
+        GraphLayout.parseInstance(obj).toImage("array-6-after.png");
 
         for (int c = 7; c <= 10; c++) {
             System.gc();
-            GraphLayout.parseInstance(array).toImage("array-" + c + "-after-gc.png");
+            GraphLayout.parseInstance(obj).toImage("array-" + c + "-after-gc.png");
         }
     }
 

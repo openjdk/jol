@@ -46,11 +46,12 @@ public class JOLSample_22_Compaction {
     /*
      * This is the example how VM compacts the objects.
      *
-     * This example generates PNG images. You can see the freshly
-     * allocated and populated list has quite the sparse layout.
-     * It happens because many temporary objects are allocated
-     * while populating the list. The subsequent GCs compact the
-     * list into the one or few dense blocks.
+     * This example generates PNG images in your current directory.
+     *
+     * You can see the freshly allocated and populated list has quite
+     * the sparse layout. It happens because many temporary objects are
+     * allocated while populating the list. The subsequent GCs compact
+     * the list into the one or few dense blocks.
      */
 
     public static volatile Object sink;

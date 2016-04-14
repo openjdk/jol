@@ -47,7 +47,7 @@ public class JOLSample_06_Gaps {
      * That unfortunately yields the artificial gaps at the end of the class.
      *
      * See also:
-     *  https://bugs.openjdk.java.net/browse/JDK-8024912
+     *    https://bugs.openjdk.java.net/browse/JDK-8024912
      */
 
     public static void main(String[] args) throws Exception {
