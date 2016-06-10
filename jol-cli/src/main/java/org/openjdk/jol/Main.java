@@ -44,6 +44,7 @@ public class Main {
         registerOperation(new ObjectShapes());
         registerOperation(new StringCompress());
         registerOperation(new HeapDump());
+        registerOperation(new HeapDumpStats());
     }
 
     private static void registerOperation(Operation op) {
