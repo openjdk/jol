@@ -24,13 +24,7 @@
  */
 package org.openjdk.jol;
 
-import org.openjdk.jol.operations.HeapDump;
-import org.openjdk.jol.operations.ObjectEstimates;
-import org.openjdk.jol.operations.ObjectExternals;
-import org.openjdk.jol.operations.ObjectFootprint;
-import org.openjdk.jol.operations.ObjectIdealPacking;
-import org.openjdk.jol.operations.ObjectInternals;
-import org.openjdk.jol.operations.StringCompress;
+import org.openjdk.jol.operations.*;
 
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -47,6 +41,7 @@ public class Main {
         registerOperation(new ObjectEstimates());
         registerOperation(new ObjectFootprint());
         registerOperation(new ObjectIdealPacking());
+        registerOperation(new ObjectShapes());
         registerOperation(new StringCompress());
         registerOperation(new HeapDump());
     }

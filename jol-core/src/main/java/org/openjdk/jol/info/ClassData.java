@@ -179,7 +179,11 @@ public class ClassData {
      * @return field data
      */
     public Collection<FieldData> fields() {
-        return Collections.unmodifiableList(fields);
+        if (isArray) {
+            return Collections.emptyList();
+        } else {
+            return Collections.unmodifiableList(fields);
+        }
     }
 
     /**
@@ -205,7 +209,11 @@ public class ClassData {
      * @return list of class names
      */
     public List<String> classHierarchy() {
-        return Collections.unmodifiableList(classNames);
+        if (isArray) {
+            return Collections.emptyList();
+        } else {
+            return Collections.unmodifiableList(classNames);
+        }
     }
 
     /**

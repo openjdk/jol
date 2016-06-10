@@ -67,4 +67,10 @@ public class Multiset<T> {
         }
         return size;
     }
+
+    public void merge(Multiset<T> other) {
+        for (T key : other.keys()) {
+            add(key, other.count(key));
+        }
+    }
 }
