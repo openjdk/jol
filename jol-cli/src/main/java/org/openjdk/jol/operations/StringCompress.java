@@ -202,7 +202,7 @@ public class StringCompress implements Operation {
                 }
             } else if (DO_MODE.equalsIgnoreCase("estimates")) {
                 for (DataModel model : DATA_MODELS) {
-                    printLine(data, new HotSpotLayouter(model, false, false, false));
+                    printLine(data, new HotSpotLayouter(model));
                 }
             }
 

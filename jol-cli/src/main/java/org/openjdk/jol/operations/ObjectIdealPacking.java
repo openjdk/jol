@@ -85,25 +85,28 @@ public class ObjectIdealPacking implements Operation {
                         ClassLayout raw = new RawLayouter(model).layout(cd);
                         ClassLayout vm = new CurrentLayouter().layout(cd);
 
-                        ClassLayout hsDefault_m = new HotSpotLayouter(model, false, false, false).layout(cd);
-                        ClassLayout hsHier_m = new HotSpotLayouter(model, true, false, false).layout(cd);
-                        ClassLayout hsSuper_m = new HotSpotLayouter(model, true, true, false).layout(cd);
-
-                        ClassLayout hsDefault_a = new HotSpotLayouter(model, false, false, true).layout(cd);
-                        ClassLayout hsHier_a = new HotSpotLayouter(model, true, false, true).layout(cd);
-                        ClassLayout hsSuper_a = new HotSpotLayouter(model, true, true, true).layout(cd);
-
-                        System.out.printf("%3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %3d, %s%n",
+                        System.out.printf("%3d, %3d, %3d, ",
                                 model.headerSize(),
                                 raw.instanceSize(),
-                                vm.instanceSize(),
-                                hsDefault_m.instanceSize(),
-                                hsHier_m.instanceSize(),
-                                hsSuper_m.instanceSize(),
-                                hsDefault_a.instanceSize(),
-                                hsHier_a.instanceSize(),
-                                hsSuper_a.instanceSize(),
-                                klass.getName());
+                                vm.instanceSize());
+
+                        final boolean[] BOOLS = {false, true};
+                        for (boolean hierarchyGaps : BOOLS) {
+                            for (boolean superClassGaps : BOOLS) {
+                                for (boolean autoAlign : BOOLS) {
+                                    for (boolean compactFields : BOOLS) {
+                                        for (int fieldAllocationStyle : new int[]{0, 1, 2}) {
+                                            ClassLayout l = new HotSpotLayouter(model,
+                                                    hierarchyGaps, superClassGaps, autoAlign,
+                                                    compactFields, fieldAllocationStyle).layout(cd);
+                                            System.out.printf("%3d, ", l.instanceSize());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        System.out.printf("%s%n", klass.getName());
                     } catch (VerifyError t) {
                     } catch (IncompatibleClassChangeError t) {
                     } catch (SecurityException t) {

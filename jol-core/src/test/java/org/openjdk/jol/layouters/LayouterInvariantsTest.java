@@ -3,7 +3,7 @@ package org.openjdk.jol.layouters;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.openjdk.jol.datamodel.CurrentDataModel;
-import org.openjdk.jol.datamodel.DataModel;
+import org.openjdk.jol.datamodel.*;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.util.ClassGenerator;
 
@@ -12,7 +12,12 @@ import java.util.Random;
 public class LayouterInvariantsTest {
 
     private static final boolean[] BOOLS = {false, true};
-    private static final DataModel[] MODELS = {new CurrentDataModel()};
+    private static final DataModel[] MODELS = {
+        new CurrentDataModel(),
+        new X86_32_DataModel(),
+        new X86_64_COOPS_DataModel(),
+        new X86_64_DataModel()
+    };
     private static final int ITERATIONS = 20000;
 
     @Test
@@ -20,7 +25,7 @@ public class LayouterInvariantsTest {
         Random seeder = new Random();
         for (int c = 0; c < ITERATIONS; c++) {
             int seed = seeder.nextInt();
-            Class<?> cl = ClassGenerator.generate(new Random(seed));
+            Class<?> cl = ClassGenerator.generate(new Random(seed), 5, 50);
 
             for (DataModel model : MODELS) {
                 try {
@@ -37,7 +42,7 @@ public class LayouterInvariantsTest {
         Random seeder = new Random();
         for (int c = 0; c < ITERATIONS; c++) {
             int seed = seeder.nextInt();
-            Class<?> cl = ClassGenerator.generate(new Random(seed));
+            Class<?> cl = ClassGenerator.generate(new Random(seed), 5, 50);
 
             try {
                 ClassLayout.parseClass(cl, new CurrentLayouter());
@@ -52,14 +57,21 @@ public class LayouterInvariantsTest {
         Random seeder = new Random();
         for (int c = 0; c < ITERATIONS; c++) {
             int seed = seeder.nextInt();
-            Class<?> cl = ClassGenerator.generate(new Random(seed));
+            Class<?> cl = ClassGenerator.generate(new Random(seed), 5, 50);
 
             try {
                 for (DataModel model : MODELS) {
                     for (boolean hierarchyGaps : BOOLS) {
                         for (boolean superClassGaps : BOOLS) {
                             for (boolean autoAlign : BOOLS) {
-                                ClassLayout.parseClass(cl, new HotSpotLayouter(model, hierarchyGaps, superClassGaps, autoAlign));
+                                for (boolean compactFields : BOOLS) {
+                                    for (int fieldAllocationStyle : new int[]{0, 1, 2}) {
+                                        ClassLayout.parseClass(cl, new HotSpotLayouter(model,
+                                                hierarchyGaps, superClassGaps, autoAlign,
+                                                compactFields, fieldAllocationStyle)
+                                        );
+                                    }
+                                }
                             }
                         }
                     }

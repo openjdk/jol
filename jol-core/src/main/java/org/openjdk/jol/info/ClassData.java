@@ -32,6 +32,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.openjdk.jol.vm.ContendedSupport;
+
 /**
  * Holds the class data, without the layout information.
  *
@@ -92,6 +94,14 @@ public class ClassData {
         }
 
         ClassData cd = new ClassData(o, klass.getName());
+        Class superKlass = klass.getSuperclass();
+
+        // TODO: Move to an appropriate constructor
+        cd.isContended = ContendedSupport.isContended(klass);
+
+        if (superKlass != null) {
+            cd.addSuperClassData(klass.getSuperclass());
+        }
 
         do {
             for (Field f : klass.getDeclaredFields()) {
@@ -113,6 +123,8 @@ public class ClassData {
     private final String arrayComponentKlass;
     private final long length;
     private final boolean isArray;
+    private boolean isContended;
+    private ClassData superClass;
 
     /**
      * Constructs the empty ClassData, suited for regular class.
@@ -130,6 +142,8 @@ public class ClassData {
         this.arrayKlass = null;
         this.arrayComponentKlass = null;
         this.isArray = false;
+        this.superClass = null;
+        this.isContended = false;
     }
 
     /**
@@ -152,6 +166,8 @@ public class ClassData {
         this.classNames = null;
         this.length = length;
         this.isArray = true;
+        this.superClass = null;
+        this.isContended = false;
     }
 
     /**
@@ -161,6 +177,15 @@ public class ClassData {
      */
     public void addSuperClass(String superClass) {
         classNames.add(0, superClass);
+    }
+
+    /**
+     * Add the super-class data of the class.
+     *
+     * @param superClass super class
+     */
+    public void addSuperClassData(Class superClass) {
+        this.superClass = parseClass(superClass);
     }
 
     /**
@@ -184,6 +209,43 @@ public class ClassData {
         } else {
             return Collections.unmodifiableList(fields);
         }
+    }
+
+    /**
+     * Get the fields' of the own fields.
+     *
+     * @return field data
+     */
+    public Collection<FieldData> ownFields() {
+        return fieldsFor(classNames.get(classNames.size() - 1));
+    }
+
+    /**
+     * Returns the count of the oops in th class
+     *
+     * @return oops count
+     */
+    public int oopsCount() {
+        int count = 0;
+
+        for (FieldData f : fields) {
+            String simpleName = f.typeClass();
+
+            if (
+                !simpleName.equals("boolean") &&
+                !simpleName.equals("byte") &&
+                !simpleName.equals("short") &&
+                !simpleName.equals("char") &&
+                !simpleName.equals("int") &&
+                !simpleName.equals("float") &&
+                !simpleName.equals("long") &&
+                !simpleName.equals("double")
+            ) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     /**
@@ -232,6 +294,24 @@ public class ClassData {
      */
     public boolean isArray() {
         return isArray;
+    }
+
+    /**
+     * Get ClassData of the super-class.
+     *
+     * @return ClassData
+     */
+    public ClassData superClass() {
+        return superClass;
+    }
+
+    /**
+     * Does the class have @Contended annotation?
+     *
+     * @return true, if class has @Contended annotation; false otherwise
+     */
+    public boolean isContended() {
+        return isContended;
     }
 
     /**

@@ -14,24 +14,22 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class ClassGenerator {
 
-    private static final int MAX_CLASSES_IN_HIERARCHY = 5;
-    private static final int MAX_FIELDS_PER_CLASS = 50;
     private static final int CLASSFILE_VERSION = 50;
 
     private static final AtomicInteger idx = new AtomicInteger();
 
-    public static Class<?> generate(Random r) throws Exception {
+    public static Class<?> generate(Random r, int maxHierarchyDepth, int maxFieldsPerClass) throws Exception {
         ByteClassLoader classLoader = new ByteClassLoader();
 
-        int numClasses = r.nextInt(MAX_CLASSES_IN_HIERARCHY);
+        int numClasses = r.nextInt(maxHierarchyDepth + 1);
         Class<?> sup = Object.class;
         for (int c = 0; c < numClasses; c++) {
-            sup = generate(r, sup, classLoader);
+            sup = generate(r, sup, classLoader, maxFieldsPerClass);
         }
         return sup;
     }
 
-    private static Class<?> generate(Random r, Class<?> superClass, ByteClassLoader classLoader) throws Exception {
+    private static Class<?> generate(Random r, Class<?> superClass, ByteClassLoader classLoader, int maxFieldsPerClass) throws Exception {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 
         String name = "Class" + idx.incrementAndGet();
@@ -47,7 +45,7 @@ public class ClassGenerator {
 
         Class<?>[] types = new Class[] { boolean.class, byte.class, short.class, char.class, int.class, float.class, long.class, double.class, Object.class };
 
-        int count = r.nextInt(MAX_FIELDS_PER_CLASS);
+        int count = r.nextInt(maxFieldsPerClass);
         for (int c = 0; c < count; c++) {
             Class<?> type = types[r.nextInt(types.length)];
             cw.visitField(ACC_PUBLIC, "field" + c, Type.getType(type).getDescriptor(), null, null);

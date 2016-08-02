@@ -25,6 +25,7 @@
 package org.openjdk.jol.info;
 
 import org.openjdk.jol.util.ObjectUtils;
+import org.openjdk.jol.vm.ContendedSupport;
 import org.openjdk.jol.vm.VM;
 
 import java.lang.reflect.Field;
@@ -45,7 +46,7 @@ public class FieldData {
      * @return field data
      */
     public static FieldData create(String hostKlass, String fieldName, String fieldType) {
-        return new FieldData(null, -1, hostKlass, fieldName, fieldType);
+        return new FieldData(null, -1, hostKlass, fieldName, fieldType, false, null);
     }
 
     /**
@@ -55,7 +56,15 @@ public class FieldData {
      * @return field data
      */
     public static FieldData parse(Field field) {
-        return new FieldData(field, VM.current().fieldOffset(field), field.getDeclaringClass().getSimpleName(), field.getName(), field.getType().getSimpleName());
+        return new FieldData(
+                field,
+                VM.current().fieldOffset(field),
+                field.getDeclaringClass().getSimpleName(),
+                field.getName(),
+                field.getType().getSimpleName(),
+                ContendedSupport.isContended(field),
+                ContendedSupport.contendedGroup(field)
+        );
     }
 
     private final String name;
@@ -63,13 +72,18 @@ public class FieldData {
     private final String klass;
     private final Field refField;
     private final long vmOffset;
+    private final boolean isContended;
+    private final String contendedGroup;
 
-    private FieldData(Field refField, long vmOffset, String hostKlass, String fieldName, String fieldType) {
+    private FieldData(Field refField, long vmOffset, String hostKlass, String fieldName, String fieldType,
+                      boolean isContended, String contendedGroup) {
         this.klass = hostKlass;
         this.name = fieldName;
         this.type = fieldType;
         this.refField = refField;
         this.vmOffset = vmOffset;
+        this.isContended = isContended;
+        this.contendedGroup = contendedGroup;
     }
 
     /**
@@ -97,6 +111,33 @@ public class FieldData {
      */
     public String name() {
         return name;
+    }
+
+    /**
+     * Answers whether the field has contentded annotation.
+     *
+     * @return true, if the field is contended
+     */
+    public boolean isContended() {
+        return isContended;
+    }
+
+    /**
+     * Get contentded group of the field.
+     *
+     * @return String
+     */
+    public String contendedGroup() {
+        return contendedGroup;
+    }
+
+    /**
+     * Get original Field.
+     *
+     * @return Field which is represented by the FieldData
+     */
+    public Field refField() {
+        return refField;
     }
 
     /**
@@ -139,4 +180,7 @@ public class FieldData {
         }
     }
 
+    public String toString() {
+        return refField.toString();
+    }
 }

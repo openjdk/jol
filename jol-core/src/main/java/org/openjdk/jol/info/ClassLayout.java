@@ -297,4 +297,24 @@ public class ClassLayout {
         return s;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ClassLayout that = (ClassLayout) o;
+
+        if (headerSize != that.headerSize) return false;
+        if (size != that.size) return false;
+        return fields.equals(that.fields);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = fields.hashCode();
+        result = 31 * result + headerSize;
+        result = 31 * result + (int) (size ^ (size >>> 32));
+        return result;
+    }
 }

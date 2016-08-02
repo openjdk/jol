@@ -75,40 +75,25 @@ public class HeapDump implements Operation {
             long rawData = process(data, l);
             out.printf("%11s %,15d: %s%n", "", rawData, l);
 
-            l = new HotSpotLayouter(model, false, false, false);
+            l = new HotSpotLayouter(model);
             long hsBase = process(data, l);
             out.printf("%11s %,15d: %s%n", "", hsBase, l);
 
-            {
-                l = new HotSpotLayouter(model, true, false, false);
-                long s = process(data, l);
-                out.printf("%10.3f%% %,15d: %s%n", (s - hsBase) * 100.0 / hsBase, s, l);
-            }
+            final boolean[] BOOLS = {false, true};
 
-            {
-                l = new HotSpotLayouter(model, false, true, false);
-                long s = process(data, l);
-                out.printf("%10.3f%% %,15d: %s%n", (s - hsBase) * 100.0 / hsBase, s, l);
+            for (boolean hierarchyGaps : BOOLS) {
+                for (boolean superClassGaps : BOOLS) {
+                    for (boolean autoAlign : BOOLS) {
+                        for (boolean compactFields : BOOLS) {
+                            for (int fieldAllocationStyle : new int[]{0, 1, 2}) {
+                                l = new HotSpotLayouter(model, hierarchyGaps, superClassGaps, autoAlign, compactFields, fieldAllocationStyle);
+                                long s = process(data, l);
+                                out.printf("%10.3f%% %,15d: %s%n", (s - hsBase) * 100.0 / hsBase, s, l);
+                            }
+                        }
+                    }
+                }
             }
-
-            {
-                l = new HotSpotLayouter(model, false, false, true);
-                long s = process(data, l);
-                out.printf("%10.3f%% %,15d: %s%n", (s - hsBase) * 100.0 / hsBase, s, l);
-            }
-
-            {
-                l = new HotSpotLayouter(model, true, false, true);
-                long s = process(data, l);
-                out.printf("%10.3f%% %,15d: %s%n", (s - hsBase) * 100.0 / hsBase, s, l);
-            }
-
-            {
-                l = new HotSpotLayouter(model, false, true, true);
-                long s = process(data, l);
-                out.printf("%10.3f%% %,15d: %s%n", (s - hsBase) * 100.0 / hsBase, s, l);
-            }
-
             out.println();
         }
     }

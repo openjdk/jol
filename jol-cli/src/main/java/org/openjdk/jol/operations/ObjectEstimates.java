@@ -50,16 +50,16 @@ public class ObjectEstimates extends ClasspathedOperation {
     @Override
     protected void runWith(Class<?> klass) throws Exception {
         out.println("***** 32-bit VM: **********************************************************");
-        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_32_DataModel(), false, false, false)).toPrintable());
+        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_32_DataModel())).toPrintable());
 
         out.println("***** 64-bit VM: **********************************************************");
-        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_DataModel(), false, false, false)).toPrintable());
+        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_DataModel())).toPrintable());
 
         out.println("***** 64-bit VM, compressed references enabled: ***************************");
-        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel(), false, false, false)).toPrintable());
+        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel())).toPrintable());
 
         out.println("***** 64-bit VM, compressed references enabled, 16-byte align: ************");
-        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel(16), false, false, false)).toPrintable());
+        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel(16))).toPrintable());
     }
 
 }
