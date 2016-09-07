@@ -53,25 +53,39 @@ public class ContendedSupport {
     }
 
     public static boolean isContended(AnnotatedElement el) {
-        if (el.getAnnotation(SUN_MISC_CONTENDED) != null) {
+        if (getSunMiscContended(el) != null) {
             return true;
         }
-        if (el.getAnnotation(JDK_INTERNAL_CONTENDED) != null) {
+        if (getJdkInternalContended(el) != null) {
             return true;
         }
         return false;
     }
 
     public static String contendedGroup(AnnotatedElement el) {
-        Object smAnn = el.getAnnotation(SUN_MISC_CONTENDED);
+        Object smAnn = getSunMiscContended(el);
         if (smAnn != null) {
             return pullValue(SUN_MISC_CONTENDED, smAnn);
         }
-        Object intAnn = el.getAnnotation(JDK_INTERNAL_CONTENDED);
+        Object intAnn = getJdkInternalContended(el);
         if (intAnn != null) {
             return pullValue(JDK_INTERNAL_CONTENDED, intAnn);
         }
         return null;
+    }
+
+    private static Object getSunMiscContended(AnnotatedElement el) {
+        if (SUN_MISC_CONTENDED == null) {
+            return null;
+        }
+        return el.getAnnotation(SUN_MISC_CONTENDED);
+    }
+
+    private static Object getJdkInternalContended(AnnotatedElement el) {
+        if (JDK_INTERNAL_CONTENDED == null) {
+            return null;
+        }
+        return el.getAnnotation(JDK_INTERNAL_CONTENDED);
     }
 
     private static String pullValue(Class<? extends Annotation> klass, Object ann) {
