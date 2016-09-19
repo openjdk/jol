@@ -80,39 +80,39 @@ public class ServiceabilityAgentSupport {
     }
 
     private final long processId;
-    private final String classpathForAgent;
     private final boolean sudoRequired;
-    private final boolean moduleExportsRequired;
+    private final AgentStyle agentStyle;
 
     private ServiceabilityAgentSupport() {
         processId = getCurrentProcId();
-        classpathForAgent = getClassPath();
-        moduleExportsRequired = needModuleExports();
-        sudoRequired = needSudo(moduleExportsRequired);
+        agentStyle = senseAgentStyle();
+        sudoRequired = needSudo(agentStyle);
     }
 
-    private boolean needModuleExports() {
-        try {
-            senseAccess(false);
-            return false;
-        } catch (Throwable t1) {
+    private AgentStyle senseAgentStyle() {
+        List<Throwable> exceptions = new ArrayList<Throwable>();
+        for (AgentStyle style : AgentStyle.values()) {
             try {
-                senseAccess(true);
-                return true;
-            } catch (Throwable t2) {
-                throw new SASupportException("Unable to attach even with module exceptions: " + t2.getMessage(), t2);
+                senseAccess(style);
+                return style;
+            } catch (Throwable t1) {
+                // fall-through
+                exceptions.add(t1);
             }
         }
+        // TODO: Use addSuppressed once we are buildable with JDK 7
+        throw new SASupportException("Unable to attach even with module exceptions: " + exceptions,
+                exceptions.get(exceptions.size()-1));
     }
 
-    private boolean needSudo(boolean moduleExportsRequired) {
+    private boolean needSudo(AgentStyle style) {
         try {
-            callAgent(null, false, moduleExportsRequired);
+            callAgent(null, false, style);
             return false;
         } catch (Throwable t1) {
             if (isSudoValidOS() && Boolean.getBoolean(TRY_WITH_SUDO_FLAG)) {
                 try {
-                    callAgent(null, true, moduleExportsRequired);
+                    callAgent(null, true, style);
                     return true;
                 } catch (Throwable t2) {
                     throw new SASupportException("Unable to attach even with escalated privileges: " + t2.getMessage(), t2);
@@ -120,29 +120,6 @@ public class ServiceabilityAgentSupport {
             } else {
                 throw new SASupportException("You can try again with escalated privileges. " +
                         "Two options: a) use -D" + TRY_WITH_SUDO_FLAG + "=true to try with sudo; b) echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope");
-            }
-        }
-    }
-
-    private static String getClassPath() {
-        final String currentClasspath = normalizePath(ManagementFactory.getRuntimeMXBean().getClassPath());
-        try {
-            // Search it at classpath
-            ClassUtils.loadClass(HOTSPOT_AGENT_CLASSNAME);
-
-            // Use current classpath for agent process
-            return currentClasspath;
-        } catch (ClassNotFoundException e) {
-            try {
-                // If it couldn't be found at classpath, try to find it at
-                File hotspotAgentLib = new File(normalizePath(System.getProperty("java.home")) + "/../lib/sa-jdi.jar");
-                if (hotspotAgentLib.exists()) {
-                    return currentClasspath + File.pathSeparator + normalizePath(hotspotAgentLib.getAbsolutePath());
-                } else {
-                    throw new SASupportException("Couldn't find HotSpot Serviceability Agent library (sa-jdi.jar).");
-                }
-            } catch (Throwable t) {
-                throw new SASupportException("Couldn't find HotSpot Serviceability Agent library (sa-jdi.jar).", t);
             }
         }
     }
@@ -184,11 +161,11 @@ public class ServiceabilityAgentSupport {
     }
 
     private Result callAgent(Task processor) {
-        return callAgent(processor, sudoRequired, moduleExportsRequired);
+        return callAgent(processor, sudoRequired, agentStyle);
     }
 
-    private Result callAgent(Task processor, boolean sudoRequired, boolean moduleExportsRequired) {
-        List<String> args = getArguments(sudoRequired, moduleExportsRequired);
+    private Result callAgent(Task processor, boolean sudoRequired, AgentStyle style) {
+        List<String> args = getArguments(sudoRequired, style);
         args.add(AttachMain.class.getName());
 
         ObjectInputStream in = null;
@@ -255,8 +232,8 @@ public class ServiceabilityAgentSupport {
         }
     }
 
-    private void senseAccess(boolean moduleExportsRequired) {
-        List<String> args = getArguments(false, moduleExportsRequired);
+    private void senseAccess(AgentStyle style) {
+        List<String> args = getArguments(false, style);
         args.add(SenseAccessMain.class.getName());
 
         Process agentProcess = null;
@@ -278,24 +255,62 @@ public class ServiceabilityAgentSupport {
         }
     }
 
-    private List<String> getArguments(boolean sudoRequired, boolean moduleExportsRequired) {
+    private List<String> getArguments(boolean sudoRequired, AgentStyle style) {
         List<String> args = new ArrayList<String>();
         if (sudoRequired) {
             args.add("sudo");
         }
+
         args.add(normalizePath(System.getProperty("java.home")) + "/" + "bin" + "/" + "java");
-        if (moduleExportsRequired) {
-            args.add("-XaddExports:jdk.hotspot.agent/sun.jvm.hotspot=ALL-UNNAMED");
-            args.add("-XaddExports:jdk.hotspot.agent/sun.jvm.hotspot.runtime=ALL-UNNAMED");
-            args.add("-XaddExports:jdk.hotspot.agent/sun.jvm.hotspot.memory=ALL-UNNAMED");
+
+        switch (style) {
+            case NONE:
+            case JDK_8:
+                break;
+            case JDK_9_b0:
+                args.add("-XaddExports:jdk.hotspot.agent/sun.jvm.hotspot=ALL-UNNAMED");
+                args.add("-XaddExports:jdk.hotspot.agent/sun.jvm.hotspot.runtime=ALL-UNNAMED");
+                args.add("-XaddExports:jdk.hotspot.agent/sun.jvm.hotspot.memory=ALL-UNNAMED");
+                break;
+            case JDK_9_b131:
+                args.add("--add-modules"); args.add("jdk.hotspot.agent");
+                args.add("--add-exports"); args.add("jdk.hotspot.agent/sun.jvm.hotspot=ALL-UNNAMED");
+                args.add("--add-exports"); args.add("jdk.hotspot.agent/sun.jvm.hotspot.runtime=ALL-UNNAMED");
+                args.add("--add-exports"); args.add("jdk.hotspot.agent/sun.jvm.hotspot.memory=ALL-UNNAMED");
+                break;
+            default:
+                throw new IllegalStateException("Unhandled style: " + style);
         }
+
+        String classPath = normalizePath(ManagementFactory.getRuntimeMXBean().getClassPath());
+        switch (style) {
+            case NONE:
+                break;
+            case JDK_8:
+            case JDK_9_b0:
+                File hotspotAgentLib = new File(normalizePath(System.getProperty("java.home")) + "/../lib/sa-jdi.jar");
+                classPath = classPath + File.pathSeparator + normalizePath(hotspotAgentLib.getAbsolutePath());
+                break;
+            case JDK_9_b131:
+                break;
+            default:
+                throw new IllegalStateException("Unhandled style: " + style);
+        }
+
         args.add("-cp");
-        args.add(classpathForAgent);
+        args.add(classPath);
         return args;
     }
 
     public UniverseData getUniverseData() {
         return (UniverseData) callAgent(new UniverseTask());
+    }
+
+    enum AgentStyle {
+        NONE,
+        JDK_8,
+        JDK_9_b0,
+        JDK_9_b131,
     }
 
 }
