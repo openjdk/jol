@@ -30,13 +30,10 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.openjdk.jol.Operation;
 import org.openjdk.jol.OptionFormatter;
+import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.vm.VM;
 
-import java.io.File;
 import java.lang.reflect.Constructor;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.System.getProperty;
@@ -54,7 +51,6 @@ public abstract class ClasspathedOperation implements Operation {
         OptionSpec<String> optClasses = parser.nonOptions("Class names to work on.");
 
         List<String> classes;
-        URL[] classPath;
         try {
             OptionSet set = parser.parse(args);
             classes = set.valuesOf(optClasses);
@@ -65,11 +61,9 @@ public abstract class ClasspathedOperation implements Operation {
                 return;
             }
 
-            List<URL> cp = new ArrayList<URL>();
-            for (String cpEntry : set.valuesOf(optClassPath)) {
-                cp.add(new File(cpEntry).toURI().toURL());
+            if (set.has(optClassPath)) {
+                ClassUtils.addClasspathEntries(optClassPath.values(set));
             }
-            classPath = cp.toArray(new URL[0]);
         } catch (OptionException e) {
             parser.printHelpOn(System.err);
             return;
@@ -77,11 +71,9 @@ public abstract class ClasspathedOperation implements Operation {
 
         out.println(VM.current().details());
 
-        URLClassLoader cl = new URLClassLoader(classPath, ClassLoader.getSystemClassLoader());
-
         for (String klassName : classes) {
             try {
-                runWith(Class.forName(klassName, true, cl));
+                runWith(ClassUtils.loadClass(klassName));
             } catch (Throwable t) {
                 t.printStackTrace(System.err);
             }

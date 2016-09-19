@@ -24,12 +24,7 @@
  */
 package org.openjdk.jol.vm.sa;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import org.openjdk.jol.util.ClassUtils;
 
 import static org.openjdk.jol.vm.sa.Constants.*;
 
@@ -40,10 +35,10 @@ class SenseAccessMain {
             System.setProperty("sun.jvm.hotspot.debugger.useProcDebugger", "true");
             System.setProperty("sun.jvm.hotspot.debugger.useWindbgDebugger", "true");
 
-            Class.forName(VM_CLASSNAME).getMethod("getVM");
-            Class.forName(HOTSPOT_AGENT_CLASSNAME).newInstance();
-            Class.forName(HOTSPOT_AGENT_CLASSNAME).getMethod("attach",int.class);
-            Class.forName(HOTSPOT_AGENT_CLASSNAME).getMethod("detach");
+            ClassUtils.loadClass(VM_CLASSNAME).getMethod("getVM");
+            ClassUtils.loadClass(HOTSPOT_AGENT_CLASSNAME).newInstance();
+            ClassUtils.loadClass(HOTSPOT_AGENT_CLASSNAME).getMethod("attach",int.class);
+            ClassUtils.loadClass(HOTSPOT_AGENT_CLASSNAME).getMethod("detach");
         } catch (Throwable t) {
             System.exit(1);
         }

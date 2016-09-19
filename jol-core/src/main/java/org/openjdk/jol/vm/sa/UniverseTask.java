@@ -24,6 +24,8 @@
  */
 package org.openjdk.jol.vm.sa;
 
+import org.openjdk.jol.util.ClassUtils;
+
 import java.lang.reflect.Method;
 
 import static org.openjdk.jol.vm.sa.Constants.*;
@@ -39,9 +41,9 @@ class UniverseTask implements Task {
     @Override
     public UniverseData process() {
         try {
-            Class<?> universeClass = Class.forName(UNIVERSE_CLASSNAME);
-            Class<?> vmClass = Class.forName(VM_CLASSNAME);
-            Object vm = Class.forName(VM_CLASSNAME).getMethod("getVM").invoke(null);
+            Class<?> universeClass = ClassUtils.loadClass(UNIVERSE_CLASSNAME);
+            Class<?> vmClass = ClassUtils.loadClass(VM_CLASSNAME);
+            Object vm = ClassUtils.loadClass(VM_CLASSNAME).getMethod("getVM").invoke(null);
 
             Method getOopSizeMethod = vmClass.getMethod("getOopSize");
             Method getObjectAlignmentInBytesMethod = vmClass.getMethod("getObjectAlignmentInBytes");

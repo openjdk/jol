@@ -38,6 +38,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.util.IOUtils;
 import sun.management.VMManagement;
 
@@ -127,7 +128,7 @@ public class ServiceabilityAgentSupport {
         final String currentClasspath = normalizePath(ManagementFactory.getRuntimeMXBean().getClassPath());
         try {
             // Search it at classpath
-            Class.forName(HOTSPOT_AGENT_CLASSNAME);
+            ClassUtils.loadClass(HOTSPOT_AGENT_CLASSNAME);
 
             // Use current classpath for agent process
             return currentClasspath;
@@ -158,7 +159,7 @@ public class ServiceabilityAgentSupport {
     private static long getCurrentProcId() {
         // Try to use JDK 9 java.lang.ProcessHandle.current().getPid()
         try {
-            Class<?> c = Class.forName("java.lang.ProcessHandle");
+            Class<?> c = ClassUtils.loadClass("java.lang.ProcessHandle");
             Object current = c.getDeclaredMethod("current").invoke(null);
             return (Long) c.getDeclaredMethod("getPid").invoke(current);
         } catch (Throwable t) {

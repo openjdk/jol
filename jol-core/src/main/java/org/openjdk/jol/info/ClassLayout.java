@@ -26,6 +26,7 @@ package org.openjdk.jol.info;
 
 import org.openjdk.jol.layouters.CurrentLayouter;
 import org.openjdk.jol.layouters.Layouter;
+import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.vm.VM;
 import org.openjdk.jol.vm.VirtualMachine;
 
@@ -208,7 +209,7 @@ public class ClassLayout {
 
         if (instance != null) {
             try {
-                Class<?> klass = Class.forName(classData.name());
+                Class<?> klass = ClassUtils.loadClass(classData.name());
                 if (!klass.isAssignableFrom(instance.getClass())) {
                     throw new IllegalArgumentException("Passed instance type " + instance.getClass() + " is not assignable from " + klass + ".");
                 }

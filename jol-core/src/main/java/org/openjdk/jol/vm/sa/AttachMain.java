@@ -24,6 +24,8 @@
  */
 package org.openjdk.jol.vm.sa;
 
+import org.openjdk.jol.util.ClassUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -54,7 +56,7 @@ class AttachMain {
 
             final Request request = (Request) in.readObject();
 
-            final Class<?> hotspotAgentClass = Class.forName(HOTSPOT_AGENT_CLASSNAME);
+            final Class<?> hotspotAgentClass = ClassUtils.loadClass(HOTSPOT_AGENT_CLASSNAME);
             hotspotAgent = hotspotAgentClass.newInstance();
             final Method attachMethod = hotspotAgentClass.getMethod("attach",int.class);
             detachMethod = hotspotAgentClass.getMethod("detach");
@@ -70,7 +72,7 @@ class AttachMain {
                                     try {
                                         // Attach to the caller process as Hotspot agent
                                         attachMethod.invoke(agent, (int) request.getProcessId());
-                                        return Class.forName(VM_CLASSNAME).getMethod("getVM").invoke(null);
+                                        return ClassUtils.loadClass(VM_CLASSNAME).getMethod("getVM").invoke(null);
                                     } catch (Exception t) {
                                         throw new RuntimeException(t);
                                     }

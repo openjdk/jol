@@ -24,6 +24,8 @@
  */
 package org.openjdk.jol.vm;
 
+import org.openjdk.jol.util.ClassUtils;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
@@ -37,7 +39,7 @@ public class ContendedSupport {
     static {
         Class<? extends Annotation> smContended;
         try {
-            smContended = (Class<? extends Annotation>) Class.forName("sun.misc.Contended");
+            smContended = (Class<? extends Annotation>) ClassUtils.loadSystemClass("sun.misc.Contended");
         } catch (ClassNotFoundException e) {
             smContended = null;
         }
@@ -45,7 +47,7 @@ public class ContendedSupport {
 
         Class<? extends Annotation> intContended;
         try {
-            intContended = (Class<? extends Annotation>) Class.forName("jdk.internal.vm.annotation.Contended");
+            intContended = (Class<? extends Annotation>) ClassUtils.loadSystemClass("jdk.internal.vm.annotation.Contended");
         } catch (ClassNotFoundException e) {
             intContended = null;
         }
