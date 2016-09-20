@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
     <parent>
         <groupId>org.openjdk.jol</groupId>
         <artifactId>jol-parent</artifactId>
-        <version>0.6</version>
+        <version>0.7-SNAPSHOT</version>
     </parent>
 
     <artifactId>jol-samples</artifactId>
