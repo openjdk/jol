@@ -95,12 +95,22 @@ public class ContendedSupport {
             Method meth = klass.getMethod("value");
             return (String) meth.invoke(ann);
         } catch (NoSuchMethodException e) {
-            throw new IllegalStateException(e);
+            printErrorOnce(e);
         } catch (InvocationTargetException e) {
-            throw new IllegalStateException(e);
+            printErrorOnce(e);
         } catch (IllegalAccessException e) {
-            throw new IllegalStateException(e);
+            printErrorOnce(e);
         }
+        return "";
+    }
+
+    static volatile boolean shown;
+
+    static void printErrorOnce(Throwable err) {
+        if (shown) return;
+        shown = true;
+        System.out.println("Error while accessing @Contended value: " + err.getMessage());
+        System.out.println();
     }
 
 }
