@@ -72,6 +72,7 @@ public class CurrentLayouter implements Layouter {
         } else {
             FieldLayout f = result.last();
             instanceSize = f.offset() + f.size();
+            // TODO: This calculation is incorrect if there is a trailing @Contended field, or the instance is @Contended
         }
         instanceSize = MathUtil.align(instanceSize, vm.objectAlignment());
         return new ClassLayout(data, result, vm.objectHeaderSize(), instanceSize, true);

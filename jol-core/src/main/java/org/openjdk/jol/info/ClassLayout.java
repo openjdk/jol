@@ -263,7 +263,7 @@ public class ClassLayout {
             nextFree = f.offset() + f.size();
         }
 
-        long sizeOf = (instance != null) ? VM.current().sizeOf(instance) : instanceSize();;
+        long sizeOf = (instance != null) ? VM.current().sizeOf(instance) : instanceSize();
 
         if (sizeOf != nextFree) {
             exterLoss = sizeOf - nextFree;

@@ -50,15 +50,15 @@ public class ObjectInternals extends ClasspathedOperation {
             Object o = tryInstantiate(klass);
             out.println(ClassLayout.parseInstance(o).toPrintable());
         } catch (NoSuchMethodException e) {
-            out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
+            out.println("Failed to find matching constructor, falling back to class-only introspection.");
             out.println();
             out.println(ClassLayout.parseClass(klass).toPrintable());
         } catch (IllegalAccessException e) {
-            out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
+            out.println("Failed to find matching constructor, falling back to class-only introspection.");
             out.println();
             out.println(ClassLayout.parseClass(klass).toPrintable());
         } catch (InstantiationException e) {
-            out.println("VM fails to invoke the default constructor, falling back to class-only introspection.");
+            out.println("Failed to find matching constructor, falling back to class-only introspection.");
             out.println();
             out.println(ClassLayout.parseClass(klass).toPrintable());
         }
