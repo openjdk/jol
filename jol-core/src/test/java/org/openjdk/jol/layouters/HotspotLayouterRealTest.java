@@ -4,6 +4,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.openjdk.jol.datamodel.CurrentDataModel;
 import org.openjdk.jol.datamodel.DataModel;
+import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.util.ClassGenerator;
 
@@ -51,6 +52,7 @@ public class HotspotLayouterRealTest {
     }
 
     private Map<Layouter, ClassLayout> candidateLayouts(Class<?> cl) {
+        ClassData cd = ClassData.parseClass(cl);
         Map<Layouter, ClassLayout> layouts = new HashMap<Layouter, ClassLayout>();
         for (DataModel model : MODELS) {
             for (boolean hierarchyGaps : BOOLS) {
@@ -61,7 +63,7 @@ public class HotspotLayouterRealTest {
                                 HotSpotLayouter layouter = new HotSpotLayouter(model,
                                         hierarchyGaps, superClassGaps, autoAlign,
                                         compactFields, fieldAllocationStyle);
-                                layouts.put(layouter, ClassLayout.parseClass(cl, layouter));
+                                layouts.put(layouter, layouter.layout(cd));
                             }
                         }
                     }

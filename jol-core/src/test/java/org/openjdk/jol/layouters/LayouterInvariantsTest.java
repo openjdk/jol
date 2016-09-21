@@ -4,6 +4,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.openjdk.jol.datamodel.CurrentDataModel;
 import org.openjdk.jol.datamodel.*;
+import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.util.ClassGenerator;
 
@@ -58,7 +59,7 @@ public class LayouterInvariantsTest {
         for (int c = 0; c < ITERATIONS; c++) {
             int seed = seeder.nextInt();
             Class<?> cl = ClassGenerator.generate(new Random(seed), 5, 50);
-
+            ClassData cd = ClassData.parseClass(cl);
             try {
                 for (DataModel model : MODELS) {
                     for (boolean hierarchyGaps : BOOLS) {
@@ -66,10 +67,10 @@ public class LayouterInvariantsTest {
                             for (boolean autoAlign : BOOLS) {
                                 for (boolean compactFields : BOOLS) {
                                     for (int fieldAllocationStyle : new int[]{0, 1, 2}) {
-                                        ClassLayout.parseClass(cl, new HotSpotLayouter(model,
+                                        HotSpotLayouter layouter = new HotSpotLayouter(model,
                                                 hierarchyGaps, superClassGaps, autoAlign,
-                                                compactFields, fieldAllocationStyle)
-                                        );
+                                                compactFields, fieldAllocationStyle);
+                                        layouter.layout(cd);
                                     }
                                 }
                             }
