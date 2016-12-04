@@ -64,14 +64,16 @@ public class JOLSample_16_AL_LL {
     public static void main(String[] args) throws Exception {
         out.println(VM.current().details());
 
-        List<Integer> al = new ArrayList<Integer>();
-        List<Integer> ll = new LinkedList<Integer>();
+        ArrayList<Integer> al = new ArrayList<Integer>();
+        LinkedList<Integer> ll = new LinkedList<Integer>();
 
         for (int i = 0; i < 1000; i++) {
             Integer io = i; // box once
             al.add(io);
             ll.add(io);
         }
+
+        al.trimToSize();
 
         PrintWriter pw = new PrintWriter(out);
         pw.println(GraphLayout.parseInstance(al).toFootprint());
