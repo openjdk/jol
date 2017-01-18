@@ -199,15 +199,17 @@ public class ClassLayout {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
-        int maxTypeLen = 5;
+        int maxTypeLen = "TYPE".length();
         for (FieldLayout f : fields()) {
             maxTypeLen = Math.max(f.typeClass().length(), maxTypeLen);
         }
+        maxTypeLen += 2;
 
-        int maxDescrLen = 30;
+        int maxDescrLen = "(object header)".length();
         for (FieldLayout f : fields()) {
-            maxDescrLen = Math.max((f.hostClass() + "" + f.name()).length(), maxDescrLen);
+            maxDescrLen = Math.max((f.hostClass() + "." + f.name()).length(), maxDescrLen);
         }
+        maxDescrLen += 2;
 
         if (instance != null) {
             try {

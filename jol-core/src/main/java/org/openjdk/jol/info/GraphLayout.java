@@ -295,7 +295,7 @@ public class GraphLayout {
 
         long last = 0L;
 
-        int typeLen = 1;
+        int typeLen = "TYPE".length();
         for (long addr : addresses()) {
             GraphPathRecord r = record(addr);
             typeLen = Math.max(typeLen, r.klass().getName().length());
