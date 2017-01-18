@@ -24,6 +24,8 @@
  */
 package org.openjdk.jol.info;
 
+import org.openjdk.jol.util.ObjectUtils;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -115,21 +117,9 @@ public class GraphWalker {
             }
         } else {
             for (Field f : getAllReferences(o.getClass())) {
-                try {
-                    f.setAccessible(true);
-                } catch (Exception e) {
-                    // Access denied
-                    result.add(new GraphPathRecord(r.path() + "." + f.getName(), r.depth() + 1, f.getType()));
-                    continue;
-                }
-
-                try {
-                    Object e = f.get(o);
-                    if (e != null) {
-                        result.add(new GraphPathRecord(r.path() + "." + f.getName(), r.depth() + 1, e));
-                    }
-                } catch (IllegalAccessException e) {
-                    throw new IllegalStateException(e);
+                Object e = ObjectUtils.value(o, f);
+                if (e != null) {
+                    result.add(new GraphPathRecord(r.path() + "." + f.getName(), r.depth() + 1, e));
                 }
             }
         }

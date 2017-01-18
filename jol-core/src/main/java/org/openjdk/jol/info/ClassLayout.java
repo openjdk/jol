@@ -27,11 +27,13 @@ package org.openjdk.jol.info;
 import org.openjdk.jol.layouters.CurrentLayouter;
 import org.openjdk.jol.layouters.Layouter;
 import org.openjdk.jol.util.ClassUtils;
+import org.openjdk.jol.util.ObjectUtils;
 import org.openjdk.jol.vm.VM;
 import org.openjdk.jol.vm.VirtualMachine;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.util.SortedSet;
 
 /**
@@ -252,12 +254,14 @@ public class ClassLayout {
                 pw.printf(" %6d %5d %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n", nextFree, (f.offset() - nextFree), "", "(alignment/padding gap)", "N/A");
                 interLoss += (f.offset() - nextFree);
             }
+
+            Field fi = f.data().refField();
             pw.printf(" %6d %5d %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n",
                     f.offset(),
                     f.size(),
                     f.typeClass(),
                     f.hostClass() + "." + f.name(),
-                    (instance != null) ? f.safeValue(instance) : "N/A"
+                    (instance != null && fi != null) ? ObjectUtils.safeToString(ObjectUtils.value(instance, fi)) : "N/A"
             );
 
             nextFree = f.offset() + f.size();

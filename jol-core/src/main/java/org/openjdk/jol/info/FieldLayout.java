@@ -92,15 +92,8 @@ public class FieldLayout implements Comparable<FieldLayout> {
         return f.name();
     }
 
-    /**
-     * Gets the string representation of field value,
-     * if appropriate.
-     *
-     * @param object the object to read the contents from
-     * @return field value in given object
-     */
-    public String safeValue(Object object) {
-        return f.safeValue(object);
+    FieldData data() {
+        return f;
     }
 
     @Override

@@ -24,6 +24,10 @@
  */
 package org.openjdk.jol.util;
 
+import org.openjdk.jol.vm.VM;
+import org.openjdk.jol.vm.VirtualMachine;
+
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
 public class ObjectUtils {
@@ -69,5 +73,62 @@ public class ObjectUtils {
         return "(object)";
     }
 
+    /**
+     * Get the object field value.
+     * @param o object to get field value from
+     * @param f field descriptor
+     * @return value, maybe a boxed primitive
+     */
+    public static Object value(Object o, Field f) {
+        // Try 1. Get with Reflection:
+        try {
+            return f.get(o);
+        } catch (Exception e) {
+            // fall-through
+        }
+
+        // Try 2. Get with Reflection and setAccessible:
+        try {
+            f.setAccessible(true);
+            return f.get(o);
+        } catch (Exception e) {
+            // fall-through
+        }
+
+        // Try 3. Get with VM hack
+        VirtualMachine vm = VM.current();
+        long off = vm.fieldOffset(f);
+        Class<?> t = f.getType();
+        if (t.isPrimitive()) {
+            if (t == boolean.class) {
+                return vm.getBoolean(o, off);
+            } else
+            if (t == byte.class) {
+                return vm.getByte(o, off);
+            } else
+            if (t == char.class) {
+                return vm.getChar(o, off);
+            } else
+            if (t == short.class) {
+                return vm.getShort(o, off);
+            } else
+            if (t == int.class) {
+                return vm.getInt(o, off);
+            } else
+            if (t == float.class) {
+                return vm.getFloat(o, off);
+            } else
+            if (t == long.class) {
+                return vm.getLong(o, off);
+            } else
+            if (t == double.class) {
+                return vm.getDouble(o, off);
+            } else {
+                throw new IllegalStateException("Unhandled primitive: " + t);
+            }
+        } else {
+            return vm.getObject(o, off);
+        }
+    }
 
 }

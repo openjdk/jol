@@ -95,12 +95,76 @@ public interface VirtualMachine {
     int arrayHeaderSize();
 
     /**
-     * Reads the int off the object at given offset.
+     * Reads a boolean off the object at given offset.
+     * @param obj instance
+     * @param offset offset
+     * @return the boolean
+     */
+    boolean getBoolean(Object obj, long offset);
+
+    /**
+     * Reads a byte off the object at given offset.
+     * @param obj instance
+     * @param offset offset
+     * @return the byte
+     */
+    byte getByte(Object obj, long offset);
+
+    /**
+     * Reads a short off the object at given offset.
+     * @param obj instance
+     * @param offset offset
+     * @return the short
+     */
+    short getShort(Object obj, long offset);
+
+    /**
+     * Reads a char off the object at given offset.
+     * @param obj instance
+     * @param offset offset
+     * @return the char
+     */
+    char getChar(Object obj, long offset);
+
+    /**
+     * Reads an int off the object at given offset.
      * @param obj instance
      * @param offset offset
      * @return the int
      */
     int getInt(Object obj, long offset);
+
+    /**
+     * Reads a float off the object at given offset.
+     * @param obj instance
+     * @param offset offset
+     * @return the float
+     */
+    float getFloat(Object obj, long offset);
+
+    /**
+     * Reads a long off the object at given offset.
+     * @param obj instance
+     * @param offset offset
+     * @return the long
+     */
+    long getLong(Object obj, long offset);
+
+    /**
+     * Reads a double off the object at given offset.
+     * @param obj instance
+     * @param offset offset
+     * @return the double
+     */
+    double getDouble(Object obj, long offset);
+
+    /**
+     * Reads an object off the object at given offset.
+     * @param obj instance
+     * @param offset offset
+     * @return the Object
+     */
+    Object getObject(Object obj, long offset);
 
     /**
      * Returns the informational details about the current VM mode

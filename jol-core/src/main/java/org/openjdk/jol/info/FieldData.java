@@ -141,32 +141,6 @@ public class FieldData {
     }
 
     /**
-     * Gets the string representation of field value,
-     * if appropriate.
-     *
-     * @param object the object to read the contents from
-     * @return field value in given object
-     */
-    public String safeValue(Object object) {
-        if (refField != null) {
-            try {
-                return ObjectUtils.safeToString(refField.get(object));
-            } catch (IllegalAccessException iae) {
-                // exception, try again
-            }
-
-            try {
-                refField.setAccessible(true);
-                return ObjectUtils.safeToString(refField.get(object));
-            } catch (Exception e) {
-                return "(access denied)";
-            }
-        } else {
-            return "N/A";
-        }
-    }
-
-    /**
      * The VM offset for the field, as discovered.
      * Some layouters need to know this.
      *
@@ -181,6 +155,6 @@ public class FieldData {
     }
 
     public String toString() {
-        return refField.toString();
+        return name + ": " + type;
     }
 }

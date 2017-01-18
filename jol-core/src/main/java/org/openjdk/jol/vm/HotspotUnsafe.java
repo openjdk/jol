@@ -360,8 +360,48 @@ class HotspotUnsafe implements VirtualMachine {
     }
 
     @Override
+    public boolean getBoolean(Object obj, long offset) {
+        return U.getBoolean(obj, offset);
+    }
+
+    @Override
+    public byte getByte(Object obj, long offset) {
+        return U.getByte(obj, offset);
+    }
+
+    @Override
+    public short getShort(Object obj, long offset) {
+        return U.getShort(obj, offset);
+    }
+
+    @Override
+    public char getChar(Object obj, long offset) {
+        return U.getChar(obj, offset);
+    }
+
+    @Override
     public int getInt(Object obj, long offset) {
         return U.getInt(obj, offset);
+    }
+
+    @Override
+    public float getFloat(Object obj, long offset) {
+        return U.getFloat(obj, offset);
+    }
+
+    @Override
+    public long getLong(Object obj, long offset) {
+        return U.getLong(obj, offset);
+    }
+
+    @Override
+    public double getDouble(Object obj, long offset) {
+        return U.getDouble(obj, offset);
+    }
+
+    @Override
+    public Object getObject(Object obj, long offset) {
+        return U.getObject(obj, offset);
     }
 
     @Override
