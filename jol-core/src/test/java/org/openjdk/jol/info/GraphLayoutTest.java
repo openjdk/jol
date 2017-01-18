@@ -2,8 +2,6 @@ package org.openjdk.jol.info;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jol.info.ClassLayout;
-import org.openjdk.jol.info.GraphLayout;
 
 public class GraphLayoutTest {
 
@@ -13,6 +11,11 @@ public class GraphLayoutTest {
 
     static class B {
         A a = new A();
+    }
+
+    static class C {
+        private final A a;
+        public C(A a) { this.a = a; }
     }
 
     @Test
@@ -59,7 +62,62 @@ public class GraphLayoutTest {
         Assert.assertEquals("GraphLayout size of B = sum of all sizes",
                 GraphLayout.parseInstance(b).totalSize(),
                 GraphLayout.parseInstance(b.a, b).totalSize());
+    }
 
+    @Test
+    public void add() {
+        A a = new A();
+        B b = new B();
+
+        GraphLayout ga = GraphLayout.parseInstance(a);
+        GraphLayout gb = GraphLayout.parseInstance(b);
+
+        Assert.assertEquals("starting count(A) = 1",
+                1, ga.totalCount());
+        Assert.assertEquals("starting count(B) = 2",
+                2, gb.totalCount());
+
+        GraphLayout sum = ga.add(gb);
+
+        Assert.assertEquals("count(A) = 1",
+                1, ga.totalCount());
+        Assert.assertEquals("count(B) = 2",
+                2, gb.totalCount());
+        Assert.assertEquals("count(A) + count(B) = count(A+B)",
+                ga.totalCount() + gb.totalCount(),
+                sum.totalCount());
+
+        Assert.assertEquals("size(A) + size(B) = size(A+B)",
+                ga.totalSize() + gb.totalSize(),
+                sum.totalSize());
+    }
+
+    @Test
+    public void subtract() {
+        A a = new A();
+        C c = new C(a);
+
+        GraphLayout ga = GraphLayout.parseInstance(a);
+        GraphLayout gc = GraphLayout.parseInstance(c);
+
+        Assert.assertEquals("starting count(A) = 1",
+                1, ga.totalCount());
+        Assert.assertEquals("starting count(C) = 2",
+                2, gc.totalCount());
+
+        GraphLayout diff = gc.subtract(ga);
+
+        Assert.assertEquals("count(A) = 1",
+                1, ga.totalCount());
+        Assert.assertEquals("count(C) = 2",
+                2, gc.totalCount());
+        Assert.assertEquals("count(C) - count(A) = count(C-A)",
+                gc.totalCount() - ga.totalCount(),
+                diff.totalCount());
+
+        Assert.assertEquals("size(C) - size(A) = size(C-A)",
+                gc.totalSize() - ga.totalSize(),
+                diff.totalSize());
     }
 
 }

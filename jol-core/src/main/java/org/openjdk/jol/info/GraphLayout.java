@@ -162,11 +162,11 @@ public class GraphLayout {
     public GraphLayout add(GraphLayout another) {
         GraphLayout res = new GraphLayout();
         for (Map.Entry<Long, GraphPathRecord> e : addresses.entrySet()) {
-            addRecord(e.getValue());
+            res.addRecord(e.getValue());
         }
         for (Map.Entry<Long, GraphPathRecord> e : another.addresses.entrySet()) {
             if (!addresses.containsKey(e.getKey())) {
-                addRecord(e.getValue());
+                res.addRecord(e.getValue());
             }
         }
         return res;
