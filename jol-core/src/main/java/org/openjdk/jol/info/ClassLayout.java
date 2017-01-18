@@ -199,13 +199,16 @@ public class ClassLayout {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
+        String MSG_GAP = "(alignment/padding gap)";
+        String MSG_NEXT_GAP = "(loss due to the next object alignment)";
+
         int maxTypeLen = "TYPE".length();
         for (FieldLayout f : fields()) {
             maxTypeLen = Math.max(f.typeClass().length(), maxTypeLen);
         }
         maxTypeLen += 2;
 
-        int maxDescrLen = "(object header)".length();
+        int maxDescrLen = Math.max(MSG_GAP.length(), MSG_NEXT_GAP.length());
         for (FieldLayout f : fields()) {
             maxDescrLen = Math.max((f.hostClass() + "." + f.name()).length(), maxDescrLen);
         }
@@ -253,7 +256,7 @@ public class ClassLayout {
 
         for (FieldLayout f : fields()) {
             if (f.offset() > nextFree) {
-                pw.printf(" %6d %5d %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n", nextFree, (f.offset() - nextFree), "", "(alignment/padding gap)", "N/A");
+                pw.printf(" %6d %5d %" + maxTypeLen + "s %-" + maxDescrLen + "s%n", nextFree, (f.offset() - nextFree), "", MSG_GAP);
                 interLoss += (f.offset() - nextFree);
             }
 
@@ -273,7 +276,7 @@ public class ClassLayout {
 
         if (sizeOf != nextFree) {
             exterLoss = sizeOf - nextFree;
-            pw.printf(" %6d %5s %" + maxTypeLen + "s %s%n", nextFree, exterLoss, "", "(loss due to the next object alignment)");
+            pw.printf(" %6d %5s %" + maxTypeLen + "s %s%n", nextFree, exterLoss, "", MSG_NEXT_GAP);
         }
 
         pw.printf("Instance size: %d bytes%n", sizeOf);
