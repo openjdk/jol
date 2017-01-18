@@ -46,20 +46,6 @@ public class GraphLayout {
     /**
      * Parse the object graph starting from the given instance.
      *
-     * @param root root instance to start from
-     * @return object graph
-     */
-    public static GraphLayout parseInstance(Object root) {
-        GraphLayout data = new GraphLayout(root);
-        GraphWalker walker = new GraphWalker(root);
-        walker.addVisitor(data.visitor());
-        walker.walk();
-        return data;
-    }
-
-    /**
-     * Parse the object graph starting from the given instance.
-     *
      * @param roots root instances to start from
      * @return object graph
      */

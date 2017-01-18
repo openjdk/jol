@@ -67,7 +67,7 @@ public class JOLSample_21_Arrays {
 
         String last = null;
         for (int c = 0; c < 100; c++) {
-            String current = GraphLayout.parseInstance(arr).toPrintable();
+            String current = GraphLayout.parseInstance((Object) arr).toPrintable();
 
             if (last == null || !last.equalsIgnoreCase(current)) {
                 pw.println(current);
