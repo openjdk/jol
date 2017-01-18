@@ -29,7 +29,7 @@ questions.
 
     <groupId>org.openjdk.jol</groupId>
     <artifactId>jol-parent</artifactId>
-    <version>0.8-SNAPSHOT</version>
+    <version>0.7.1</version>
     <packaging>pom</packaging>
 
     <name>Java Object Layout: Parent</name>
