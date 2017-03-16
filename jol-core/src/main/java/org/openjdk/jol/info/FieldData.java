@@ -59,9 +59,9 @@ public class FieldData {
         return new FieldData(
                 field,
                 VM.current().fieldOffset(field),
-                field.getDeclaringClass().getSimpleName(),
+                field.getDeclaringClass().getCanonicalName(),
                 field.getName(),
-                field.getType().getSimpleName(),
+                field.getType().getCanonicalName(),
                 ContendedSupport.isContended(field),
                 ContendedSupport.contendedGroup(field)
         );

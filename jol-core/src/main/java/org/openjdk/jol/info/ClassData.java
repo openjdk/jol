@@ -109,7 +109,7 @@ public class ClassData {
                     cd.addField(FieldData.parse(f));
                 }
             }
-            cd.addSuperClass(klass.getSimpleName());
+            cd.addSuperClass(klass.getCanonicalName());
         } while ((klass = klass.getSuperclass()) != null);
 
         return cd;

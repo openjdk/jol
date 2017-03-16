@@ -210,7 +210,7 @@ public class ClassLayout {
 
         int maxDescrLen = Math.max(MSG_GAP.length(), MSG_NEXT_GAP.length());
         for (FieldLayout f : fields()) {
-            maxDescrLen = Math.max((f.hostClass() + "." + f.name()).length(), maxDescrLen);
+            maxDescrLen = Math.max(f.shortFieldName().length(), maxDescrLen);
         }
         maxDescrLen += 2;
 
@@ -265,7 +265,7 @@ public class ClassLayout {
                     f.offset(),
                     f.size(),
                     f.typeClass(),
-                    f.hostClass() + "." + f.name(),
+                    f.shortFieldName(),
                     (instance != null && fi != null) ? ObjectUtils.safeToString(ObjectUtils.value(instance, fi)) : "N/A"
             );
 

@@ -92,6 +92,16 @@ public class FieldLayout implements Comparable<FieldLayout> {
         return f.name();
     }
 
+    public String shortFieldName() {
+        String cl = hostClass();
+        int idx = cl.lastIndexOf(".");
+        if (idx != -1 && idx < cl.length()) {
+            return cl.substring(idx + 1) + "." + f.name();
+        } else {
+            return cl + "." + name();
+        }
+    }
+
     FieldData data() {
         return f;
     }
