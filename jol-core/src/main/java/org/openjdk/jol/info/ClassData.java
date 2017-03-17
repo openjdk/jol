@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.vm.ContendedSupport;
 
 /**
@@ -109,7 +110,7 @@ public class ClassData {
                     cd.addField(FieldData.parse(f));
                 }
             }
-            cd.addSuperClass(klass.getCanonicalName());
+            cd.addSuperClass(ClassUtils.getSafeName(klass));
         } while ((klass = klass.getSuperclass()) != null);
 
         return cd;

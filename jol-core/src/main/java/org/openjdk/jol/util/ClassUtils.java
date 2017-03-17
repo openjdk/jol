@@ -82,4 +82,16 @@ public class ClassUtils {
         return Class.forName(name, true, ClassLoader.getSystemClassLoader());
     }
 
+    public static String getSafeName(Class klass) {
+        // We want a human-readable class name. getName() returns JVM signature.
+        // getCanonicalName() returns proper string, unless it is hits the bug.
+        // If it fails, then we will fall back to getName()
+        //   https://bugs.openjdk.java.net/browse/JDK-8057919
+        try {
+            return klass.getCanonicalName();
+        } catch (Throwable e) {
+            // fall-through
+        }
+        return klass.getName();
+    }
 }

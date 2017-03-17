@@ -24,6 +24,7 @@
  */
 package org.openjdk.jol.info;
 
+import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.util.ObjectUtils;
 import org.openjdk.jol.vm.ContendedSupport;
 import org.openjdk.jol.vm.VM;
@@ -59,9 +60,9 @@ public class FieldData {
         return new FieldData(
                 field,
                 VM.current().fieldOffset(field),
-                field.getDeclaringClass().getCanonicalName(),
+                ClassUtils.getSafeName(field.getDeclaringClass()),
                 field.getName(),
-                field.getType().getCanonicalName(),
+                ClassUtils.getSafeName(field.getType()),
                 ContendedSupport.isContended(field),
                 ContendedSupport.contendedGroup(field)
         );
