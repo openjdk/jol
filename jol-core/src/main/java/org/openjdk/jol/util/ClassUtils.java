@@ -88,7 +88,10 @@ public class ClassUtils {
         // If it fails, then we will fall back to getName()
         //   https://bugs.openjdk.java.net/browse/JDK-8057919
         try {
-            return klass.getCanonicalName();
+            String n = klass.getCanonicalName();
+            if (n != null) {
+                return n;
+            }
         } catch (Throwable e) {
             // fall-through
         }
