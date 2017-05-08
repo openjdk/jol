@@ -40,7 +40,6 @@ import java.util.List;
 
 import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.util.IOUtils;
-import sun.management.VMManagement;
 
 import static org.openjdk.jol.vm.sa.Constants.*;
 
@@ -150,7 +149,7 @@ public class ServiceabilityAgentSupport {
             Field jvmField = mxbean.getClass().getDeclaredField("jvm");
             jvmField.setAccessible(true);
 
-            VMManagement management = (VMManagement) jvmField.get(mxbean);
+            sun.management.VMManagement management = (sun.management.VMManagement) jvmField.get(mxbean);
             Method method = management.getClass().getDeclaredMethod("getProcessId");
             method.setAccessible(true);
 
