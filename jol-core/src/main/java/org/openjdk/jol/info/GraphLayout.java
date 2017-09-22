@@ -50,6 +50,14 @@ public class GraphLayout {
      * @return object graph
      */
     public static GraphLayout parseInstance(Object... roots) {
+        if (roots == null) {
+            throw new IllegalArgumentException("Roots are null");
+        }
+        for (Object root : roots) {
+            if (root == null) {
+                throw new IllegalArgumentException("Some root is null");
+            }
+        }
         GraphLayout data = new GraphLayout(roots);
         GraphWalker walker = new GraphWalker(roots);
         walker.addVisitor(data.visitor());
@@ -317,7 +325,12 @@ public class GraphLayout {
         if (addresses().isEmpty()) return;
 
         long start = startAddress();
-        long end = endAddress();
+        long end = endAddress() + record(endAddress()).size();
+
+        if (start == end) {
+            // Make sure we render something
+            end = start + 1;
+        }
 
         final int WIDTH = 1000;
         final int HEIGHT = 320;
