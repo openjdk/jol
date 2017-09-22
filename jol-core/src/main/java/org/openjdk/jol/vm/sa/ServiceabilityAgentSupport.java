@@ -137,7 +137,7 @@ public class ServiceabilityAgentSupport {
         try {
             Class<?> c = ClassUtils.loadClass("java.lang.ProcessHandle");
             Object current = c.getDeclaredMethod("current").invoke(null);
-            return (Long) c.getDeclaredMethod("getPid").invoke(current);
+            return (Long) c.getDeclaredMethod("pid").invoke(current);
         } catch (Throwable t) {
             // okay, no support yet, falling through
         }
@@ -266,12 +266,7 @@ public class ServiceabilityAgentSupport {
             case NONE:
             case JDK_8:
                 break;
-            case JDK_9_b0:
-                args.add("-XaddExports:jdk.hotspot.agent/sun.jvm.hotspot=ALL-UNNAMED");
-                args.add("-XaddExports:jdk.hotspot.agent/sun.jvm.hotspot.runtime=ALL-UNNAMED");
-                args.add("-XaddExports:jdk.hotspot.agent/sun.jvm.hotspot.memory=ALL-UNNAMED");
-                break;
-            case JDK_9_b131:
+            case JDK_9:
                 args.add("--add-modules"); args.add("jdk.hotspot.agent");
                 args.add("--add-exports"); args.add("jdk.hotspot.agent/sun.jvm.hotspot=ALL-UNNAMED");
                 args.add("--add-exports"); args.add("jdk.hotspot.agent/sun.jvm.hotspot.runtime=ALL-UNNAMED");
@@ -286,11 +281,10 @@ public class ServiceabilityAgentSupport {
             case NONE:
                 break;
             case JDK_8:
-            case JDK_9_b0:
                 File hotspotAgentLib = new File(normalizePath(System.getProperty("java.home")) + "/../lib/sa-jdi.jar");
                 classPath = classPath + File.pathSeparator + normalizePath(hotspotAgentLib.getAbsolutePath());
                 break;
-            case JDK_9_b131:
+            case JDK_9:
                 break;
             default:
                 throw new IllegalStateException("Unhandled style: " + style);
@@ -308,8 +302,7 @@ public class ServiceabilityAgentSupport {
     enum AgentStyle {
         NONE,
         JDK_8,
-        JDK_9_b0,
-        JDK_9_b131,
+        JDK_9,
     }
 
 }

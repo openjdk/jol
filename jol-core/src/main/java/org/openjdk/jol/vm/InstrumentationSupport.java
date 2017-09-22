@@ -63,7 +63,7 @@ class InstrumentationSupport {
                 tryDynamicAttach();
                 return INSTRUMENTATION;
             } catch (Exception ignored) {
-                throw new InstrumentationException("Dynamic Attach failed: " + ignored.getMessage() + ". You may add this JAR as -javaagent manually.");
+                throw new InstrumentationException("Dynamic Attach failed. You may add this JAR as -javaagent manually, or supply -Djdk.attach.allowAttachSelf");
             }
         }
         throw new InstrumentationException("No instrumentation. Add this JAR as -javaagent manually.");
