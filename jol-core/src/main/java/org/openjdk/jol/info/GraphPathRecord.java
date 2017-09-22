@@ -33,37 +33,21 @@ import org.openjdk.jol.vm.VM;
  * @author Aleksey Shipilev
  */
 public class GraphPathRecord {
+    private final GraphPathRecord parent;
     private final String path;
     private final int depth;
-    private Object obj;
-    private final Class<?> klass;
+    private final Object obj;
     private final long size;
     private final long address;
-    private final String toString;
+    private String toString;
 
-    GraphPathRecord(String path, int depth, Object obj) {
-        this(path, depth, obj, obj.getClass());
-    }
-
-    GraphPathRecord(String path, int depth, Class<?> klass) {
-        this(path, depth, null, klass);
-    }
-
-    GraphPathRecord(String path, int depth, Object obj, Class<?> klass) {
+    GraphPathRecord(GraphPathRecord parent, String path, int depth, Object obj) {
+        this.parent = parent;
         this.path = path;
         this.obj = obj;
-        this.klass = klass;
         this.depth = depth;
-
-        if (obj != null) {
-            toString = ObjectUtils.safeToString(obj);
-            size = VM.current().sizeOf(obj);
-            address = VM.current().addressOf(obj);
-        } else {
-            toString = "(access denied)";
-            size = 0;
-            address = 0;
-        }
+        this.size = VM.current().sizeOf(obj);
+        this.address = VM.current().addressOf(obj);
     }
 
     Object obj() {
@@ -71,11 +55,15 @@ public class GraphPathRecord {
     }
 
     public String path() {
-        return path;
+        if (parent != null) {
+            return parent.path() + path;
+        } else {
+            return path;
+        }
     }
 
     public Class<?> klass() {
-        return klass;
+        return obj.getClass();
     }
 
     public long size() {
@@ -87,7 +75,12 @@ public class GraphPathRecord {
     }
 
     public String objToString() {
-        return toString;
+        String v = toString;
+        if (v == null) {
+            v = ObjectUtils.safeToString(obj);
+            toString = v;
+        }
+        return v;
     }
 
     public int depth() {

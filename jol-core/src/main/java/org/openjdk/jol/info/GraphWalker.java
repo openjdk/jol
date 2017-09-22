@@ -64,7 +64,7 @@ public class GraphWalker {
         boolean single = (roots.length == 1);
         for (Object root : roots) {
             String label = single ? "" : ("<r" + rootId + ">");
-            GraphPathRecord e = new GraphPathRecord(label, 0, root);
+            GraphPathRecord e = new GraphPathRecord(null, label, 0, root);
             visited.add(root);
             visitObject(e);
             curLayer.add(e);
@@ -111,7 +111,7 @@ public class GraphWalker {
             int c = 0;
             for (Object e : (Object[]) o) {
                 if (e != null) {
-                    result.add(new GraphPathRecord(r.path() + "[" + c + "]", r.depth() + 1, e));
+                    result.add(new GraphPathRecord(r, "[" + c + "]", r.depth() + 1, e));
                 }
                 c++;
             }
@@ -119,7 +119,7 @@ public class GraphWalker {
             for (Field f : getAllReferences(o.getClass())) {
                 Object e = ObjectUtils.value(o, f);
                 if (e != null) {
-                    result.add(new GraphPathRecord(r.path() + "." + f.getName(), r.depth() + 1, e));
+                    result.add(new GraphPathRecord(r, "." + f.getName(), r.depth() + 1, e));
                 }
             }
         }
