@@ -70,7 +70,7 @@ questions.
     </modules>
 
     <prerequisites>
-        <maven>3.0</maven>
+        <maven>3.2</maven>
     </prerequisites>
 
     <dependencyManagement>
@@ -104,7 +104,7 @@ questions.
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.0.0-M1</version>
+                    <version>3.0.1</version>
                 </plugin>
                 <plugin>
                     <groupId>com.mycila.maven-license-plugin</groupId>
@@ -114,7 +114,7 @@ questions.
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>2.2</version>
+                    <version>3.2.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
