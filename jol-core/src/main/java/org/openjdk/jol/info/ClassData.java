@@ -129,6 +129,7 @@ public class ClassData {
 
     /**
      * Constructs the empty ClassData, suited for regular class.
+     * @param name class name
      */
     public ClassData(String name) {
         this(null, name);

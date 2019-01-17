@@ -64,7 +64,7 @@ public class ClassUtils {
      *
      * @param name class name
      * @return class
-     * @throws ClassNotFoundException
+     * @throws ClassNotFoundException if class was not found
      */
     public static Class<?> loadClass(String name) throws ClassNotFoundException {
         return Class.forName(name, true, CL);
@@ -76,7 +76,7 @@ public class ClassUtils {
      *
      * @param name class name
      * @return class
-     * @throws ClassNotFoundException
+     * @throws ClassNotFoundException if class was not found
      */
     public static Class<?> loadSystemClass(String name) throws ClassNotFoundException {
         return Class.forName(name, true, ClassLoader.getSystemClassLoader());

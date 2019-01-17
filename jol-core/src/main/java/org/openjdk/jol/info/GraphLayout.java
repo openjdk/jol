@@ -320,6 +320,7 @@ public class GraphLayout {
      * Put the graphical representation of object graph into the file.
      *
      * @param fileName filename
+     * @throws IOException when I/O fails
      */
     public void toImage(String fileName) throws IOException {
         if (addresses().isEmpty()) return;
