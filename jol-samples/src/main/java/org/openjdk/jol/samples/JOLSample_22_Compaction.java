@@ -65,7 +65,7 @@ public class JOLSample_22_Compaction {
         }
         System.gc();
 
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         for (int c = 0; c < 1000; c++) {
             list.add("Key" + c);
         }

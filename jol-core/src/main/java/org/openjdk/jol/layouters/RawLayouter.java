@@ -48,7 +48,7 @@ public class RawLayouter implements Layouter {
 
     @Override
     public ClassLayout layout(ClassData data) {
-        SortedSet<FieldLayout> result = new TreeSet<FieldLayout>();
+        SortedSet<FieldLayout> result = new TreeSet<>();
 
         if (data.isArray()) {
             // special case of arrays

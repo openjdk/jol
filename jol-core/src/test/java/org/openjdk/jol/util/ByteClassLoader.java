@@ -35,7 +35,7 @@ public class ByteClassLoader extends URLClassLoader {
 
     public ByteClassLoader() {
         super(new URL[] {});
-        customClasses = new HashMap<String, byte[]>();
+        customClasses = new HashMap<>();
     }
 
     @Override

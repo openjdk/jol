@@ -62,7 +62,7 @@ public class JOLSample_24_Difference {
     public static void main(String[] args) throws Exception {
         out.println(VM.current().details());
 
-        Map<String, String> chm = new ConcurrentHashMap<String, String>();
+        Map<String, String> chm = new ConcurrentHashMap<>();
 
         GraphLayout gl1 = GraphLayout.parseInstance(chm);
 

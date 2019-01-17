@@ -33,7 +33,7 @@ import java.util.TreeMap;
 
 public class Main {
 
-    private static SortedMap<String, Operation> operations = new TreeMap<String, Operation>();
+    private static SortedMap<String, Operation> operations = new TreeMap<>();
 
     static {
         registerOperation(new ObjectInternals());

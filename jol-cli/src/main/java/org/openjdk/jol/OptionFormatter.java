@@ -54,7 +54,7 @@ public class OptionFormatter implements HelpFormatter {
     }
 
     private Collection<String> rewrap(String lines) {
-        Collection<String> result = new ArrayList<String>();
+        Collection<String> result = new ArrayList<>();
         String[] words = lines.split("[ \n]");
         String line = "";
         int cols = 0;

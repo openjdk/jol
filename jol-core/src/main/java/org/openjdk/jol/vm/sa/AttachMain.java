@@ -108,11 +108,7 @@ class AttachMain {
             if (hotspotAgent != null && detachMethod != null) {
                 try {
                     detachMethod.invoke(hotspotAgent);
-                } catch (IllegalArgumentException e) {
-                    // There is nothing to do, so just ignore
-                } catch (IllegalAccessException e) {
-                    // There is nothing to do, so just ignore
-                } catch (InvocationTargetException e) {
+                } catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
                     // There is nothing to do, so just ignore
                 }
             }

@@ -46,7 +46,7 @@ public class ClassUtils {
      * @param cpEntries classpath entries.
      */
     public static void addClasspathEntries(Collection<String> cpEntries) {
-        List<URL> cp = new ArrayList<URL>();
+        List<URL> cp = new ArrayList<>();
         for (String cpEntry : cpEntries) {
             try {
                 cp.add(new File(cpEntry).toURI().toURL());

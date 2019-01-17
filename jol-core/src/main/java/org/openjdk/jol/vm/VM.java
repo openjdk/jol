@@ -43,9 +43,7 @@ public class VM {
                             Field unsafe = Unsafe.class.getDeclaredField("theUnsafe");
                             unsafe.setAccessible(true);
                             return (Unsafe) unsafe.get(null);
-                        } catch (NoSuchFieldException e) {
-                            throw new IllegalStateException(e);
-                        } catch (IllegalAccessException e) {
+                        } catch (NoSuchFieldException | IllegalAccessException e) {
                             throw new IllegalStateException(e);
                         }
                     }

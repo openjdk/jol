@@ -94,11 +94,7 @@ public class ContendedSupport {
         try {
             Method meth = klass.getMethod("value");
             return (String) meth.invoke(ann);
-        } catch (NoSuchMethodException e) {
-            printErrorOnce(e);
-        } catch (InvocationTargetException e) {
-            printErrorOnce(e);
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             printErrorOnce(e);
         }
         return "";

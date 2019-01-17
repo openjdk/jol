@@ -35,17 +35,21 @@ enum FieldAllocationType {
     ;
 
     static FieldAllocationType allocationTypeFor(FieldData field) {
-        String simpleName = field.typeClass();
-        if (simpleName.equals("boolean") || simpleName.equals("byte")) {
-            return FieldAllocationType.BYTE;
-        } else if (simpleName.equals("short") || simpleName.equals("char")) {
-            return FieldAllocationType.SHORT;
-        } else if (simpleName.equals("int") || simpleName.equals("float")) {
-            return FieldAllocationType.WORD;
-        } else if (simpleName.equals("long") || simpleName.equals("double")) {
-            return FieldAllocationType.DOUBLE;
-        } else {
-            return FieldAllocationType.OOP;
+        switch (field.typeClass()) {
+            case "boolean":
+            case "byte":
+                return FieldAllocationType.BYTE;
+            case "short":
+            case "char":
+                return FieldAllocationType.SHORT;
+            case "int":
+            case "float":
+                return FieldAllocationType.WORD;
+            case "long":
+            case "double":
+                return FieldAllocationType.DOUBLE;
+            default:
+                return FieldAllocationType.OOP;
         }
     }
 }

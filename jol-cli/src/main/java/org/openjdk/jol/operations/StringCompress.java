@@ -94,14 +94,13 @@ public class StringCompress implements Operation {
                     "\"char[]-1b\"", "\"char[]-1b-comp\"", "\"savings(same)\"",  "\"savings(bool)\"", "\"savings(oop)\"", "\"hprof file\"", "\"model\"");
         }
 
-        List<Future<?>> res = new ArrayList<Future<?>>();
+        List<Future<?>> res = new ArrayList<>();
         ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         for (String arg : args) {
             res.add(service.submit(new Worker(arg)));
         }
 
-        for (int i = 0; i < res.size(); i++) {
-            Future<?> f = res.get(i);
+        for (Future<?> f : res) {
             try {
                 f.get();
             } catch (ExecutionException e) {
@@ -124,15 +123,15 @@ public class StringCompress implements Operation {
 
         public Worker(String arg) {
             this.path = arg;
-            this.compressibleCharArrays = new Multiset<Integer>();
-            this.nonCompressibleCharArrays = new Multiset<Integer>();
+            this.compressibleCharArrays = new Multiset<>();
+            this.nonCompressibleCharArrays = new Multiset<>();
         }
 
         public Object call() throws Exception {
-            final Set<Long> referencedArrays = new HashSet<Long>();
+            final Set<Long> referencedArrays = new HashSet<>();
 
-            final Map<Long, Boolean> isCompressible = new HashMap<Long, Boolean>();
-            final Map<Long, Integer> size = new HashMap<Long, Integer>();
+            final Map<Long, Boolean> isCompressible = new HashMap<>();
+            final Map<Long, Integer> size = new HashMap<>();
 
             HeapDumpReader reader = new HeapDumpReader(new File(path)) {
                 @Override
@@ -193,7 +192,7 @@ public class StringCompress implements Operation {
             }
 
             if (DO_MODE.equalsIgnoreCase("histo")) {
-                TreeSet<Integer> sizes = new TreeSet<Integer>();
+                TreeSet<Integer> sizes = new TreeSet<>();
                 sizes.addAll(compressibleCharArrays.keys());
                 sizes.addAll(nonCompressibleCharArrays.keys());
 

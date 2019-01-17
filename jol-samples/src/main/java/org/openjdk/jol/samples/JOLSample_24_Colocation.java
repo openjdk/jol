@@ -71,7 +71,7 @@ public class JOLSample_24_Colocation {
 
         final int COUNT = 1000;
 
-        ConcurrentHashMap<Object, Object> chm = new ConcurrentHashMap<Object, Object>();
+        ConcurrentHashMap<Object, Object> chm = new ConcurrentHashMap<>();
 
         addElements(COUNT, chm);
 

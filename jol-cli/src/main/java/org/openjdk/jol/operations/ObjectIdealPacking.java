@@ -107,20 +107,13 @@ public class ObjectIdealPacking implements Operation {
                         }
 
                         System.out.printf("%s%n", klass.getName());
-                    } catch (VerifyError t) {
-                    } catch (IncompatibleClassChangeError t) {
-                    } catch (SecurityException t) {
-                    } catch (ClassFormatError t) {
-                    } catch (ClassNotFoundException t) {
-                    } catch (NoClassDefFoundError t) {
+                    } catch (VerifyError | NoClassDefFoundError | ClassNotFoundException | ClassFormatError | SecurityException | IncompatibleClassChangeError t) {
                     } catch (Throwable t) {
                         t.printStackTrace();
                     }
                 }
                 jarFile.close();
-            } catch (ZipException t) {
-            } catch (FileNotFoundException t) {
-                // ignore
+            } catch (ZipException | FileNotFoundException t) {
             }
         }
     }

@@ -44,7 +44,7 @@ public class DoubleInnerTest {
     private static final int CLASSFILE_VERSION = 50;
 
     public Collection<Class<?>> generate() throws ClassNotFoundException, IOException {
-        Collection<Class<?>> res = new ArrayList<Class<?>>();
+        Collection<Class<?>> res = new ArrayList<>();
         ByteClassLoader classLoader = new ByteClassLoader();
         {
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);

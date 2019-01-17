@@ -8,7 +8,7 @@ public class GraphLayoutExhaustionTests {
 
     @Test
     public void testLinkedList() throws Exception {
-        LinkedList<Integer> list = new LinkedList<Integer>();
+        LinkedList<Integer> list = new LinkedList<>();
         for (int i = 0; i < 1000000; i++) {
             list.add(i);
         }

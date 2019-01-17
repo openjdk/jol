@@ -73,8 +73,8 @@ public class HeapDumpStats implements Operation {
         HeapDumpReader reader = new HeapDumpReader(new File(path));
         Multiset<ClassData> data = reader.parse();
 
-        final Multiset<String> counts = new Multiset<String>();
-        final Multiset<String> sizes = new Multiset<String>();
+        final Multiset<String> counts = new Multiset<>();
+        final Multiset<String> sizes = new Multiset<>();
 
         Layouter layouter = new HotSpotLayouter(new CurrentDataModel());
         for (ClassData cd : data.keys()) {
@@ -83,7 +83,7 @@ public class HeapDumpStats implements Operation {
             sizes.add(cd.name(),  data.count(cd) * size);
         }
 
-        List<String> sorted = new ArrayList<String>();
+        List<String> sorted = new ArrayList<>();
         sorted.addAll(sizes.keys());
         Collections.sort(sorted, new Comparator<String>() {
             @Override

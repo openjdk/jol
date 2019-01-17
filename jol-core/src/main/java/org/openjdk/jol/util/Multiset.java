@@ -36,7 +36,7 @@ import java.util.Map;
  */
 public class Multiset<T> {
 
-    private final Map<T, Long> map = new HashMap<T, Long>();
+    private final Map<T, Long> map = new HashMap<>();
 
     public void add(T t) {
         add(t, 1);

@@ -72,10 +72,10 @@ public class GraphLayout {
         }
     };
 
-    private final Set<Class<?>> classes = new TreeSet<Class<?>>(CLASS_COMPARATOR);
-    private final Multiset<Class<?>> classSizes = new Multiset<Class<?>>();
-    private final Multiset<Class<?>> classCounts = new Multiset<Class<?>>();
-    private final SortedMap<Long, GraphPathRecord> addresses = new TreeMap<Long, GraphPathRecord>();
+    private final Set<Class<?>> classes = new TreeSet<>(CLASS_COMPARATOR);
+    private final Multiset<Class<?>> classSizes = new Multiset<>();
+    private final Multiset<Class<?>> classCounts = new Multiset<>();
+    private final SortedMap<Long, GraphPathRecord> addresses = new TreeMap<>();
 
     private final String description;
     private long totalCount;
@@ -244,7 +244,7 @@ public class GraphLayout {
      * @see #record(long)
      */
     public SortedSet<Long> addresses() {
-        return new TreeSet<Long>(addresses.keySet());
+        return new TreeSet<>(addresses.keySet());
     }
 
     /**
@@ -354,7 +354,7 @@ public class GraphLayout {
             maxDepth = Math.max(maxDepth, p.depth());
         }
 
-        Multiset<Integer> depths = new Multiset<Integer>();
+        Multiset<Integer> depths = new Multiset<>();
         for (long addr : addresses()) {
             GraphPathRecord r = record(addr);
             depths.add(r.depth(), r.size());

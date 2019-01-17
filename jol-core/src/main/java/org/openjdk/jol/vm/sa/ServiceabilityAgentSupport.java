@@ -89,7 +89,7 @@ public class ServiceabilityAgentSupport {
     }
 
     private AgentStyle senseAgentStyle() {
-        List<Throwable> exceptions = new ArrayList<Throwable>();
+        List<Throwable> exceptions = new ArrayList<>();
         for (AgentStyle style : AgentStyle.values()) {
             try {
                 senseAccess(style);
@@ -255,7 +255,7 @@ public class ServiceabilityAgentSupport {
     }
 
     private List<String> getArguments(boolean sudoRequired, AgentStyle style) {
-        List<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
         if (sudoRequired) {
             args.add("sudo");
         }

@@ -135,10 +135,10 @@ public class ClassData {
     }
 
     private ClassData(Object instance, String name) {
-        this.instance = new WeakReference<Object>(instance);
+        this.instance = new WeakReference<>(instance);
         this.name = name;
-        this.fields = new ArrayList<FieldData>();
-        this.classNames = new ArrayList<String>();
+        this.fields = new ArrayList<>();
+        this.classNames = new ArrayList<>();
         this.length = -1;
         this.arrayKlass = null;
         this.arrayComponentKlass = null;
@@ -159,7 +159,7 @@ public class ClassData {
     }
 
     private ClassData(Object instance, String arrayKlass, String componentKlass, int length) {
-        this.instance = new WeakReference<Object>(instance);
+        this.instance = new WeakReference<>(instance);
         this.name = arrayKlass;
         this.arrayKlass = arrayKlass;
         this.arrayComponentKlass = componentKlass;
@@ -256,7 +256,7 @@ public class ClassData {
      * @return field data
      */
     public Collection<FieldData> fieldsFor(String klass) {
-        List<FieldData> r = new ArrayList<FieldData>();
+        List<FieldData> r = new ArrayList<>();
         for (FieldData f : fields) {
             if (f.hostClass().equals(klass)) {
                 r.add(f);

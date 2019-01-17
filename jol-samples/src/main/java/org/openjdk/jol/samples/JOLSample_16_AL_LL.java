@@ -64,8 +64,8 @@ public class JOLSample_16_AL_LL {
     public static void main(String[] args) throws Exception {
         out.println(VM.current().details());
 
-        ArrayList<Integer> al = new ArrayList<Integer>();
-        LinkedList<Integer> ll = new LinkedList<Integer>();
+        ArrayList<Integer> al = new ArrayList<>();
+        LinkedList<Integer> ll = new LinkedList<>();
 
         for (int i = 0; i < 1000; i++) {
             Integer io = i; // box once

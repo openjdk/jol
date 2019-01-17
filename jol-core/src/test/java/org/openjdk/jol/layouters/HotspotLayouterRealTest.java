@@ -53,7 +53,7 @@ public class HotspotLayouterRealTest {
 
     private Map<Layouter, ClassLayout> candidateLayouts(Class<?> cl) {
         ClassData cd = ClassData.parseClass(cl);
-        Map<Layouter, ClassLayout> layouts = new HashMap<Layouter, ClassLayout>();
+        Map<Layouter, ClassLayout> layouts = new HashMap<>();
         for (DataModel model : MODELS) {
             for (boolean hierarchyGaps : BOOLS) {
                 for (boolean superClassGaps : BOOLS) {

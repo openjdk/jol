@@ -72,10 +72,10 @@ public class HeapDumpReader {
         } else {
             this.is = new BufferedInputStream(new FileInputStream(file), 16 * 1024 * 1024);
         }
-        this.strings = new HashMap<Long, String>();
-        this.classNames = new HashMap<Long, String>();
-        this.classCounts = new Multiset<ClassData>();
-        this.classDatas = new HashMap<Long, ClassData>();
+        this.strings = new HashMap<>();
+        this.classNames = new HashMap<>();
+        this.classCounts = new Multiset<>();
+        this.classDatas = new HashMap<>();
         this.buf = new byte[32*1024];
         this.wrapBuf = ByteBuffer.wrap(buf);
     }
@@ -295,7 +295,7 @@ public class HeapDumpReader {
         }
 
         int offset = 0;
-        List<Integer> oopIdx = new ArrayList<Integer>();
+        List<Integer> oopIdx = new ArrayList<>();
 
         int cpInstance = read_U2();
         for (int c = 0; c < cpInstance; c++) {

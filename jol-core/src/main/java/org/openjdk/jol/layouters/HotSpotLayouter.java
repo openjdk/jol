@@ -44,7 +44,7 @@ import static org.openjdk.jol.layouters.FieldAllocationType.*;
  */
 public class HotSpotLayouter implements Layouter {
     // The next classes have predefined hard-coded fields offsets.
-    private static Set<String> PREDEF_OFFSETS = new HashSet<String>(Arrays.asList(
+    private static Set<String> PREDEF_OFFSETS = new HashSet<>(Arrays.asList(
             "java.lang.AssertionStatusDirectives",
             "java.lang.Class",
             "java.lang.ClassLoader",
@@ -89,7 +89,7 @@ public class HotSpotLayouter implements Layouter {
 
     @Override
     public ClassLayout layout(ClassData cd) {
-        SortedSet<FieldLayout> result = new TreeSet<FieldLayout>();
+        SortedSet<FieldLayout> result = new TreeSet<>();
 
         if (cd.isArray()) {
             // special case for arrays
@@ -104,7 +104,7 @@ public class HotSpotLayouter implements Layouter {
             return new ClassLayout(cd, result, model.arrayHeaderSize(), instanceSize, false);
         }
 
-        List<ClassData> classDataClassHierarchy = new ArrayList<ClassData>();
+        List<ClassData> classDataClassHierarchy = new ArrayList<>();
         ClassData cld = cd;
         classDataClassHierarchy.add(cld);
 
@@ -115,14 +115,14 @@ public class HotSpotLayouter implements Layouter {
         int superClassLastOopOffset = 0;
         int superClassFieldsSize = 0;
         int nextPaddedOffset = 0;
-        List<Integer> superGapsOffsets = new ArrayList<Integer>();
-        List<Integer> superGapsSizes = new ArrayList<Integer>();
+        List<Integer> superGapsOffsets = new ArrayList<>();
+        List<Integer> superGapsSizes = new ArrayList<>();
 
         for (ClassData clsData : classDataClassHierarchy) {
-            EnumMap<FieldAllocationType, Integer> fieldsAllocationCount = new EnumMap<FieldAllocationType, Integer>(FieldAllocationType.class);
-            EnumMap<FieldAllocationType, Integer> nextOffset = new EnumMap<FieldAllocationType, Integer>(FieldAllocationType.class);
-            EnumMap<FieldAllocationType, ArrayDeque<Integer>> spaceOffset = new EnumMap<FieldAllocationType, ArrayDeque<Integer>>(FieldAllocationType.class);
-            EnumMap<FieldAllocationType, Integer> allocationTypeSizes = new EnumMap<FieldAllocationType, Integer>(FieldAllocationType.class);
+            EnumMap<FieldAllocationType, Integer> fieldsAllocationCount = new EnumMap<>(FieldAllocationType.class);
+            EnumMap<FieldAllocationType, Integer> nextOffset = new EnumMap<>(FieldAllocationType.class);
+            EnumMap<FieldAllocationType, ArrayDeque<Integer>> spaceOffset = new EnumMap<>(FieldAllocationType.class);
+            EnumMap<FieldAllocationType, Integer> allocationTypeSizes = new EnumMap<>(FieldAllocationType.class);
 
             for (FieldAllocationType atype : FieldAllocationType.values()) {
                 fieldsAllocationCount.put(atype, 0);
@@ -143,7 +143,7 @@ public class HotSpotLayouter implements Layouter {
 
             // Count the contended fields by type.
             int contendedCount = 0;
-            EnumMap<FieldAllocationType, Integer> facContended = new EnumMap<FieldAllocationType, Integer>(FieldAllocationType.class);
+            EnumMap<FieldAllocationType, Integer> facContended = new EnumMap<>(FieldAllocationType.class);
 
             for (FieldData f : clsData.ownFields()) {
                 FieldAllocationType atype = FieldAllocationType.allocationTypeFor(f);
@@ -374,7 +374,7 @@ public class HotSpotLayouter implements Layouter {
                 nextPaddedOffset = nextOffset.get(OOP) + (oopCount * allocationTypeSizes.get(OOP));
             }
 
-            Set<FieldData> layoutedFields = new HashSet<FieldData>();
+            Set<FieldData> layoutedFields = new HashSet<>();
 
             // Iterate over fields again and compute correct offsets.
             // The field allocation type was temporarily stored in the offset slot.
@@ -429,7 +429,7 @@ public class HotSpotLayouter implements Layouter {
                 nextPaddedOffset += CONTENDED_PADDING_WIDTH;
 
                 // collect all contended groups
-                HashSet<String> contendedGroups = new HashSet<String>();
+                HashSet<String> contendedGroups = new HashSet<>();
 
                 for (FieldData f : clsData.ownFields()) {
                     if (f.isContended()) {

@@ -60,7 +60,7 @@ public class ObjectShapes implements Operation {
         }
 
         ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        CompletionService<Multiset<String>> cs = new ExecutorCompletionService<Multiset<String>>(threadPool);
+        CompletionService<Multiset<String>> cs = new ExecutorCompletionService<>(threadPool);
 
         for (final String arg : args) {
             if (arg.endsWith(".jar")) {
@@ -81,7 +81,7 @@ public class ObjectShapes implements Operation {
             }
         }
 
-        Multiset<String> shapes = new Multiset<String>();
+        Multiset<String> shapes = new Multiset<>();
         for (String arg : args) {
             Multiset<String> ms = cs.take().get();
             shapes.merge(ms);
@@ -95,7 +95,7 @@ public class ObjectShapes implements Operation {
     }
 
     private Multiset<String> processHeapDump(String arg) {
-        Multiset<String> shapes = new Multiset<String>();
+        Multiset<String> shapes = new Multiset<>();
         try {
             HeapDumpReader reader = new HeapDumpReader(new File(arg));
             Multiset<ClassData> data = reader.parse();
@@ -110,7 +110,7 @@ public class ObjectShapes implements Operation {
     }
 
     private Multiset<String> processJAR(String jarName) {
-        Multiset<String> shapes = new Multiset<String>();
+        Multiset<String> shapes = new Multiset<>();
         try {
             URLClassLoader cl = URLClassLoader.newInstance(new URL[]{new URL("jar:file:" + jarName + "!/")});
 

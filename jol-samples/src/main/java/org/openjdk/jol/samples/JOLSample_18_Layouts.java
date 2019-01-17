@@ -57,7 +57,7 @@ public class JOLSample_18_Layouts {
 
         PrintWriter pw = new PrintWriter(System.out, true);
 
-        Map<Dummy, Void> map = new HashMap<Dummy, Void>();
+        Map<Dummy, Void> map = new HashMap<>();
 
         map.put(new Dummy(1), null);
         map.put(new Dummy(2), null);

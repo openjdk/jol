@@ -49,9 +49,7 @@ public class ObjectFootprint extends ClasspathedOperation {
         try {
             Object o = tryInstantiate(klass);
             out.println(GraphLayout.parseInstance(o).toFootprint());
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException("Instantiation exception, does the class have the default constructor?", e);
-        } catch (InstantiationException e) {
+        } catch (NoSuchMethodException | InstantiationException e) {
             throw new IllegalStateException("Instantiation exception, does the class have the default constructor?", e);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException("Illegal access exception, does the class have the public default constructor?", e);

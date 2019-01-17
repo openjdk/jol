@@ -49,7 +49,7 @@ public class GraphWalker {
     public GraphWalker(Object... roots) {
         this.roots = roots;
         this.visited = Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>());
-        this.visitors = new ArrayList<GraphVisitor>();
+        this.visitors = new ArrayList<>();
     }
 
     public void addVisitor(GraphVisitor v) {
@@ -57,8 +57,8 @@ public class GraphWalker {
     }
 
     public void walk() {
-        List<GraphPathRecord> curLayer = new ArrayList<GraphPathRecord>();
-        List<GraphPathRecord> newLayer = new ArrayList<GraphPathRecord>();
+        List<GraphPathRecord> curLayer = new ArrayList<>();
+        List<GraphPathRecord> newLayer = new ArrayList<>();
 
         int rootId = 1;
         boolean single = (roots.length == 1);
@@ -105,7 +105,7 @@ public class GraphWalker {
             return Collections.emptyList();
         }
 
-        List<GraphPathRecord> result = new ArrayList<GraphPathRecord>();
+        List<GraphPathRecord> result = new ArrayList<>();
 
         if (o.getClass().isArray()) {
             int c = 0;
@@ -128,7 +128,7 @@ public class GraphWalker {
     }
 
     private Collection<Field> getAllReferences(Class<?> klass) {
-        List<Field> results = new ArrayList<Field>();
+        List<Field> results = new ArrayList<>();
 
         for (Field f : klass.getDeclaredFields()) {
             if (Modifier.isStatic(f.getModifiers())) continue;
