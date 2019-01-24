@@ -290,8 +290,10 @@ public class ServiceabilityAgentSupport {
                 throw new IllegalStateException("Unhandled style: " + style);
         }
 
-        args.add("-cp");
-        args.add(classPath);
+        if (!classPath.isEmpty()) {
+            args.add("-cp");
+            args.add(classPath);
+        }
         return args;
     }
 
