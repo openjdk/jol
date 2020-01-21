@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2020, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,58 +24,27 @@
  */
 package org.openjdk.jol.info;
 
-import org.openjdk.jol.util.ObjectUtils;
-import org.openjdk.jol.vm.VM;
 
 /**
  * Object path in object graph.
  *
  * @author Aleksey Shipilev
  */
-public abstract class GraphPathRecord {
-    protected final GraphPathRecord parent;
-    private final int depth;
-    private final Object obj;
-    private final long size;
-    private final long address;
-    private String toString;
+public class ArrayGraphPathRecord extends GraphPathRecord {
+    private final int idx;
 
-    GraphPathRecord(GraphPathRecord parent, int depth, Object obj) {
-        this.parent = parent;
-        this.obj = obj;
-        this.depth = depth;
-        this.size = VM.current().sizeOf(obj);
-        this.address = VM.current().addressOf(obj);
+    ArrayGraphPathRecord(GraphPathRecord parent, int idx, int depth, Object obj) {
+        super(parent, depth, obj);
+        this.idx = idx;
     }
 
-    Object obj() {
-        return obj;
-    }
-
-    public abstract String path();
-
-    public Class<?> klass() {
-        return obj.getClass();
-    }
-
-    public long size() {
-        return size;
-    }
-
-    public long address() {
-        return address;
-    }
-
-    public String objToString() {
-        String v = toString;
-        if (v == null) {
-            v = ObjectUtils.safeToString(obj);
-            toString = v;
+    @Override
+    public String path() {
+        if (parent != null) {
+            return parent.path() + "[" + idx + "]";
+        } else {
+            return "[" + idx + "]";
         }
-        return v;
     }
 
-    public int depth() {
-        return depth;
-    }
 }
