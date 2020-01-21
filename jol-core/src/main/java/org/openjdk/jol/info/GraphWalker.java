@@ -65,9 +65,10 @@ public class GraphWalker {
         for (Object root : roots) {
             String label = single ? "" : ("<r" + rootId + ">");
             GraphPathRecord e = new GraphPathRecord(null, label, 0, root);
-            visited.add(root);
-            visitObject(e);
-            curLayer.add(e);
+            if (visited.add(root)) {
+                visitObject(e);
+                curLayer.add(e);
+            }
             rootId++;
         }
 
