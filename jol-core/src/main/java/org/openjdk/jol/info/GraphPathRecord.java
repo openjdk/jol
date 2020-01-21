@@ -36,7 +36,7 @@ public abstract class GraphPathRecord {
     protected final GraphPathRecord parent;
     private final int depth;
     private final Object obj;
-    private final long size;
+    private long size;
     private final long address;
     private String toString;
 
@@ -44,7 +44,7 @@ public abstract class GraphPathRecord {
         this.parent = parent;
         this.obj = obj;
         this.depth = depth;
-        this.size = VM.current().sizeOf(obj);
+        // Address might change, capture it as soon as possible.
         this.address = VM.current().addressOf(obj);
     }
 
@@ -59,6 +59,10 @@ public abstract class GraphPathRecord {
     }
 
     public long size() {
+        if (size == 0) {
+            // Object size would not change, fine to compute lazily.
+            size = VM.current().sizeOf(obj);
+        }
         return size;
     }
 
