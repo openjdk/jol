@@ -25,8 +25,6 @@
 package org.openjdk.jol.info;
 
 import org.openjdk.jol.util.Multiset;
-import org.openjdk.jol.util.ObjectUtils;
-import org.openjdk.jol.vm.VM;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -37,6 +35,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
+import java.util.List;
 
 /**
  * Holds the object graph layout info.
@@ -65,19 +64,20 @@ public class GraphLayout {
         return data;
     }
 
-    private static final Comparator<Class<?>> CLASS_COMPARATOR = new Comparator<Class<?>>() {
-        @Override
-        public int compare(Class<?> o1, Class<?> o2) {
-            return o1.getName().compareTo(o2.getName());
-        }
-    };
-
-    private final Set<Class<?>> classes = new TreeSet<>(CLASS_COMPARATOR);
-    private final Multiset<Class<?>> classSizes = new Multiset<>();
-    private final Multiset<Class<?>> classCounts = new Multiset<>();
-    private final SortedMap<Long, GraphPathRecord> addresses = new TreeMap<>();
-
+    private final List<GraphPathRecord> gprs = new ArrayList<>();
     private final String description;
+
+    private volatile boolean processedHisto;
+    private Set<Class<?>> classes;
+    private Multiset<Class<?>> classSizes;
+    private Multiset<Class<?>> classCounts;
+
+    private volatile boolean processedAddresses;
+    private Map<Long, GraphPathRecord> addresses;
+    private long minAddress;
+    private long maxAddress;
+
+    private volatile boolean processedTotals;
     private long totalCount;
     private long totalSize;
 
@@ -105,19 +105,31 @@ public class GraphLayout {
     }
 
     private void addRecord(GraphPathRecord gpr) {
-        long addr = gpr.address();
-        addresses.put(addr, gpr);
+        gprs.add(gpr);
+    }
 
-        Class<?> klass = gpr.klass();
-        classes.add(klass);
-        classCounts.add(klass);
-        totalCount++;
-        try {
-            long size = gpr.size();
-            totalSize += size;
-            classSizes.add(klass, size);
-        } catch (Exception e) {
-            classSizes.add(klass, 0);
+    private void ensureProcessedAddresses() {
+        if (processedAddresses) return;
+
+        synchronized (this) {
+            addresses = new HashMap<>();
+
+            minAddress = Long.MAX_VALUE;
+            maxAddress = Long.MIN_VALUE;
+
+            for (GraphPathRecord gpr : gprs) {
+                long addr = gpr.address();
+                addresses.put(addr, gpr);
+                minAddress = Math.min(minAddress, addr);
+                maxAddress = Math.max(maxAddress, addr);
+            }
+
+            if (gprs.isEmpty()) {
+                minAddress = 0;
+                maxAddress = 0;
+            }
+
+            processedAddresses = true;
         }
     }
 
@@ -133,6 +145,9 @@ public class GraphLayout {
      * @return new data object, that contains the difference.
      */
     public GraphLayout subtract(GraphLayout another) {
+        ensureProcessedAddresses();
+        another.ensureProcessedAddresses();
+
         GraphLayout res = new GraphLayout();
         for (Map.Entry<Long, GraphPathRecord> e : addresses.entrySet()) {
             if (!another.addresses.containsKey(e.getKey())) {
@@ -154,6 +169,9 @@ public class GraphLayout {
      * @return new data object, that contains the union.
      */
     public GraphLayout add(GraphLayout another) {
+        ensureProcessedAddresses();
+        another.ensureProcessedAddresses();
+
         GraphLayout res = new GraphLayout();
         for (Map.Entry<Long, GraphPathRecord> e : addresses.entrySet()) {
             res.addRecord(e.getValue());
@@ -166,12 +184,42 @@ public class GraphLayout {
         return res;
     }
 
+
+    private void ensureProcessedHisto() {
+        if (processedHisto) return;
+
+        synchronized (this) {
+            classes = new TreeSet<>(new Comparator<Class<?>>() {
+                @Override
+                public int compare(Class<?> o1, Class<?> o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
+            classSizes = new Multiset<>();
+            classCounts = new Multiset<>();
+
+            for (GraphPathRecord gpr : gprs) {
+                Class<?> klass = gpr.klass();
+                classes.add(klass);
+                classCounts.add(klass);
+                try {
+                    classSizes.add(klass, gpr.size());
+                } catch (Exception e) {
+                    classSizes.add(klass, 0);
+                }
+            }
+
+            processedHisto = true;
+        }
+    }
+
     /**
      * Answer the class sizes.
      *
      * @return class sizes multiset
      */
     public Multiset<Class<?>> getClassSizes() {
+        ensureProcessedHisto();
         return classSizes;
     }
 
@@ -181,6 +229,7 @@ public class GraphLayout {
      * @return class counts multiset
      */
     public Multiset<Class<?>> getClassCounts() {
+        ensureProcessedHisto();
         return classCounts;
     }
 
@@ -190,7 +239,21 @@ public class GraphLayout {
      * @return observed classes set
      */
     public Set<Class<?>> getClasses() {
+        ensureProcessedHisto();
         return classes;
+    }
+
+    private void ensureProcessedTotals() {
+        if (processedTotals) return;
+
+        synchronized (this) {
+            for (GraphPathRecord gpr : gprs) {
+                totalSize += gpr.size();
+            }
+            totalCount = gprs.size();
+
+            processedTotals = true;
+        }
     }
 
     /**
@@ -199,6 +262,7 @@ public class GraphLayout {
      * @return total instance count
      */
     public long totalCount() {
+        ensureProcessedTotals();
         return totalCount;
     }
 
@@ -208,6 +272,7 @@ public class GraphLayout {
      * @return total instance footprint, bytes
      */
     public long totalSize() {
+        ensureProcessedTotals();
         return totalSize;
     }
 
@@ -217,11 +282,8 @@ public class GraphLayout {
      * @return starting address
      */
     public long startAddress() {
-        if (!addresses.isEmpty()) {
-            return addresses.firstKey();
-        } else {
-            return 0;
-        }
+        ensureProcessedAddresses();
+        return minAddress;
     }
 
     /**
@@ -230,11 +292,8 @@ public class GraphLayout {
      * @return ending address
      */
     public long endAddress() {
-        if (!addresses.isEmpty()) {
-            return addresses.lastKey();
-        } else {
-            return 0;
-        }
+        ensureProcessedAddresses();
+        return maxAddress;
     }
 
     /**
@@ -244,6 +303,7 @@ public class GraphLayout {
      * @see #record(long)
      */
     public SortedSet<Long> addresses() {
+        ensureProcessedAddresses();
         return new TreeSet<>(addresses.keySet());
     }
 
@@ -254,6 +314,7 @@ public class GraphLayout {
      * @return object descriptor
      */
     public GraphPathRecord record(long address) {
+        ensureProcessedAddresses();
         return addresses.get(address);
     }
 
