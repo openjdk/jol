@@ -34,7 +34,6 @@
         <version>0.10-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openjdk</groupId>
     <artifactId>jol-benchmarks</artifactId>
     <packaging>jar</packaging>
 
