@@ -43,14 +43,18 @@ import static java.lang.System.out;
 public class JOLSample_26_IHC_BL_Conflict {
 
     /*
-     * This is the example of biased locking.
+     * This is the example of biased locking conflicting with identity hash
+     * code. Identity hash code takes precedence.
      *
      * In order to demonstrate this, we first need to sleep for >5 seconds
      * to pass the grace period of biased locking. Then, we do the same
      * trick as the example before. You may notice that the mark word
-     * had not changed after the lock was released. That is because
-     * the mark word now contains the reference to the thread this object
-     * was biased to.
+     * had not changed after the first lock was released, retaining the bias.
+     *
+     * The identity hash code computation overwrites the biased locking information,
+     * and subsequent locks only displace it temporarily. After the second lock
+     * is released, identity hash code data gets back. No biased locking is
+     * possible for that object anymore.
      */
 
     public static void main(String[] args) throws Exception {
