@@ -26,14 +26,17 @@ package org.openjdk.jol.vm;
 
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.layouters.CurrentLayouter;
+import org.openjdk.jol.util.IOUtils;
 import org.openjdk.jol.util.MathUtil;
 import org.openjdk.jol.vm.sa.UniverseData;
 import sun.misc.Unsafe;
 
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Random;
 
@@ -61,6 +64,8 @@ class HotspotUnsafe implements VirtualMachine {
     private final long arrayObjectBase;
 
     private final Sizes sizes;
+
+    private final Method trampolineOffset;
 
     private final ThreadLocal<Object[]> BUFFERS = new ThreadLocal<Object[]>() {
         @Override
@@ -95,6 +100,8 @@ class HotspotUnsafe implements VirtualMachine {
         narrowKlassBase = saDetails.getNarrowKlassBase();
 
         sizes = new Sizes(this);
+
+        trampolineOffset = getTrampolineOffset();
     }
 
     HotspotUnsafe(Unsafe u, Instrumentation inst) {
@@ -143,6 +150,19 @@ class HotspotUnsafe implements VirtualMachine {
         narrowKlassBase = 0;
 
         sizes = new Sizes(this);
+
+        trampolineOffset = getTrampolineOffset();
+    }
+
+    private Method getTrampolineOffset() {
+        String name = "/java/lang/JOLUnsafeTrampoline.class";
+        try (InputStream is = getClass().getResourceAsStream(name)) {
+            byte[] bytes = IOUtils.readAllBytes(is);
+            Class<?> cl = U.defineAnonymousClass(Object.class, bytes, null);
+            return cl.getMethod("objectFieldOffset", Field.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private long guessNarrowOopBase() {
@@ -406,10 +426,22 @@ class HotspotUnsafe implements VirtualMachine {
 
     @Override
     public long fieldOffset(Field field) {
-        if (Modifier.isStatic(field.getModifiers())) {
-            return U.staticFieldOffset(field);
-        } else {
-            return U.objectFieldOffset(field);
+        try {
+            if (Modifier.isStatic(field.getModifiers())) {
+                return U.staticFieldOffset(field);
+            } else {
+                return U.objectFieldOffset(field);
+            }
+        } catch (UnsupportedOperationException uoe) {
+            // Access denied? Try again with trampoline.
+            try {
+                return (long) trampolineOffset.invoke(null, field);
+            } catch (Exception e) {
+                RuntimeException ex = new IllegalStateException("Unable to get the offset for " + field);
+                ex.addSuppressed(uoe);
+                ex.addSuppressed(e);
+                throw ex;
+            }
         }
     }
 

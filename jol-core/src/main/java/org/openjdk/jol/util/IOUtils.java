@@ -24,10 +24,7 @@
  */
 package org.openjdk.jol.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Reader;
+import java.io.*;
 
 public class IOUtils {
 
@@ -70,5 +67,19 @@ public class IOUtils {
         }
     }
 
+    public static byte[] readAllBytes(InputStream is) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buf = new byte[1024];
+            int read;
+            while ((read = is.read(buf)) != -1) {
+                baos.write(buf, 0, read);
+            }
+            baos.flush();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            return null;
+        }
+    }
 
 }
