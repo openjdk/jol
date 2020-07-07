@@ -63,7 +63,7 @@ public class CurrentLayouter implements Layouter {
 
         SortedSet<FieldLayout> result = new TreeSet<>();
         for (FieldData f : fields) {
-            result.add(new FieldLayout(f, f.vmOffset(), vm.sizeOfField(f.typeClass())));
+            result.add(new FieldLayout(f, vm.fieldOffset(f.refField()), vm.sizeOfField(f.typeClass())));
         }
 
         long instanceSize;

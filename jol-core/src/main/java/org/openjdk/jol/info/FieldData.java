@@ -47,7 +47,7 @@ public class FieldData {
      * @return field data
      */
     public static FieldData create(String hostKlass, String fieldName, String fieldType) {
-        return new FieldData(null, -1, hostKlass, fieldName, fieldType, false, null);
+        return new FieldData(null, hostKlass, fieldName, fieldType, false, null);
     }
 
     /**
@@ -59,7 +59,6 @@ public class FieldData {
     public static FieldData parse(Field field) {
         return new FieldData(
                 field,
-                VM.current().fieldOffset(field),
                 ClassUtils.getSafeName(field.getDeclaringClass()),
                 field.getName(),
                 ClassUtils.getSafeName(field.getType()),
@@ -72,17 +71,15 @@ public class FieldData {
     private final String type;
     private final String klass;
     private final Field refField;
-    private final long vmOffset;
     private final boolean isContended;
     private final String contendedGroup;
 
-    private FieldData(Field refField, long vmOffset, String hostKlass, String fieldName, String fieldType,
+    private FieldData(Field refField, String hostKlass, String fieldName, String fieldType,
                       boolean isContended, String contendedGroup) {
         this.klass = hostKlass;
         this.name = fieldName;
         this.type = fieldType;
         this.refField = refField;
-        this.vmOffset = vmOffset;
         this.isContended = isContended;
         this.contendedGroup = contendedGroup;
     }
@@ -139,20 +136,6 @@ public class FieldData {
      */
     public Field refField() {
         return refField;
-    }
-
-    /**
-     * The VM offset for the field, as discovered.
-     * Some layouters need to know this.
-     *
-     * @return vm offset
-     */
-    public long vmOffset() {
-        if (vmOffset != -1) {
-            return vmOffset;
-        } else {
-            throw new IllegalStateException("VM offset is not defined");
-        }
     }
 
     public String toString() {
