@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.instrument.Instrumentation;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -158,8 +159,18 @@ class HotspotUnsafe implements VirtualMachine {
         String name = "/java/lang/JOLUnsafeTrampoline.class";
         try (InputStream is = getClass().getResourceAsStream(name)) {
             byte[] bytes = IOUtils.readAllBytes(is);
-            Class<?> cl = U.defineAnonymousClass(Object.class, bytes, null);
-            return cl.getMethod("objectFieldOffset", Field.class);
+
+            // Define the trampoline class with elevated privileges.
+            // Use the full-privileged Lookup object, and use defineClass from there.
+            // Lookup::defineClass is available only from 9+, so fail gracefully here.
+            Method mDefCl = MethodHandles.Lookup.class.getMethod("defineClass", byte[].class);
+            Field fImplLookup = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
+            fImplLookup.setAccessible(true);
+            MethodHandles.Lookup lookup = (MethodHandles.Lookup)fImplLookup.get(null);
+            Class<?> tramCl = (Class<?>) mDefCl.invoke(lookup, bytes);
+
+            // Call the trampoline
+            return tramCl.getMethod("objectFieldOffset", Field.class);
         } catch (Exception e) {
             return null;
         }
