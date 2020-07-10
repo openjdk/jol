@@ -136,7 +136,7 @@ public class ClassData {
     }
 
     private ClassData(Object instance, String name) {
-        this.instance = new WeakReference<>(instance);
+        this.instance = wrapInstance(instance);
         this.name = name;
         this.fields = new ArrayList<>();
         this.classNames = new ArrayList<>();
@@ -160,7 +160,7 @@ public class ClassData {
     }
 
     private ClassData(Object instance, String arrayKlass, String componentKlass, int length) {
-        this.instance = new WeakReference<>(instance);
+        this.instance = wrapInstance(instance);
         this.name = arrayKlass;
         this.arrayKlass = arrayKlass;
         this.arrayComponentKlass = componentKlass;
@@ -170,6 +170,18 @@ public class ClassData {
         this.isArray = true;
         this.superClass = null;
         this.isContended = false;
+    }
+
+    private WeakReference<Object> wrapInstance(Object instance) {
+        if (instance != null) {
+            try {
+                return new WeakReference<>(instance);
+            } catch (IllegalArgumentException iae) {
+                // Asking for reference to value/inline type can fail here.
+                // Fallthrough to pretend we don't have an instance.
+            }
+        }
+        return null;
     }
 
     /**
@@ -395,6 +407,6 @@ public class ClassData {
      * @return the recorded instance, if available
      */
     public Object instance() {
-        return instance.get();
+        return (instance != null) ? instance.get() : null;
     }
 }
