@@ -49,6 +49,7 @@ class InstrumentationSupport {
 
     private static Instrumentation INSTRUMENTATION;
 
+    private static boolean TRY_INSTALL_ATTACH = !Boolean.getBoolean("jol.skipInstallAttach");
     private static boolean TRY_DYNAMIC_ATTACH = !Boolean.getBoolean("jol.skipDynamicAttach");
 
     public static void premain(String agentArgs, Instrumentation inst) {
@@ -56,6 +57,12 @@ class InstrumentationSupport {
     }
 
     static Instrumentation instance() {
+        if (INSTRUMENTATION != null) return INSTRUMENTATION;
+
+        if (TRY_INSTALL_ATTACH) {
+            tryAlreadyAttached();
+        }
+
         if (INSTRUMENTATION != null) return INSTRUMENTATION;
 
         if (TRY_DYNAMIC_ATTACH) {
@@ -67,6 +74,10 @@ class InstrumentationSupport {
             }
         }
         throw new InstrumentationException("No instrumentation. Add this JAR as -javaagent manually.");
+    }
+
+    private static void tryAlreadyAttached() {
+        INSTRUMENTATION = Installer.INSTRUMENTATION;
     }
 
     private static void tryDynamicAttach() throws Exception {
@@ -131,7 +142,7 @@ class InstrumentationSupport {
         }
     }
 
-    private static class Installer {
+    public static class Installer {
         public static volatile Instrumentation INSTRUMENTATION;
         public static void agentmain(String agentArgs, Instrumentation inst) {
             INSTRUMENTATION = inst;

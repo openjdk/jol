@@ -100,6 +100,7 @@ questions.
                                     <mainClass>org.openjdk.jol.Main</mainClass>
                                     <manifestEntries>
                                         <Premain-Class>org.openjdk.jol.vm.InstrumentationSupport</Premain-Class>
+                                        <Launcher-Agent-Class>org.openjdk.jol.vm.InstrumentationSupport$Installer</Launcher-Agent-Class>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
