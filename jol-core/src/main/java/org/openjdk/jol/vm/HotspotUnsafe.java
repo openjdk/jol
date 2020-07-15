@@ -66,7 +66,8 @@ class HotspotUnsafe implements VirtualMachine {
 
     private final Sizes sizes;
 
-    private final Method trampolineOffset;
+    private volatile boolean trampolineOffsetInitialized;
+    private Method trampolineOffset;
 
     private final ThreadLocal<Object[]> BUFFERS = new ThreadLocal<Object[]>() {
         @Override
@@ -101,8 +102,6 @@ class HotspotUnsafe implements VirtualMachine {
         narrowKlassBase = saDetails.getNarrowKlassBase();
 
         sizes = new Sizes(this);
-
-        trampolineOffset = getTrampolineOffset();
     }
 
     HotspotUnsafe(Unsafe u, Instrumentation inst) {
@@ -151,11 +150,15 @@ class HotspotUnsafe implements VirtualMachine {
         narrowKlassBase = 0;
 
         sizes = new Sizes(this);
-
-        trampolineOffset = getTrampolineOffset();
     }
 
     private Method getTrampolineOffset() {
+        if (trampolineOffsetInitialized) {
+            return trampolineOffset;
+        }
+
+        Method to;
+
         String name = "/java/lang/JOLUnsafeTrampoline.class";
         try (InputStream is = getClass().getResourceAsStream(name)) {
             byte[] bytes = IOUtils.readAllBytes(is);
@@ -170,10 +173,14 @@ class HotspotUnsafe implements VirtualMachine {
             Class<?> tramCl = (Class<?>) mDefCl.invoke(lookup, bytes);
 
             // Call the trampoline
-            return tramCl.getMethod("objectFieldOffset", Field.class);
+            to = tramCl.getMethod("objectFieldOffset", Field.class);
         } catch (Exception e) {
-            return null;
+            to = null;
         }
+
+        trampolineOffset = to;
+        trampolineOffsetInitialized = true;
+        return to;
     }
 
     private long guessNarrowOopBase() {
@@ -445,8 +452,13 @@ class HotspotUnsafe implements VirtualMachine {
             }
         } catch (UnsupportedOperationException uoe) {
             // Access denied? Try again with trampoline.
+            Method to = getTrampolineOffset();
+            if (to == null) {
+                throw uoe;
+            }
+
             try {
-                return (long) trampolineOffset.invoke(null, field);
+                return (long) to.invoke(null, field);
             } catch (Exception e) {
                 RuntimeException ex = new IllegalStateException("Unable to get the offset for " + field);
                 ex.addSuppressed(uoe);
