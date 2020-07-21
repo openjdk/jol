@@ -65,6 +65,84 @@ questions.
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-minus-coops-1g</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-XX:-UseCompressedOops -Xmx1g</argLine>
+                            <forkMode>always</forkMode>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-plus-coops-1g</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-XX:+UseCompressedOops -Xmx1g</argLine>
+                            <forkMode>always</forkMode>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-plus-coops-4g</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-XX:+UseCompressedOops -Xmx4g</argLine>
+                            <forkMode>always</forkMode>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-minus-coops-1g-align16</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-XX:-UseCompressedOops -Xmx1g -XX:ObjectAlignmentInBytes=16</argLine>
+                            <forkMode>always</forkMode>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-plus-coops-1g-align16</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-XX:+UseCompressedOops -Xmx1g -XX:ObjectAlignmentInBytes=16</argLine>
+                            <forkMode>always</forkMode>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-plus-coops-4g-align16</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-XX:+UseCompressedOops -Xmx4g -XX:ObjectAlignmentInBytes=16</argLine>
+                            <forkMode>always</forkMode>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <quiet>true</quiet>

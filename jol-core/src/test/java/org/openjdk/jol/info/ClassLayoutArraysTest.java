@@ -23,17 +23,9 @@ public class ClassLayoutArraysTest {
 
     static final int SIZE_SLACK = 16;
 
-
-
     @Test
     public void arraySizes_0() {
-        for (Class<?> cl : TYPES) {
-            Object o = Array.newInstance(cl, 0);
-            ClassLayout l = ClassLayout.parseInstance(o);
-            Assert.assertEquals(cl + "[0] size equals to header size",
-                    l.headerSize(),
-                    l.instanceSize());
-        }
+        doArraySizeFor(0);
     }
 
     @Test
