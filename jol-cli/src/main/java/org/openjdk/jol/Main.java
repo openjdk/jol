@@ -40,10 +40,8 @@ public class Main {
         registerOperation(new ObjectExternals());
         registerOperation(new ObjectEstimates());
         registerOperation(new ObjectFootprint());
-        registerOperation(new ObjectIdealPacking());
         registerOperation(new ObjectShapes());
         registerOperation(new StringCompress());
-        registerOperation(new HeapDump());
         registerOperation(new HeapDumpStats());
     }
 

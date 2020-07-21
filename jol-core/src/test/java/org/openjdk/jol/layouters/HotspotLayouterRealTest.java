@@ -12,7 +12,6 @@ import java.util.*;
 
 public class HotspotLayouterRealTest {
 
-    private static final boolean[] BOOLS = {false, true};
     private static final DataModel[] MODELS = { new CurrentDataModel() };
     private static final int ITERATIONS = 20000;
 
@@ -65,20 +64,8 @@ public class HotspotLayouterRealTest {
         ClassData cd = ClassData.parseClass(cl);
         Map<Layouter, ClassLayout> layouts = new HashMap<>();
         for (DataModel model : MODELS) {
-            for (boolean hierarchyGaps : BOOLS) {
-                for (boolean superClassGaps : BOOLS) {
-                    for (boolean autoAlign : BOOLS) {
-                        for (boolean compactFields : BOOLS) {
-                            for (int fieldAllocationStyle : new int[]{0, 1, 2}) {
-                                HotSpotLayouter layouter = new HotSpotLayouter(model,
-                                        hierarchyGaps, superClassGaps, autoAlign,
-                                        compactFields, fieldAllocationStyle);
-                                layouts.put(layouter, layouter.layout(cd));
-                            }
-                        }
-                    }
-                }
-            }
+            HotSpotLayouter layouter = new HotSpotLayouter(model);
+            layouts.put(layouter, layouter.layout(cd));
         }
         return layouts;
     }

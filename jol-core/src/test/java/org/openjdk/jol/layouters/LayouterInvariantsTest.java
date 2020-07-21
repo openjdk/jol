@@ -62,20 +62,8 @@ public class LayouterInvariantsTest {
             ClassData cd = ClassData.parseClass(cl);
             try {
                 for (DataModel model : MODELS) {
-                    for (boolean hierarchyGaps : BOOLS) {
-                        for (boolean superClassGaps : BOOLS) {
-                            for (boolean autoAlign : BOOLS) {
-                                for (boolean compactFields : BOOLS) {
-                                    for (int fieldAllocationStyle : new int[]{0, 1, 2}) {
-                                        HotSpotLayouter layouter = new HotSpotLayouter(model,
-                                                hierarchyGaps, superClassGaps, autoAlign,
-                                                compactFields, fieldAllocationStyle);
-                                        layouter.layout(cd);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    HotSpotLayouter layouter = new HotSpotLayouter(model);
+                    layouter.layout(cd);
                 }
             } catch (Exception e) {
                 Assert.fail("Failed. Seed = " + seed);

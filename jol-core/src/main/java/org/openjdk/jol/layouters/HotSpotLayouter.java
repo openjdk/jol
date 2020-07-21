@@ -64,27 +64,11 @@ public class HotSpotLayouter implements Layouter {
     ));
 
     static final int CONTENDED_PADDING_WIDTH = Integer.getInteger("contendedPaddingWidth", 128);
-    static final int DEFAULT_FIELD_ALLOCATION_STYLE = Integer.getInteger("fieldAllocationStyle", 1);
 
     private final DataModel model;
-    private final boolean takeHierarchyGaps;
-    private final boolean takeSuperGaps;
-    private final boolean autoAlign;
-    private final boolean compactFields;
-    private final int fieldAllocationStyle;
 
     public HotSpotLayouter(DataModel model) {
-        this(model, false, false, false, true, DEFAULT_FIELD_ALLOCATION_STYLE);
-    }
-
-    public HotSpotLayouter(DataModel model, boolean takeHierarchyGaps, boolean takeSuperGaps, boolean autoAlign,
-                           boolean compactFields, int fieldAllocationStyle) {
         this.model = model;
-        this.takeHierarchyGaps = takeHierarchyGaps;
-        this.takeSuperGaps = takeSuperGaps;
-        this.autoAlign = autoAlign;
-        this.compactFields = compactFields;
-        this.fieldAllocationStyle = fieldAllocationStyle;
     }
 
     @Override
@@ -112,11 +96,8 @@ public class HotSpotLayouter implements Layouter {
             classDataClassHierarchy.add(0, cld);
         }
 
-        int superClassLastOopOffset = 0;
         int superClassFieldsSize = 0;
         int nextPaddedOffset = 0;
-        List<Integer> superGapsOffsets = new ArrayList<>();
-        List<Integer> superGapsSizes = new ArrayList<>();
 
         for (ClassData clsData : classDataClassHierarchy) {
             EnumMap<FieldAllocationType, Integer> fieldsAllocationCount = new EnumMap<>(FieldAllocationType.class);
@@ -154,8 +135,7 @@ public class HotSpotLayouter implements Layouter {
                 }
             }
 
-            int fieldsStart = (clsData.superClass() == null ? model.headerSize() : 0) + superClassFieldsSize;
-            int nextFieldOffset = fieldsStart;
+            int nextFieldOffset = (clsData.superClass() == null ? model.headerSize() : 0) + superClassFieldsSize;
 
             boolean isContendedClass = clsData.isContended();
 
@@ -176,16 +156,12 @@ public class HotSpotLayouter implements Layouter {
 
             int firstOopOffset = 0; // will be set for first oop field
 
-            boolean compactFields = this.compactFields;
-            int allocationStyle = this.fieldAllocationStyle;
-            if (allocationStyle < 0 || allocationStyle > 2) {
-                allocationStyle = 1; // Optimistic
-            }
+            boolean compactFields = true;
+            int allocationStyle = 1;
 
             // Use default fields allocation order for classes, which have predefined hard-coded fields offsets.
-            if ((allocationStyle != 0 || compactFields) &&
-                    PREDEF_OFFSETS.contains(clsData.name())) {
-                allocationStyle = 0;     // Allocate oops first
+            if (PREDEF_OFFSETS.contains(clsData.name())) {
+                allocationStyle = 0;   // Allocate oops first
                 compactFields = false; // Don't compact fields
             }
 
@@ -194,123 +170,9 @@ public class HotSpotLayouter implements Layouter {
                 // Fields order: oops, longs/doubles, ints, shorts/chars, bytes, padded fields
                 nextOffset.put(OOP, nextFieldOffset);
                 nextOffset.put(DOUBLE, nextOffset.get(OOP) + (oopCount * model.sizeOf("oop")));
-            } else if (allocationStyle == 1) {
+            } else {
                 // Fields order: longs/doubles, ints, shorts/chars, bytes, oops, padded fields
                 nextOffset.put(DOUBLE, nextFieldOffset);
-            } else if (allocationStyle == 2) {
-                // Fields allocation: oops fields in super and sub classes are together.
-                if (superClassFieldsSize > 0) {
-                    if (clsData.superClass() != null && clsData.superClass().oopsCount() > 0) {
-                        if (superClassLastOopOffset + model.sizeOf("oop") == nextFieldOffset) {
-                            allocationStyle = 0;   // allocate oops first
-                            nextOffset.put(OOP, nextFieldOffset);
-                            nextOffset.put(DOUBLE, nextOffset.get(OOP) + (oopCount * model.sizeOf("oop")));
-                        }
-                    }
-                }
-                if (allocationStyle == 2) {
-                    allocationStyle = 1;     // allocate oops last
-                    nextOffset.put(DOUBLE, nextFieldOffset);
-                }
-            } else {
-                throw new IllegalStateException();
-            }
-
-            if (takeHierarchyGaps || takeSuperGaps) {
-                ListIterator<Integer> itSuperGapsOffsets = superGapsOffsets.listIterator();
-                ListIterator<Integer> itSuperGapsSizes = superGapsSizes.listIterator();
-                int currentGapIndex = 0;
-
-                // Allocate available fields into the hierarchy gaps.
-                while (itSuperGapsOffsets.hasNext() && itSuperGapsSizes.hasNext()) {
-                    int offset = itSuperGapsOffsets.next();
-                    int length = itSuperGapsSizes.next();
-
-                    if (length >= allocationTypeSizes.get(WORD) && wordCount > 0) {
-                        int alignedWordOffset = MathUtil.align(offset, allocationTypeSizes.get(WORD));
-
-                        // If there is enough space for word after alignment
-                        if (alignedWordOffset + allocationTypeSizes.get(WORD) <= offset + length) {
-                            wordCount -= 1;
-                            spaceOffset.get(WORD).push(alignedWordOffset);
-                            length -= allocationTypeSizes.get(WORD);
-
-                            // Try to squeeze some of the fields into the gaps due to word alignment
-                            if (length >= allocationTypeSizes.get(SHORT) && shortCount > 0) {
-                                int alignedShortOffset = MathUtil.align(offset, allocationTypeSizes.get(SHORT));
-
-                                // If there is enough space for short after alignment
-                                if (alignedShortOffset + allocationTypeSizes.get(SHORT) <= alignedWordOffset) {
-                                    shortCount -= 1;
-                                    spaceOffset.get(SHORT).push(alignedShortOffset);
-                                    length -= allocationTypeSizes.get(SHORT);
-
-                                    // Try to squeeze some of the fields into the gaps due to short alignment
-                                    if (length >= allocationTypeSizes.get(BYTE) && byteCount > 0) {
-                                        byteCount -= 1;
-                                        spaceOffset.get(BYTE).push(offset);
-                                        length -= allocationTypeSizes.get(BYTE);
-                                    }
-                                } else {
-                                    throw new IllegalStateException();
-                                }
-                            }
-                        } else {
-                            throw new IllegalStateException();
-                        }
-                    } else {
-                        while (length >= allocationTypeSizes.get(SHORT) && shortCount > 0) {
-                            int alignedShortOffset = MathUtil.align(offset, allocationTypeSizes.get(SHORT));
-                            int shortAlignmentGapSize = alignedShortOffset - offset;
-                            int shortAlignmentGapOffset = offset;
-
-                            // If there is enough space for short after alignment
-                            if (alignedShortOffset + allocationTypeSizes.get(SHORT) <= offset + length) {
-                                shortCount -= 1;
-                                spaceOffset.get(SHORT).push(alignedShortOffset);
-                                length -= allocationTypeSizes.get(SHORT);
-                                offset = alignedShortOffset + allocationTypeSizes.get(SHORT);
-
-                                if (shortAlignmentGapSize != 0) {
-                                    if (byteCount > 0) {
-                                        byteCount -= 1;
-                                        spaceOffset.get(BYTE).push(shortAlignmentGapOffset);
-                                    } else {
-                                        itSuperGapsOffsets.previous();
-                                        itSuperGapsSizes.previous();
-                                        itSuperGapsOffsets.add(shortAlignmentGapOffset);
-                                        itSuperGapsSizes.add(shortAlignmentGapSize);
-                                        currentGapIndex++;
-                                        itSuperGapsOffsets.next();
-                                        itSuperGapsSizes.next();
-                                    }
-                                    length -= allocationTypeSizes.get(BYTE);
-                                }
-                            }
-                        }
-                    }
-
-                    // Fill the gap with byte fields
-                    while (length > 0 && byteCount > 0) {
-                        byteCount -= 1;
-                        spaceOffset.get(BYTE).push(offset);
-                        length -= allocationTypeSizes.get(BYTE);
-                        offset += allocationTypeSizes.get(BYTE);
-                    }
-
-                    // If the gap is filled, remove it from the lists
-                    if (length == 0) {
-                        itSuperGapsOffsets.remove();
-                        itSuperGapsSizes.remove();
-                        continue;
-                    } else {
-
-                        superGapsOffsets.set(currentGapIndex, offset);
-                        superGapsSizes.set(currentGapIndex, length);
-                    }
-
-                    currentGapIndex++;
-                }
             }
 
             // Try to squeeze some of the fields into the gaps due to
@@ -342,20 +204,11 @@ public class HotSpotLayouter implements Layouter {
                             offset += allocationTypeSizes.get(BYTE);
                         }
                         // Allocate oop field in the gap if there are no other fields for that.
-                        if (length >= allocationTypeSizes.get(OOP) && oopCount > 0 &&
-                                allocationStyle != 0) { // when oop fields not first
+                        if (length >= allocationTypeSizes.get(OOP) && oopCount > 0) {
+                            // when oop fields not first
                             oopCount -= 1;
                             spaceOffset.get(OOP).push(offset);
-                            length -= allocationTypeSizes.get(OOP);
-                            offset += allocationTypeSizes.get(OOP);
                         }
-                    }
-
-                    // Add a gap, that is left to super gaps list.
-                    // takeSuperGaps strategy extends takeHierarchyGaps, and this is the "extension point".
-                    if (takeSuperGaps && length > 0) {
-                        superGapsOffsets.add(offset);
-                        superGapsSizes.add(length);
                     }
                 }
             }
@@ -409,10 +262,6 @@ public class HotSpotLayouter implements Layouter {
 
                 layoutedFields.add(f);
                 result.add(new FieldLayout(f, realOffset, model.sizeOf(f.typeClass())));
-
-                if (atype == OOP) {
-                    superClassLastOopOffset = realOffset;
-                }
             }
 
             // Handle the contended cases.
@@ -488,15 +337,9 @@ public class HotSpotLayouter implements Layouter {
             }
 
             superClassFieldsSize = MathUtil.align(nextPaddedOffset, model.sizeOf("oop"));
-
-            // If there is a gap after object alignment add it to the super gaps list.
-            if ((takeHierarchyGaps || takeSuperGaps) && superClassFieldsSize != nextPaddedOffset) {
-                superGapsOffsets.add(nextPaddedOffset);
-                superGapsSizes.add(superClassFieldsSize - nextPaddedOffset);
-            }
         }
 
-        int minAlignment = autoAlign ? 4 : model.objectAlignment();
+        int minAlignment = model.objectAlignment();
         for (String k : cd.classHierarchy()) {
             Collection<FieldData> fields = cd.fieldsFor(k);
             for (FieldData f : fields) {
@@ -511,11 +354,6 @@ public class HotSpotLayouter implements Layouter {
 
     @Override
     public String toString() {
-        return "VM Layout Simulation (" + model
-                + (takeHierarchyGaps ? ", hierarchy gaps" : "")
-                + (takeSuperGaps ? ", super gaps" : "")
-                + (autoAlign ? ", autoalign" : "")
-                + (compactFields ? ", compact fields" : "")
-                + ", field allocation style: " + fieldAllocationStyle + ")";
+        return "VM Layout Simulation (" + model + ")";
     }
 }
