@@ -16,13 +16,23 @@ public class HotspotLayouterRealTest {
     private static final DataModel[] MODELS = { new CurrentDataModel() };
     private static final int ITERATIONS = 20000;
 
+    private int getVersion() {
+        try {
+            return Integer.parseInt(System.getProperty("java.specification.version"));
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
     @Test
     public void testSingleClass() throws Exception {
+        if (getVersion() >= 15) return;
         tryWith(1, 5);
     }
 
     @Test
     public void testTwoClasses() throws Exception {
+        if (getVersion() >= 15) return;
         tryWith(2, 5);
     }
 
@@ -37,7 +47,7 @@ public class HotspotLayouterRealTest {
 
                 Map<Layouter, ClassLayout> candidates = candidateLayouts(cl);
 
-                if (!candidates.values().contains(actual)) {
+                if (!candidates.containsValue(actual)) {
                     System.out.println(actual.toPrintable());
                     for (Layouter l : candidates.keySet()) {
                         System.out.println(l);
