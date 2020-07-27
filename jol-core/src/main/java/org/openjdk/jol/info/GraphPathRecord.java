@@ -66,6 +66,10 @@ public abstract class GraphPathRecord {
         return size;
     }
 
+    void setSize(long size) {
+        this.size = size;
+    }
+
     public long address() {
         return address;
     }

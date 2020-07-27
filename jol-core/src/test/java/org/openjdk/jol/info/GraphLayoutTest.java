@@ -18,6 +18,11 @@ public class GraphLayoutTest {
         public C(A a) { this.a = a; }
     }
 
+    static class D {
+        private final D d;
+        public D(D d) { this.d = d; }
+    }
+
     @Test
     public void basicCounts() {
         A a = new A();
@@ -62,6 +67,22 @@ public class GraphLayoutTest {
         Assert.assertEquals("GraphLayout size of B = sum of all sizes",
                 GraphLayout.parseInstance(b).totalSize(),
                 GraphLayout.parseInstance(b.a, b).totalSize());
+    }
+
+    @Test
+    public void compoundSizes() {
+        for (int s : new int[] {0, 1, 10, 100, 1000}) {
+            D d = new D(null);
+            for (int i = 0; i < s; i++) {
+                d = new D(d);
+            }
+
+            long dSize = GraphLayout.parseInstance(d).totalSize();
+            long dSize_insta = ClassLayout.parseInstance(d).instanceSize();
+
+            Assert.assertEquals("GraphLayout size of D chain = size of D times " + (s + 1),
+                    dSize, dSize_insta * (s+1));
+        }
     }
 
     @Test

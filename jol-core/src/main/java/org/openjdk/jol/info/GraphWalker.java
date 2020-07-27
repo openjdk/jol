@@ -25,6 +25,7 @@
 package org.openjdk.jol.info;
 
 import org.openjdk.jol.util.ObjectUtils;
+import org.openjdk.jol.vm.VM;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -38,9 +39,11 @@ import java.util.*;
 public class GraphWalker {
 
     private final Map<Class<?>, Field[]> fieldsCache;
+    private final Map<Class<?>, Long> sizeCache;
 
     public GraphWalker() {
         fieldsCache = new HashMap<>();
+        sizeCache = new HashMap<>();
     }
 
     public GraphLayout walk(Object... roots) {
@@ -83,6 +86,13 @@ public class GraphWalker {
                     }
                 }
             } else {
+                Long knownSize = sizeCache.get(cl);
+                if (knownSize == null) {
+                    knownSize = VM.current().sizeOf(o);
+                    sizeCache.put(cl, knownSize);
+                }
+                cGpr.setSize(knownSize);
+
                 Field[] fields = getAllReferences(cl);
                 for (Field f : fields) {
                     Object e = ObjectUtils.value(o, f);
