@@ -37,25 +37,17 @@ import java.util.*;
  */
 public class GraphWalker {
 
-    private final Set<Object> visited;
-    private final Object[] roots;
-    private final Collection<GraphVisitor> visitors;
     private final Map<Class<?>, Field[]> fieldsCache;
 
-    public GraphWalker(Object... roots) {
-        this.roots = roots;
-        this.visited = Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>());
-        this.visitors = new ArrayList<>();
-        this.fieldsCache = new HashMap<>();
+    public GraphWalker() {
+        fieldsCache = new HashMap<>();
     }
 
-    public void addVisitor(GraphVisitor v) {
-        visitors.add(v);
-    }
+    public GraphLayout walk(Object... roots) {
+        GraphLayout data = new GraphLayout();
 
-    public void walk() {
-        List<GraphPathRecord> curLayer = new ArrayList<>();
-        List<GraphPathRecord> newLayer = new ArrayList<>();
+        Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>());
+        ArrayDeque<GraphPathRecord> q = new ArrayDeque<>();
 
         int rootId = 1;
         boolean single = (roots.length == 1);
@@ -63,58 +55,47 @@ public class GraphWalker {
             String label = single ? "" : ("<r" + rootId + ">");
             GraphPathRecord e = new FieldGraphPathRecord(null, label, 0, root);
             if (visited.add(root)) {
-                visitObject(e);
-                curLayer.add(e);
+                data.addRecord(e);
+                q.add(e);
             }
             rootId++;
         }
 
-        while (!curLayer.isEmpty()) {
-            newLayer.clear();
-            for (GraphPathRecord next : curLayer) {
-                Object o = next.obj();
+        while (!q.isEmpty()) {
+            GraphPathRecord cGpr = q.pop();
+            Object o = cGpr.obj();
+            Class<?> cl = o.getClass();
 
-                if (o.getClass().isArray()) {
-                    if (o.getClass().getComponentType().isPrimitive()) {
-                        // Nothing to do here
-                        continue;
+            if (cl.isArray()) {
+                if (cl.getComponentType().isPrimitive()) {
+                    // Nothing to do here
+                    continue;
+                }
+
+                Object[] arr = (Object[]) o;
+
+                for (int i = 0; i < arr.length; i++) {
+                    Object e = arr[i];
+                    if (e != null && visited.add(e)) {
+                        GraphPathRecord gpr = new ArrayGraphPathRecord(cGpr, i, cGpr.depth() + 1, e);
+                        data.addRecord(gpr);
+                        q.push(gpr);
                     }
-
-                    Object[] arr = (Object[]) o;
-
-                    for (int i = 0; i < arr.length; i++) {
-                        Object e = arr[i];
-                        if (e != null) {
-                            if (visited.add(e)) {
-                                GraphPathRecord gpr = new ArrayGraphPathRecord(next, i, next.depth() + 1, e);
-                                visitObject(gpr);
-                                newLayer.add(gpr);
-                            }
-                        }
-                    }
-                } else {
-                    Field[] fields = getAllReferences(o.getClass());
-                    for (Field f : fields) {
-                        Object e = ObjectUtils.value(o, f);
-                        if (e != null) {
-                            if (visited.add(e)) {
-                                GraphPathRecord gpr = new FieldGraphPathRecord(next, f.getName(), next.depth() + 1, e);
-                                visitObject(gpr);
-                                newLayer.add(gpr);
-                            }
-                        }
+                }
+            } else {
+                Field[] fields = getAllReferences(cl);
+                for (Field f : fields) {
+                    Object e = ObjectUtils.value(o, f);
+                    if (e != null && visited.add(e)) {
+                        GraphPathRecord gpr = new FieldGraphPathRecord(cGpr, f.getName(), cGpr.depth() + 1, e);
+                        data.addRecord(gpr);
+                        q.push(gpr);
                     }
                 }
             }
-            curLayer.clear();
-            curLayer.addAll(newLayer);
         }
-    }
 
-    private void visitObject(GraphPathRecord record) {
-        for (GraphVisitor v : visitors) {
-            v.visit(record);
-        }
+        return data;
     }
 
     private Field[] getAllReferences(Class<?> klass) {

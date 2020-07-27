@@ -57,11 +57,7 @@ public class GraphLayout {
                 throw new IllegalArgumentException("Some root is null");
             }
         }
-        GraphLayout data = new GraphLayout(roots);
-        GraphWalker walker = new GraphWalker(roots);
-        walker.addVisitor(data.visitor());
-        walker.walk();
-        return data;
+        return new GraphWalker().walk(roots);
     }
 
     private final List<GraphPathRecord> gprs = new ArrayList<>();
@@ -95,16 +91,7 @@ public class GraphLayout {
         this.description = sb.toString();
     }
 
-    private GraphVisitor visitor() {
-        return new GraphVisitor() {
-            @Override
-            public void visit(GraphPathRecord gpr) {
-                addRecord(gpr);
-            }
-        };
-    }
-
-    private void addRecord(GraphPathRecord gpr) {
+    void addRecord(GraphPathRecord gpr) {
         gprs.add(gpr);
     }
 
