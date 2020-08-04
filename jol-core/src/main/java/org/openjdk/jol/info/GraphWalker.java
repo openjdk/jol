@@ -29,7 +29,11 @@ import org.openjdk.jol.vm.VM;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Basic class to walk object graphs.
@@ -49,7 +53,7 @@ public class GraphWalker {
     public GraphLayout walk(Object... roots) {
         GraphLayout data = new GraphLayout();
 
-        Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>());
+        IdentityHashSet visited = new IdentityHashSet(IdentityHashSet.MINIMUM_CAPACITY);
         ArrayDeque<GraphPathRecord> q = new ArrayDeque<>();
 
         int rootId = 1;
@@ -137,4 +141,79 @@ public class GraphWalker {
         return arr;
     }
 
+    private static final class IdentityHashSet {
+        private static final int MINIMUM_CAPACITY = 4;
+        private static final int MAXIMUM_CAPACITY = 1 << 29;
+
+        private Object[] table;
+        private int size;
+
+        public IdentityHashSet(int expectedMaxSize) {
+            table = new Object[capacity(expectedMaxSize)];
+        }
+
+        private static int capacity(int expectedMaxSize) {
+            return (expectedMaxSize > MAXIMUM_CAPACITY / 3) ? MAXIMUM_CAPACITY :
+                   (expectedMaxSize <= 2 * MINIMUM_CAPACITY / 3) ? MINIMUM_CAPACITY :
+                   Integer.highestOneBit(expectedMaxSize + (expectedMaxSize << 1));
+        }
+
+        private static int hash(Object x, int length) {
+            return System.identityHashCode(x) & (length - 1);
+        }
+
+        private static int nextIndex(int i, int len) {
+            return (i + 1 < len ? i + 1 : 0);
+        }
+
+        public boolean add(Object o) {
+            while (true) {
+                final Object[] tab = table;
+                final int len = tab.length;
+                int i = hash(o, len);
+
+                for (Object item; (item = tab[i]) != null; i = nextIndex(i, len)) {
+                    if (item == o) {
+                        return false;
+                    }
+                }
+
+                final int s = size + 1;
+                if (s*3 > len && resize(len)) continue;
+
+                tab[i] = o;
+                size = s;
+                return true;
+            }
+        }
+
+        private boolean resize(int newCapacity) {
+            int newLength = newCapacity * 2;
+
+            Object[] oldTable = table;
+            int oldLength = oldTable.length;
+            if (oldLength == 2 * MAXIMUM_CAPACITY) { // can't expand any further
+                if (size == MAXIMUM_CAPACITY - 1) {
+                    throw new IllegalStateException("Capacity exhausted.");
+                }
+                return false;
+            }
+            if (oldLength >= newLength)
+                return false;
+
+            Object[] newTable = new Object[newLength];
+
+            for (Object o : oldTable) {
+                if (o != null) {
+                    int i = hash(o, newLength);
+                    while (newTable[i] != null) {
+                        i = nextIndex(i, newLength);
+                    }
+                    newTable[i] = o;
+                }
+            }
+            table = newTable;
+            return true;
+        }
+    }
 }
