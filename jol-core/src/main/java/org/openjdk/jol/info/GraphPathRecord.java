@@ -37,7 +37,7 @@ public abstract class GraphPathRecord {
     private final int depth;
     private final Object obj;
     private long size;
-    private final long address;
+    private long address;
     private String toString;
 
     GraphPathRecord(GraphPathRecord parent, int depth, Object obj) {
@@ -45,7 +45,7 @@ public abstract class GraphPathRecord {
         this.obj = obj;
         this.depth = depth;
         // Address might change, capture it as soon as possible.
-        this.address = VM.current().addressOf(obj);
+        checkAndRecomputeAddr();
     }
 
     Object obj() {
@@ -85,5 +85,14 @@ public abstract class GraphPathRecord {
 
     public int depth() {
         return depth;
+    }
+
+    public boolean checkAndRecomputeAddr() {
+        long current = VM.current().addressOf(obj);
+        if (address != current) {
+            address = current;
+            return true;
+        }
+        return false;
     }
 }

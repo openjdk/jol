@@ -72,6 +72,8 @@ public class GraphLayout {
     private Map<Long, GraphPathRecord> addresses;
     private long minAddress;
     private long maxAddress;
+    private int addressTries;
+    private boolean addressStable;
 
     private volatile boolean processedTotals;
     private long totalCount;
@@ -99,23 +101,37 @@ public class GraphLayout {
         if (processedAddresses) return;
 
         synchronized (this) {
-            addresses = new HashMap<>();
-
-            minAddress = Long.MAX_VALUE;
-            maxAddress = Long.MIN_VALUE;
-
-            for (GraphPathRecord gpr : gprs) {
-                long addr = gpr.address();
-                addresses.put(addr, gpr);
-                minAddress = Math.min(minAddress, addr);
-                maxAddress = Math.max(maxAddress, addr);
-            }
-
             if (gprs.isEmpty()) {
                 minAddress = 0;
                 maxAddress = 0;
             }
 
+            addresses = new HashMap<>();
+
+            boolean good = false;
+            for (addressTries = 0; (addressTries < 10) && !good; addressTries++) {
+                addresses.clear();
+                minAddress = Long.MAX_VALUE;
+                maxAddress = Long.MIN_VALUE;
+
+                good = true;
+                for (GraphPathRecord gpr : gprs) {
+                    if (gpr.checkAndRecomputeAddr()) {
+                        // If any object have moved, continue traversing to recompute
+                        // others, and then force a retry, hoping for a clean iteration.
+                        good = false;
+                    }
+
+                    if (good) {
+                        long addr = gpr.address();
+                        addresses.put(addr, gpr);
+                        minAddress = Math.min(minAddress, addr);
+                        maxAddress = Math.max(maxAddress, addr);
+                    }
+                }
+            }
+
+            addressStable = good;
             processedAddresses = true;
         }
     }
@@ -359,6 +375,8 @@ public class GraphLayout {
             pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", addr, size, record.klass().getName(), record.path(), record.objToString());
             last = addr + size;
         }
+        pw.println();
+        pw.println("Addresses are " + (addressStable ? "stable" : "still unstable") + " after " + addressTries + " tries.");
         pw.println();
         pw.close();
         return sw.toString();
