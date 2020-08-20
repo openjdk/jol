@@ -51,7 +51,7 @@ public class GraphWalker {
     }
 
     public GraphLayout walk(Object... roots) {
-        GraphLayout data = new GraphLayout();
+        GraphLayout data = new GraphLayout(roots);
 
         IdentityHashSet visited = new IdentityHashSet(IdentityHashSet.MINIMUM_CAPACITY);
         ArrayDeque<GraphPathRecord> q = new ArrayDeque<>();
