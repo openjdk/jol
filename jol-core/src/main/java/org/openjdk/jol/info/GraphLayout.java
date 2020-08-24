@@ -25,6 +25,7 @@
 package org.openjdk.jol.info;
 
 import org.openjdk.jol.util.Multiset;
+import org.openjdk.jol.vm.VM;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -108,6 +109,13 @@ public class GraphLayout {
 
             addresses = new HashMap<>();
 
+            // First round of address computations to seed the addresses.
+            // We would then confirm the addresses are stable on the next step.
+            long[] rawAddresses = new long[gprs.size()];
+            for (int i = 0; i < gprs.size(); i++) {
+                rawAddresses[i] = VM.current().addressOf(gprs.get(i).obj());
+            }
+
             boolean good = false;
             for (addressTries = 0; (addressTries < 10) && !good; addressTries++) {
                 addresses.clear();
@@ -115,15 +123,19 @@ public class GraphLayout {
                 maxAddress = Long.MIN_VALUE;
 
                 good = true;
-                for (GraphPathRecord gpr : gprs) {
-                    if (gpr.checkAndRecomputeAddr()) {
+                for (int i = 0; i < gprs.size(); i++) {
+                    GraphPathRecord gpr = gprs.get(i);
+                    Object o = gpr.obj();
+
+                    long addr = VM.current().addressOf(o);
+                    if (rawAddresses[i] != addr) {
                         // If any object have moved, continue traversing to recompute
                         // others, and then force a retry, hoping for a clean iteration.
+                        rawAddresses[i] = addr;
                         good = false;
                     }
 
                     if (good) {
-                        long addr = gpr.address();
                         addresses.put(addr, gpr);
                         minAddress = Math.min(minAddress, addr);
                         maxAddress = Math.max(maxAddress, addr);
