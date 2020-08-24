@@ -29,7 +29,7 @@ package org.openjdk.jol.info;
  *
  * @author Aleksey Shipilev
  */
-public class FieldGraphPathRecord extends GraphPathRecord {
+final class FieldGraphPathRecord extends GraphPathRecord {
     private final String name;
 
     FieldGraphPathRecord(GraphPathRecord parent, String name, int depth, Object obj) {
@@ -38,7 +38,7 @@ public class FieldGraphPathRecord extends GraphPathRecord {
     }
 
     @Override
-    public String path() {
+    final String path() {
         if (parent != null) {
             return parent.path() + "." + name;
         } else {

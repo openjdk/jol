@@ -30,7 +30,7 @@ package org.openjdk.jol.info;
  *
  * @author Aleksey Shipilev
  */
-public class ArrayGraphPathRecord extends GraphPathRecord {
+final class ArrayGraphPathRecord extends GraphPathRecord {
     private final int idx;
 
     ArrayGraphPathRecord(GraphPathRecord parent, int idx, int depth, Object obj) {
@@ -39,7 +39,7 @@ public class ArrayGraphPathRecord extends GraphPathRecord {
     }
 
     @Override
-    public String path() {
+    final String path() {
         if (parent != null) {
             return parent.path() + "[" + idx + "]";
         } else {
