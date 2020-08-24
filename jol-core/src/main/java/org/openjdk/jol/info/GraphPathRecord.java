@@ -24,7 +24,6 @@
  */
 package org.openjdk.jol.info;
 
-import org.openjdk.jol.util.ObjectUtils;
 import org.openjdk.jol.vm.VM;
 
 /**
@@ -37,7 +36,6 @@ public abstract class GraphPathRecord {
     private final int depth;
     private final Object obj;
     private long size;
-    private String toString;
 
     GraphPathRecord(GraphPathRecord parent, int depth, Object obj) {
         this.parent = parent;
@@ -65,15 +63,6 @@ public abstract class GraphPathRecord {
 
     void setSize(long size) {
         this.size = size;
-    }
-
-    public String objToString() {
-        String v = toString;
-        if (v == null) {
-            v = ObjectUtils.safeToString(obj);
-            toString = v;
-        }
-        return v;
     }
 
     public int depth() {

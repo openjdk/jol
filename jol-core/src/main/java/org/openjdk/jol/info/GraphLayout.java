@@ -25,6 +25,7 @@
 package org.openjdk.jol.info;
 
 import org.openjdk.jol.util.Multiset;
+import org.openjdk.jol.util.ObjectUtils;
 import org.openjdk.jol.vm.VM;
 
 import javax.imageio.ImageIO;
@@ -384,7 +385,7 @@ public class GraphLayout {
                 pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", last, addr - last, "**** OVERLAP ****", "**** OVERLAP ****", "**** OVERLAP ****");
             }
 
-            pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", addr, size, record.klass().getName(), record.path(), record.objToString());
+            pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", addr, size, record.klass().getName(), record.path(), ObjectUtils.safeToString(record.obj()));
             last = addr + size;
         }
         pw.println();
