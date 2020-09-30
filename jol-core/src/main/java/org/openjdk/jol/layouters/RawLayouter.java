@@ -57,7 +57,7 @@ public class RawLayouter implements Layouter {
 
             long instanceSize = base + data.arrayLength() * scale;
             result.add(new FieldLayout(FieldData.create(data.arrayClass(), "<elements>", data.arrayComponentType()), base, scale * data.arrayLength()));
-            return new ClassLayout(data, result, model.arrayHeaderSize(), instanceSize, false);
+            return ClassLayout.createClassLayout(data, result, model.arrayHeaderSize(), instanceSize, false);
         }
 
         int offset = model.headerSize();
@@ -68,10 +68,10 @@ public class RawLayouter implements Layouter {
         }
 
         if (result.isEmpty()) {
-            return new ClassLayout(data, result, model.headerSize(), model.headerSize(), false);
+            return ClassLayout.createClassLayout(data, result, model.headerSize(), model.headerSize(), false);
         } else {
             FieldLayout f = result.last();
-            return new ClassLayout(data, result, model.headerSize(), f.offset() + f.size(), false);
+            return ClassLayout.createClassLayout(data, result, model.headerSize(), f.offset() + f.size(), false);
         }
     }
 

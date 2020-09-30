@@ -114,7 +114,7 @@ public class ClassLayout {
      * @param instanceSize instance size
      * @param check        whether to check important invariants
      */
-    public ClassLayout(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, long instanceSize, boolean check) {
+    private ClassLayout(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, long instanceSize, boolean check) {
         this.classData = classData;
         this.fields = fields;
         this.headerSize = headerSize;
@@ -122,6 +122,10 @@ public class ClassLayout {
         if (check) {
             checkInvariants();
         }
+    }
+
+    public static ClassLayout createClassLayout(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, long instanceSize, boolean check) {
+        return new ClassLayout(classData, fields, headerSize, instanceSize, check);
     }
 
     private void checkInvariants() {
