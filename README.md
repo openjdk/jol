@@ -146,7 +146,7 @@ If you don't have the access to JDK Bug System, submit the bug report at "Issues
 ## Development
 
 JOL project accepts pull requests, like other OpenJDK projects.
-If you have never contributed to OpenJDK before, then bots would require you to [sign OCA first](http://openjdk.java.net/contribute).
+If you have never contributed to OpenJDK before, then bots would require you to [sign OCA first](https://openjdk.java.net/contribute/).
 Normally, you don't need to post patches anywhere else, or post to mailing lists, etc.
 If you do want to have a wider discussion about JOL, please refer to [jol-dev](https://mail.openjdk.java.net/mailman/listinfo/jol-dev).
 
