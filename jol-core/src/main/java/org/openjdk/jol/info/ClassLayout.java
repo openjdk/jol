@@ -104,12 +104,18 @@ public class ClassLayout {
     private final SortedSet<FieldLayout> fields;
     private final int headerSize;
     private final long size;
+    private final int lossesInternal;
+    private final int lossesExternal;
+    private final int lossesTotal;
 
-    private ClassLayout(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, long instanceSize) {
+    private ClassLayout(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, long instanceSize, int lossesInternal, int lossesExternal, int lossesTotal) {
         this.classData = classData;
         this.fields = fields;
         this.headerSize = headerSize;
         this.size = instanceSize;
+        this.lossesInternal = lossesInternal;
+        this.lossesExternal = lossesExternal;
+        this.lossesTotal = lossesTotal;
     }
 
     /**
@@ -125,7 +131,19 @@ public class ClassLayout {
         if (check) {
             checkInvariants(fields, instanceSize);
         }
-        return new ClassLayout(classData, fields, headerSize, instanceSize);
+        // calculate loses
+        long nextFree = headerSize;
+        long lossesInternal = 0;
+        for (FieldLayout fieldLayout : fields) {
+            if (fieldLayout.offset() > nextFree) {
+                long fieldLayoutSize = fieldLayout.offset() - nextFree;
+                lossesInternal += fieldLayoutSize;
+            }
+            nextFree = fieldLayout.offset() + fieldLayout.size();
+        }
+        long lossesExternal = instanceSize != nextFree ? instanceSize - nextFree : 0;
+        long lossesTotal = lossesInternal + lossesExternal;
+        return new ClassLayout(classData, fields, headerSize, instanceSize, (int) lossesInternal, (int) lossesExternal, (int)lossesTotal);
     }
 
     private static void checkInvariants(SortedSet<FieldLayout> fields, long instanceSize) {
@@ -169,6 +187,27 @@ public class ClassLayout {
      */
     public int headerSize() {
         return headerSize;
+    }
+
+    /**
+     * Loosed bytes from padding between fields
+     */
+    public long getLossesInternal() {
+        return lossesInternal;
+    }
+
+    /**
+     * Loosed bytes due to next object alignment
+     */
+    public long getLossesExternal() {
+        return lossesExternal;
+    }
+
+    /**
+     * Total loosed bytes i.e. lossesInternal + lossesExternal
+     */
+    public long getLossesTotal() {
+        return lossesTotal;
     }
 
     @Override
@@ -255,13 +294,9 @@ public class ClassLayout {
 
         long nextFree = headerSize();
 
-        long interLoss = 0;
-        long exterLoss = 0;
-
         for (FieldLayout f : fields()) {
             if (f.offset() > nextFree) {
                 pw.printf(" %6d %5d %" + maxTypeLen + "s %-" + maxDescrLen + "s%n", nextFree, (f.offset() - nextFree), "", MSG_GAP);
-                interLoss += (f.offset() - nextFree);
             }
 
             Field fi = f.data().refField();
@@ -279,12 +314,11 @@ public class ClassLayout {
         long sizeOf = (instance != null) ? VM.current().sizeOf(instance) : instanceSize();
 
         if (sizeOf != nextFree) {
-            exterLoss = sizeOf - nextFree;
-            pw.printf(" %6d %5s %" + maxTypeLen + "s %s%n", nextFree, exterLoss, "", MSG_NEXT_GAP);
+            pw.printf(" %6d %5s %" + maxTypeLen + "s %s%n", nextFree, lossesExternal, "", MSG_NEXT_GAP);
         }
 
         pw.printf("Instance size: %d bytes%n", sizeOf);
-        pw.printf("Space losses: %d bytes internal + %d bytes external = %d bytes total%n", interLoss, exterLoss, interLoss + exterLoss);
+        pw.printf("Space losses: %d bytes internal + %d bytes external = %d bytes total%n", lossesInternal, lossesExternal, lossesTotal);
 
         pw.close();
 
