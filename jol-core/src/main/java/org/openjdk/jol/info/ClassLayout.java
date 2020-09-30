@@ -105,6 +105,13 @@ public class ClassLayout {
     private final int headerSize;
     private final long size;
 
+    private ClassLayout(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, long instanceSize) {
+        this.classData = classData;
+        this.fields = fields;
+        this.headerSize = headerSize;
+        this.size = instanceSize;
+    }
+
     /**
      * Builds the class layout.
      *
@@ -114,28 +121,21 @@ public class ClassLayout {
      * @param instanceSize instance size
      * @param check        whether to check important invariants
      */
-    private ClassLayout(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, long instanceSize, boolean check) {
-        this.classData = classData;
-        this.fields = fields;
-        this.headerSize = headerSize;
-        this.size = instanceSize;
-        if (check) {
-            checkInvariants();
-        }
-    }
-
     public static ClassLayout createClassLayout(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, long instanceSize, boolean check) {
-        return new ClassLayout(classData, fields, headerSize, instanceSize, check);
+        if (check) {
+            checkInvariants(fields, instanceSize);
+        }
+        return new ClassLayout(classData, fields, headerSize, instanceSize);
     }
 
-    private void checkInvariants() {
+    private static void checkInvariants(SortedSet<FieldLayout> fields, long instanceSize) {
         FieldLayout lastField = null;
         for (FieldLayout f : fields) {
             if (f.offset() % f.size() != 0) {
                 throw new IllegalStateException("Field " + f + " is not aligned");
             }
-            if (f.offset() + f.size() > instanceSize()) {
-                throw new IllegalStateException("Field " + f + " is overflowing the object of size " + instanceSize());
+            if (f.offset() + f.size() > instanceSize) {
+                throw new IllegalStateException("Field " + f + " is overflowing the object of size " + instanceSize);
             }
             if (lastField != null && (f.offset() < lastField.offset() + lastField.size())) {
                 throw new IllegalStateException("Field " + f + " overlaps with the previous field "+ lastField);
