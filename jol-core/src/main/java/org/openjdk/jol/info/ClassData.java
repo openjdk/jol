@@ -203,6 +203,15 @@ public class ClassData {
     }
 
     /**
+     * Add the super-class data of the class.
+     *
+     * @param superClassData parsed super class
+     */
+    public void addSuperClassData(ClassData superClassData) {
+        this.superClass = superClassData;
+    }
+
+    /**
      * Add the field data.
      *
      * @param fieldData the data to add
