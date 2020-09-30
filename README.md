@@ -8,6 +8,12 @@ specification assumptions, etc.
 
 ## Usage
 
+### JOL Samples
+
+You can have a brief tour of JOL capabilities by looking through the [JOL Samples](https://github.com/openjdk/jol/tree/master/jol-samples/src/main/java/org/openjdk/jol/samples). You can run them from the IDE, or using the JAR file:
+
+    $ java -cp jol-samples/target/jol-samples.jar org.openjdk.jol.samples.JOLSample_01_Basic
+
 ### Use as Library Dependency
 
 [Maven Central](https://repo.maven.apache.org/maven2/org/openjdk/jol/jol-core/)
@@ -140,8 +146,9 @@ If you don't have the access to JDK Bug System, submit the bug report at "Issues
 ## Development
 
 JOL project accepts pull requests, like other OpenJDK projects.
-If you have never contributed to OpenJDK, then bots would require you to [sign OCA first](http://openjdk.java.net/contribute).
-You don't need to post patches anywhere else, or post to mailing lists, etc.
+If you have never contributed to OpenJDK before, then bots would require you to [sign OCA first](http://openjdk.java.net/contribute).
+Normally, you don't need to post patches anywhere else, or post to mailing lists, etc.
+If you do want to have a wider discussion about JOL, please refer to [jol-dev](https://mail.openjdk.java.net/mailman/listinfo/jol-dev).
 
 Compile and run tests:
 
