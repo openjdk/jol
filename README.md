@@ -22,15 +22,17 @@ contains the latest releases. You can use them right away with this Maven depend
         <version>put-the-version-here</version>
     </dependency>
 
-JOL module would try to self-attach as Java Agent, if possible. If you are using JOL as the library, it is recommended to add `Premain-Class` and `Launcher-Agent` attributes to the [final JAR manifest](https://github.com/openjdk/jol/blob/a549b7410045167238716677dac3de221951da2d/jol-samples/pom.xml#L132-L133).
+JOL module would try to self-attach as Java Agent, if possible. If you are using JOL as the library,
+it is recommended to add `Premain-Class` and `Launcher-Agent` attributes to the
+[final JAR manifest](https://github.com/openjdk/jol/blob/a549b7410045167238716677dac3de221951da2d/jol-samples/pom.xml#L132-L133).
 
 Use as Command Line Tool
 ----
 
 Build produces the self-contained executable JAR in `jol-cli/target/jol-cli.jar`.
 Published Maven artifacts also include the executable JAR that one can download
-and start using right away. To do that, look for the latest version of
-jol-cli-$version-full.jar here.
+and start using right away. The JAR is published both at
+`jol-cli-$version-full.jar` at [Maven Central](https://repo.maven.apache.org/maven2/org/openjdk/jol/jol-cli/) Command [here](https://builds.shipilev.net/jol/).
 
 List the supported commands with `-h`:
 
@@ -49,7 +51,7 @@ List the supported commands with `-h`:
 A brief tour of commands:
 
   * **internals**: dive into Object layout: field layout within the object, header information, field values, alignment/padding losses.
-+
+
         # Running 64-bit HotSpot VM.
         # Using compressed oop with 3-bit shift.
         # Using compressed klass with 3-bit shift.
@@ -127,15 +129,24 @@ A brief tour of commands:
 
 
 
+Reporting Bugs
+----
+
+If you have the access to [JDK Bug System](https://bugs.openjdk.java.net/), please submit the bug there:
+ * Project: CODETOOLS
+ * Component: tools
+ * Sub-component: jol
+
+If you don't have the access to JDK Bug System, submit the bug report at "Issues" here, and wait for maintainers to pick that up.
 
 Development
 ----
 
-JOL project accepts pull requests, like the regular OpenJDK project. The bots would require you to [sign OCA first](http://openjdk.java.net/contribute).
+JOL project accepts pull requests, like other OpenJDK projects. If you have never contributed to OpenJDK, then bots would require you to [sign OCA first](http://openjdk.java.net/contribute). You don't need to post patches anywhere else, or post to mailing lists, etc.
 
 Compile and run tests:
 
-    $ mvn clean install
+    $ mvn clean verify
 
 Tests would normally run in many JVM configurations. If you are contributing the code,
 please try to run the build on multiple JDK releases, most importantly 8u and 11u.
