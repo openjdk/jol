@@ -51,6 +51,20 @@ public class FieldData {
     }
 
     /**
+     * Creates the field data.
+     *
+     * @param hostKlass class name where the field is declared
+     * @param fieldName field name
+     * @param fieldType string representation of field type
+     * @param isContended true if the field marked with {@code jdk.internal.vm.annotation.Contended} annotation
+     * @param contendedGroup name of the group specified in the {@code @Contended} annotation
+     * @return field data
+     */
+    public static FieldData create(String hostKlass, String fieldName, String fieldType, boolean isContended, String contendedGroup) {
+        return new FieldData(null, hostKlass, fieldName, fieldType, isContended, contendedGroup);
+    }
+
+    /**
      * Parses the field data from the existing field.
      *
      * @param field field to parse
