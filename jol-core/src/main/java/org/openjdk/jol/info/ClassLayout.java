@@ -190,6 +190,8 @@ public class ClassLayout {
 
     /**
      * Loosed bytes from padding between fields
+     *
+     * @return Internally loosed bytes
      */
     public long getLossesInternal() {
         return lossesInternal;
@@ -197,6 +199,8 @@ public class ClassLayout {
 
     /**
      * Loosed bytes due to next object alignment
+     *
+     * @return Externally loosed bytes
      */
     public long getLossesExternal() {
         return lossesExternal;
@@ -204,6 +208,8 @@ public class ClassLayout {
 
     /**
      * Total loosed bytes i.e. lossesInternal + lossesExternal
+     *
+     * @return Total loosed bytes
      */
     public long getLossesTotal() {
         return lossesTotal;
