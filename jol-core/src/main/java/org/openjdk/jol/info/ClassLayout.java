@@ -132,18 +132,17 @@ public class ClassLayout {
             checkInvariants(fields, instanceSize);
         }
         // calculate loses
-        long nextFree = headerSize;
-        long lossesInternal = 0;
-        for (FieldLayout fieldLayout : fields) {
-            if (fieldLayout.offset() > nextFree) {
-                long fieldLayoutSize = fieldLayout.offset() - nextFree;
-                lossesInternal += fieldLayoutSize;
+        long next = headerSize;
+        long internal = 0;
+        for (FieldLayout fl : fields) {
+            if (fl.offset() > next) {
+                internal += fl.offset() - next;
             }
-            nextFree = fieldLayout.offset() + fieldLayout.size();
+            next = fl.offset() + fl.size();
         }
-        long lossesExternal = instanceSize != nextFree ? instanceSize - nextFree : 0;
-        long lossesTotal = lossesInternal + lossesExternal;
-        return new ClassLayout(classData, fields, headerSize, instanceSize, (int) lossesInternal, (int) lossesExternal, (int)lossesTotal);
+        long external = (instanceSize != next) ? (instanceSize - next) : 0;
+        long total = internal + external;
+        return new ClassLayout(classData, fields, headerSize, instanceSize, (int) internal, (int) external, (int) total);
     }
 
     private static void checkInvariants(SortedSet<FieldLayout> fields, long instanceSize) {
