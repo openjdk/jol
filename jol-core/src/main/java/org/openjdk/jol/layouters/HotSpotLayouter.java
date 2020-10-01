@@ -85,7 +85,7 @@ public class HotSpotLayouter implements Layouter {
             base = MathUtil.align(base, Math.max(4, scale));
 
             result.add(new FieldLayout(FieldData.create(cd.arrayClass(), "<elements>", cd.arrayComponentType()), base, scale * cd.arrayLength()));
-            return ClassLayout.createClassLayout(cd, result, model.arrayHeaderSize(), instanceSize, false);
+            return ClassLayout.create(cd, result, model.arrayHeaderSize(), instanceSize, false);
         }
 
         List<ClassData> classDataClassHierarchy = new ArrayList<>();
@@ -349,7 +349,7 @@ public class HotSpotLayouter implements Layouter {
 
         int instanceSize = MathUtil.align(nextPaddedOffset, minAlignment);
 
-        return ClassLayout.createClassLayout(cd, result, model.headerSize(), instanceSize, true);
+        return ClassLayout.create(cd, result, model.headerSize(), instanceSize, true);
     }
 
     @Override

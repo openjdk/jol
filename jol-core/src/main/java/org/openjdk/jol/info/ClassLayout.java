@@ -126,8 +126,9 @@ public class ClassLayout {
      * @param headerSize   header size
      * @param instanceSize instance size
      * @param check        whether to check important invariants
+     * @return a new instance of the ClassLayout
      */
-    public static ClassLayout createClassLayout(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, long instanceSize, boolean check) {
+    public static ClassLayout create(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, long instanceSize, boolean check) {
         if (check) {
             checkInvariants(fields, instanceSize);
         }
