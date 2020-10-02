@@ -39,12 +39,12 @@ questions.
     </description>
 
     <url>
-        http://openjdk.java.net/projects/code-tools/jol/
+        https://github.com/openjdk/jol/
     </url>
 
     <scm>
-        <url>http://hg.openjdk.java.net/code-tools/jol/</url>
-        <connection>scm:hg:http://hg.openjdk.java.net/code-tools/jol/</connection>
+        <url>https://github.com/openjdk/jol/</url>
+        <connection>scm:git:https://github.com/openjdk/jol.git</connection>
     </scm>
 
     <licenses>
