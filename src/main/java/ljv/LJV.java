@@ -27,7 +27,7 @@ class LJV {
     private final IdentityHashMap<Object, String> objectsId = new IdentityHashMap<>();
 
     private String dotName(Object obj) {
-        return objectsId.computeIfAbsent(obj, s -> "n" + (objectsId.size() + 1));
+        return obj == null ? "NULL" : objectsId.computeIfAbsent(obj, s -> "n" + (objectsId.size() + 1));
     }
 
 
@@ -53,15 +53,15 @@ class LJV {
     }
 
     private boolean hasPrimitiveFields(Context ctx, Field[] fs, Object obj) {
-        for (int i = 0; i < fs.length; i++)
-            if (fieldExistsAndIsPrimitive(ctx, fs[i], obj))
+        for (Field f : fs)
+            if (fieldExistsAndIsPrimitive(ctx, f, obj))
                 return true;
         return false;
     }
 
 
     private void processPrimitiveArray(Object obj, StringBuilder out) {
-        out.append(dotName(obj) + "[shape=record, label=\"");
+        out.append(dotName(obj)).append("[shape=record, label=\"");
         for (int i = 0, len = Array.getLength(obj); i < len; i++) {
             if (i != 0)
                 out.append("|");
@@ -72,12 +72,12 @@ class LJV {
 
 
     private void processObjectArray(Context ctx, Object obj, StringBuilder out) {
-        out.append(dotName(obj) + "[label=\"");
+        out.append(dotName(obj)).append("[label=\"");
         int len = Array.getLength(obj);
         for (int i = 0; i < len; i++) {
             if (i != 0)
                 out.append("|");
-            out.append("<f" + i + ">");
+            out.append("<f").append(i).append(">");
         }
         out.append("\",shape=record];\n");
         for (int i = 0; i < len; i++) {
@@ -85,47 +85,50 @@ class LJV {
             if (ref == null)
                 continue;
             generateDotInternal(ctx, ref, out);
-            out.append(dotName(obj) + ":f" + i + " -> " + dotName(ref)
-                    + "[label=\"" + i + "\",fontsize=12];\n");
+            out.append(dotName(obj))
+                    .append(":f")
+                    .append(i)
+                    .append(" -> ")
+                    .append(dotName(ref))
+                    .append("[label=\"")
+                    .append(i)
+                    .append("\",fontsize=12];\n");
         }
     }
 
 
     private void labelObjectWithSomePrimitiveFields(Context ctx, Object obj, Field[] fs, StringBuilder out) {
         Object cabs = ctx.getClassAtribute(obj.getClass());
-        out.append(dotName(obj) + "[label=\"" + className(obj, ctx, false) + "|{");
+        out.append(dotName(obj)).append("[label=\"").append(className(obj, ctx, false)).append("|{");
         String sep = "";
-        for (int i = 0; i < fs.length; i++) {
-            Field field = fs[i];
+        for (Field field : fs) {
             if (!ctx.canIgnoreField(field))
                 try {
                     Object ref = field.get(obj);
                     if (field.getType().isPrimitive() || canTreatAsPrimitive(ctx, ref)) {
                         if (ctx.isShowFieldNamesInLabels())
-                            out.append(sep + field.getName() + ": " + Quote.quote(String.valueOf(ref)));
+                            out.append(sep).append(field.getName()).append(": ").append(Quote.quote(String.valueOf(ref)));
                         else
-                            out.append(sep + Quote.quote(String.valueOf(ref)));
+                            out.append(sep).append(Quote.quote(String.valueOf(ref)));
                         sep = "|";
                     }
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
         }
-        out.append("}\"" + (cabs == null ? "" : "," + cabs) + ",shape=record];\n");
+        out.append("}\"").append(cabs == null ? "" : "," + cabs).append(",shape=record];\n");
     }
 
 
     private void labelObjectWithNoPrimitiveFields(Context ctx, Object obj, StringBuilder out) {
         Object cabs = ctx.getClassAtribute(obj.getClass());
-        out.append(dotName(obj)
-                + "[label=\"" + className(obj, ctx, true) + "\""
-                + (cabs == null ? "" : "," + cabs)
-                + "];\n");
+        out.append(dotName(obj)).append("[label=\"")
+                .append(className(obj, ctx, true))
+                .append("\"").append(cabs == null ? "" : "," + cabs).append("];\n");
     }
 
     private void processFields(Context ctx, Object obj, Field[] fs, StringBuilder out) {
-        for (int i = 0; i < fs.length; i++) {
-            Field field = fs[i];
+        for (Field field : fs) {
             if (!ctx.canIgnoreField(field)) {
                 try {
                     Object ref = field.get(obj);
@@ -138,10 +141,13 @@ class LJV {
                     if (fabs == null)
                         fabs = ctx.getFieldAttribute(name);
                     generateDotInternal(ctx, ref, out);
-                    out.append(dotName(obj) + " -> " + dotName(ref)
-                            + "[label=\"" + name + "\",fontsize=12"
-                            + (fabs == null ? "" : "," + fabs)
-                            + "];\n");
+                    out.append(dotName(obj)).append(" -> ")
+                            .append(dotName(ref))
+                            .append("[label=\"")
+                            .append(name)
+                            .append("\",fontsize=12")
+                            .append(fabs == null ? "" : "," + fabs)
+                            .append("];\n");
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
@@ -151,8 +157,8 @@ class LJV {
 
     private static boolean redefinesToString(Object obj) {
         Method[] ms = obj.getClass().getMethods();
-        for (int i = 0; i < ms.length; i++)
-            if (ms[i].getName().equals("toString") && ms[i].getDeclaringClass() != Object.class)
+        for (Method m : ms)
+            if (m.getName().equals("toString") && m.getDeclaringClass() != Object.class)
                 return true;
         return false;
     }
@@ -200,8 +206,8 @@ class LJV {
                 return false;
 
             Class<?>[] ifs = cz.getInterfaces();
-            for (int i = 0; i < ifs.length; i++)
-                if (canTreatClassAsPrimitive(context, ifs[i]))
+            for (Class<?> anIf : ifs)
+                if (canTreatClassAsPrimitive(context, anIf))
                     return true;
 
             cz = cz.getSuperclass();
@@ -222,8 +228,8 @@ class LJV {
 
     private void generateDotInternal(Context ctx, Object obj, StringBuilder out) {
         if (obj == null)
-            out.append(dotName(obj) + "[label=\"null\"" + ", shape=plaintext];\n");
-         else if (!objectsId.containsKey(obj)) {
+            out.append(dotName(null)).append("[label=\"null\"").append(", shape=plaintext];\n");
+        else if (!objectsId.containsKey(obj)) {
             Class<?> c = obj.getClass();
             if (c.isArray()) {
                 if (looksLikePrimitiveArray(obj, ctx))

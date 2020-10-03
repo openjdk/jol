@@ -112,8 +112,7 @@ class Context {
      */
     public Context addIgnoreFields(Class<?> cz) {
         Field[] fs = cz.getDeclaredFields();
-        for (int i = 0; i < fs.length; i++)
-            this.addIgnoreField(fs[i]);
+        for (Field f : fs) this.addIgnoreField(f);
         return this;
     }
 

@@ -202,4 +202,14 @@ public class LJVTest {
 
         assertEquals(expected_graph_6, actual_graph_6, "Multiarray case failed");
     }
+
+    @Test
+    void testNull() {
+        String actualGraph = ljv.drawGraph(null);
+
+        assertEquals("digraph Java {\n" +
+                "NULL[label=\"null\", shape=plaintext];\n" +
+                "}\n", actualGraph);
+    }
+
 }

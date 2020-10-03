@@ -14,7 +14,7 @@ public class Quote {
     }
 
     static String quote(String s) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0, n = s.length(); i < n; i++) {
             char c = s.charAt(i);
             if (quotable.indexOf(c) != -1)
@@ -22,7 +22,7 @@ public class Quote {
             else if (canAppearUnquotedInLabel(c))
                 sb.append(c);
             else
-                sb.append("\\\\0u").append(Integer.toHexString((int) c));
+                sb.append("\\\\0u").append(Integer.toHexString(c));
         }
         return sb.toString();
     }
