@@ -1,4 +1,4 @@
-name: JOL Pre-integration tests
+name: JOL Pre-Integration Tests
 
 on: [push]
 
@@ -7,17 +7,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        java: [8, 11, 13, 14, 15, 16-ea]
         os: [ubuntu-18.04, windows-2019, macos-10.15]
-        java: [8.0.265, 11.0.8, 13.0.4, 14.0.2, 15, 16-ea]
       fail-fast: false
-      max-parallel: 5
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up JDK
-      uses: actions/setup-java@v1
+    - uses: actions/checkout@v2
+    - uses: actions/setup-java@v1
       with:
         java-version: ${{ matrix.java }}
-    - name: Test with ${{ matrix.java }}
-      run: mvn test -B --file pom.xml
+    - run: mvn test -B --file pom.xml
