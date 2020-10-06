@@ -1,6 +1,9 @@
 name: JOL Pre-Integration Tests
 
-on: [push]
+on:
+  pull-request:
+    types: [synchronize]
+  workflow_dispatch:
 
 jobs:
   test:
