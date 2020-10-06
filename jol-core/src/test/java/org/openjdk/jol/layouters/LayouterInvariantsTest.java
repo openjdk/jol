@@ -1,7 +1,7 @@
 package org.openjdk.jol.layouters;
 
-import junit.framework.Assert;
 import org.junit.BeforeClass;
+import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jol.datamodel.CurrentDataModel;
 import org.openjdk.jol.datamodel.*;
