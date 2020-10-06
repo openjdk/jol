@@ -22,9 +22,9 @@ jobs:
     - name: Cache Maven packages
       uses: actions/cache@v2
       with:
-        path: ~/.m2
-        key: m2-${{ hashFiles('**/pom.xml', '.github/workflows/pre-integration.yml') }}
-        restore-keys: m2
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml', '.github/workflows/pre-integration.yml') }}
+        restore-keys: ${{ runner.os }}-maven
     - name: Build all without tests
       run: mvn verify -DskipTests -B --file pom.xml
     - name: Run tests
