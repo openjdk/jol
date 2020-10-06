@@ -10,6 +10,7 @@ jobs:
         java: [8, 11, 13, 14, 15, 16-ea]
         os: [ubuntu-18.04, windows-2019, macos-10.15]
       fail-fast: false
+      max-parallel: 4
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
 
     steps:
@@ -22,7 +23,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/.m2
-        key: m2-${{ hashFiles('**/pom.xml') }}
+        key: m2-${{ hashFiles('**/pom.xml', '.github/workflows/pre-integration.yml') }}
         restore-keys: m2
     - name: Build all without tests
       run: mvn verify -DskipTests -B --file pom.xml
