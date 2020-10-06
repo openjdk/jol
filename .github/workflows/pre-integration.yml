@@ -24,5 +24,7 @@ jobs:
         path: ~/.m2
         key: m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: m2
-    - name: Run Tests
+    - name: Build all without tests
+      run: mvn verify -DskipTests -B --file pom.xml
+    - name: Run tests
       run: mvn test -B --file pom.xml
