@@ -86,7 +86,7 @@ public class StringCompress implements Operation {
         }
 
         if (DO_MODE.equalsIgnoreCase("histo")) {
-            out.printf("%15s, %15s, %15s, %s%n",
+            out.printf("%15s, %15s, %18s, %s%n",
                     "\"size\"", "\"compressible\"", "\"non-compressible\"", "\"hprof file\"");
         } else if (DO_MODE.equalsIgnoreCase("estimates")) {
             out.printf("%15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %s, %s%n",
@@ -197,7 +197,7 @@ public class StringCompress implements Operation {
                 sizes.addAll(nonCompressibleCharArrays.keys());
 
                 for (Integer s : sizes) {
-                    out.printf("%15d, %15d, %15d, \"%s\"%n", s, compressibleCharArrays.count(s), nonCompressibleCharArrays.count(s), path);
+                    out.printf("%15d, %15d, %18d, \"%s\"%n", s, compressibleCharArrays.count(s), nonCompressibleCharArrays.count(s), path);
                 }
             } else if (DO_MODE.equalsIgnoreCase("estimates")) {
                 for (DataModel model : DATA_MODELS) {
