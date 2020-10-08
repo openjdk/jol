@@ -159,3 +159,7 @@ Compile and run tests:
 Tests would normally run in many JVM configurations. If you are contributing the code,
 please try to run the build on multiple JDK releases, most importantly 8u and 11u.
 GitHub workflow "JOL Pre-Integration Tests" should pass with your changes.
+
+## Related projects
+
+* [IntelliJ IDEA JOL Plugin](https://github.com/stokito/IdeaJol) can estimate object size and has an inspection to find heavy classes
