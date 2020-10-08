@@ -86,12 +86,12 @@ public class StringCompress implements Operation {
         }
 
         if (DO_MODE.equalsIgnoreCase("histo")) {
-            out.printf("%15s, %15s, %15s, %s%n",
+            out.printf("%15s, %15s, %18s, %s%n",
                     "\"size\"", "\"compressible\"", "\"non-compressible\"", "\"hprof file\"");
         } else if (DO_MODE.equalsIgnoreCase("estimates")) {
-            out.printf("%15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %s, %s%n",
+            out.printf("%15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %15s, %s, %70s, %s%n",
                     "\"total\"", "\"String\"", "\"String+bool\"", "\"String+oop\"", "\"char[]-2b\"",
-                    "\"char[]-1b\"", "\"char[]-1b-comp\"", "\"savings(same)\"",  "\"savings(bool)\"", "\"savings(oop)\"", "\"hprof file\"", "\"model\"");
+                    "\"char[]-1b\"", "\"char[]-1b-comp\"", "\"savings(same)\"",  "\"savings(bool)\"", "\"savings(oop)\"", "\"model\"", "\"hprof file\"");
         }
 
         List<Future<?>> res = new ArrayList<>();
@@ -197,7 +197,7 @@ public class StringCompress implements Operation {
                 sizes.addAll(nonCompressibleCharArrays.keys());
 
                 for (Integer s : sizes) {
-                    out.printf("%15d, %15d, %15d, \"%s\"%n", s, compressibleCharArrays.count(s), nonCompressibleCharArrays.count(s), path);
+                    out.printf("%15d, %15d, %18d, \"%s\"%n", s, compressibleCharArrays.count(s), nonCompressibleCharArrays.count(s), path);
                 }
             } else if (DO_MODE.equalsIgnoreCase("estimates")) {
                 for (DataModel model : DATA_MODELS) {
@@ -264,9 +264,9 @@ public class StringCompress implements Operation {
             double savingSame = 100.0 * ((compressibleBytes - compressedBytes)) / totalFootprint;
             double savingBool = 100.0 * ((compressibleBytes - compressedBytes) - (stringsBool - strings)) / totalFootprint;
             double savingOop  = 100.0 * ((compressibleBytes - compressedBytes) - (stringsOop - strings))  / totalFootprint;
-            out.printf("%15d, %15d, %15d, %15d, %15d, %15d, %15d, %15.3f, %15.3f, %15.3f, \"%s\", \"%s\"%n",
+            out.printf("%15d, %15d, %15d, %15d, %15d, %15d, %15d, %15.3f, %15.3f, %15.3f, %70s, \"%s\"%n",
                     totalFootprint, strings, stringsBool, stringsOop, nonCompressibleBytes, compressibleBytes, compressedBytes,
-                    savingSame, savingBool, savingOop, path, l);
+                    savingSame, savingBool, savingOop, "\"" + l + "\"", path);
         }
 
         public static boolean isCompressible(byte[] bytes) {
