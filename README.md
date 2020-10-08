@@ -86,7 +86,7 @@ This dives into Object layout: field layout within the object, header informatio
 #### "externals"
 
 This dives into the Object graphs layout: list objects reachable from the instance,
-their addresses, paths through the reachability graph, etc (is is more
+their addresses, paths through the reachability graph, etc (is more
 convenient with API though).
 
     $ java -jar jol-cli.jar externals java.lang.String
@@ -136,12 +136,14 @@ This gets the object footprint estimate, similar to the object externals, but ta
 
 ## Reporting Bugs
 
-If you have the access to [JDK Bug System](https://bugs.openjdk.java.net/), please submit the bug there:
- * Project: CODETOOLS
- * Component: tools
- * Sub-component: jol
+You may find unresolved bugs and feature request in 
+[JDK Bug System](https://bugs.openjdk.java.net/issues/?jql=project%20%3D%20CODETOOLS%20AND%20resolution%20%3D%20Unresolved%20AND%20component%20%3D%20tools%20AND%20Subcomponent%20%3D%20jol) 
+Please submit the new bug there:
+ * Project: `CODETOOLS`
+ * Component: `tools`
+ * Sub-component: `jol`
 
-If you don't have the access to JDK Bug System, submit the bug report at "Issues" here, and wait for maintainers to pick that up.
+If you don't have the access to JDK Bug System, submit the bug report at [Issues](https://github.com/openjdk/jol/issues) here, and wait for maintainers to pick that up.
 
 ## Development
 
