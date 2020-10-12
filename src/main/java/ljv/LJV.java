@@ -23,254 +23,228 @@ package ljv;
 import java.lang.reflect.*;
 import java.util.*;
 
-class LJV {
-    private final IdentityHashMap<Object, String> objectsId = new IdentityHashMap<>();
+public final class LJV {
+    private final Map<Object, String> classAttributeMap = new HashMap<>();
+    private final Map<Object, String> fieldAttributeMap = new HashMap<>();
+    private final Set<Object> pretendPrimitiveSet = new HashSet<>();
+    private final Set<Object> ignoreSet = new HashSet<>();
+    private Direction direction = Direction.TB;
 
-    private String dotName(Object obj) {
-        return obj == null ? "NULL" : objectsId.computeIfAbsent(obj, s -> "n" + (objectsId.size() + 1));
+    public LJV setDirection(Direction direction) {
+        this.direction = direction;
+        return this;
     }
 
-
-    private boolean fieldExistsAndIsPrimitive(Context ctx, Field field, Object obj) {
-        if (!ctx.canIgnoreField(field)) {
-            try {
-                //- The order of these statements matters.  If field is not
-                //- accessible, we want an IllegalAccessException to be raised
-                //- (and caught).  It is not correct to return true if
-                //- field.getType( ).isPrimitive( )
-                Object val = field.get(obj);
-                if (field.getType().isPrimitive() || canTreatAsPrimitive(ctx, val))
-                    //- Just calling ctx.canTreatAsPrimitive is not adequate --
-                    //- val will be wrapped as a Boolean or Character, etc. if we
-                    //- are dealing with a truly primitive type.
-                    return true;
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return false;
+    public Direction getDirection() {
+        return direction;
     }
 
-    private boolean hasPrimitiveFields(Context ctx, Field[] fs, Object obj) {
-        for (Field f : fs)
-            if (fieldExistsAndIsPrimitive(ctx, f, obj))
-                return true;
-        return false;
+    private enum Options {
+        /**
+         * Allow private, protected and package-access fields to be shown.
+         * This is only possible if the security manager allows
+         * <code>ReflectPermission("suppressAccessChecks")</code> permission.
+         * This is usually the case when running from an application, but
+         * not from an applet or servlet.
+         */
+        IGNOREPRIVATEFIELDS,
+        /**
+         * Toggle whether to display the class name in the label for an
+         * object (false, the default) or to use the result of calling
+         * toString (true).
+         */
+        USETOSTRINGASCLASSNAME,
+        /**
+         * Toggle whether to display qualified nested class names in the
+         * label for an object from the same package as LJV (true) or
+         * to display an abbreviated name (false, the default).
+         */
+        QUALIFYNESTEDCLASSNAMES,
+        SHOWPACKAGENAMESINCLASSES,
+        /**
+         * Toggle whether or not to include the field name in the label for an
+         * object.  This is currently all-or-nothing.  TODO: allow this to be
+         * set on a per-class basis.
+         */
+        SHOWFIELDNAMESINLABELS,
+    }
+    private final EnumSet<Options> oSet = EnumSet.of(Options.SHOWPACKAGENAMESINCLASSES, Options.SHOWFIELDNAMESINLABELS);
+
+    /**
+     * Set the DOT attributes for a class.  This allows you to change the
+     * appearance of certain nodes in the output, but requires that you
+     * know something about dot attributes.  Simple attributes are, e.g.,
+     * "color=red".
+     */
+    public void setClassAttribute(Class<?> cz, String attrib) {
+        classAttributeMap.put(cz, attrib);
     }
 
-
-    private void processPrimitiveArray(Object obj, StringBuilder out) {
-        out.append(dotName(obj)).append("[shape=record, label=\"");
-        for (int i = 0, len = Array.getLength(obj); i < len; i++) {
-            if (i != 0)
-                out.append("|");
-            out.append(Quote.quote(String.valueOf(Array.get(obj, i))));
-        }
-        out.append("\"];\n");
+    public String getClassAttribute(Class<?> cz) {
+        return classAttributeMap.get(cz);
     }
 
-
-    private void processObjectArray(Context ctx, Object obj, StringBuilder out) {
-        out.append(dotName(obj)).append("[label=\"");
-        int len = Array.getLength(obj);
-        for (int i = 0; i < len; i++) {
-            if (i != 0)
-                out.append("|");
-            out.append("<f").append(i).append(">");
-        }
-        out.append("\",shape=record];\n");
-        for (int i = 0; i < len; i++) {
-            Object ref = Array.get(obj, i);
-            if (ref == null)
-                continue;
-            generateDotInternal(ctx, ref, out);
-            out.append(dotName(obj))
-                    .append(":f")
-                    .append(i)
-                    .append(" -> ")
-                    .append(dotName(ref))
-                    .append("[label=\"")
-                    .append(i)
-                    .append("\",fontsize=12];\n");
-        }
-    }
-
-
-    private void labelObjectWithSomePrimitiveFields(Context ctx, Object obj, Field[] fs, StringBuilder out) {
-        Object cabs = ctx.getClassAtribute(obj.getClass());
-        out.append(dotName(obj)).append("[label=\"").append(className(obj, ctx, false)).append("|{");
-        String sep = "";
-        for (Field field : fs) {
-            if (!ctx.canIgnoreField(field))
-                try {
-                    Object ref = field.get(obj);
-                    if (field.getType().isPrimitive() || canTreatAsPrimitive(ctx, ref)) {
-                        if (ctx.isShowFieldNamesInLabels())
-                            out.append(sep).append(field.getName()).append(": ").append(Quote.quote(String.valueOf(ref)));
-                        else
-                            out.append(sep).append(Quote.quote(String.valueOf(ref)));
-                        sep = "|";
-                    }
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-        }
-        out.append("}\"").append(cabs == null ? "" : "," + cabs).append(",shape=record];\n");
-    }
-
-
-    private void labelObjectWithNoPrimitiveFields(Context ctx, Object obj, StringBuilder out) {
-        Object cabs = ctx.getClassAtribute(obj.getClass());
-        out.append(dotName(obj)).append("[label=\"")
-                .append(className(obj, ctx, true))
-                .append("\"").append(cabs == null ? "" : "," + cabs).append("];\n");
-    }
-
-    private void processFields(Context ctx, Object obj, Field[] fs, StringBuilder out) {
-        for (Field field : fs) {
-            if (!ctx.canIgnoreField(field)) {
-                try {
-                    Object ref = field.get(obj);
-                    if (field.getType().isPrimitive() || canTreatAsPrimitive(ctx, ref))
-                        //- The field might be declared, say, Object, but the actual
-                        //- object may be, say, a String.
-                        continue;
-                    String name = field.getName();
-                    Object fabs = ctx.getFieldAttribute(field);
-                    if (fabs == null)
-                        fabs = ctx.getFieldAttribute(name);
-                    generateDotInternal(ctx, ref, out);
-                    out.append(dotName(obj)).append(" -> ")
-                            .append(dotName(ref))
-                            .append("[label=\"")
-                            .append(name)
-                            .append("\",fontsize=12")
-                            .append(fabs == null ? "" : "," + fabs)
-                            .append("];\n");
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private static boolean redefinesToString(Object obj) {
-        Method[] ms = obj.getClass().getMethods();
-        for (Method m : ms)
-            if (m.getName().equals("toString") && m.getDeclaringClass() != Object.class)
-                return true;
-        return false;
-    }
-
-
-    protected String className(Object obj, Context context, boolean useToStringAsClassName) {
-        if (obj == null)
-            return "";
-
-        Class<?> c = obj.getClass();
-        if (useToStringAsClassName && redefinesToString(obj))
-            return Quote.quote(obj.toString());
-        else {
-            String name = c.getName();
-            if (!context.isShowPackageNamesInClasses() || c.getPackage() == LJV.class.getPackage()) {
-                //- Strip away everything before the last .
-                name = name.substring(name.lastIndexOf('.') + 1);
-
-                if (!context.isQualifyNestedClassNames())
-                    name = name.substring(name.lastIndexOf('$') + 1);
-            }
-            return name;
-        }
-    }
-
-    boolean canTreatAsPrimitive(Context context, Object obj) {
-        return obj == null || canTreatClassAsPrimitive(context, obj.getClass());
-    }
-
-
-    private boolean canTreatClassAsPrimitive(Context context, Class<?> cz) {
-        if (cz == null || cz.isPrimitive())
-            return true;
-
-        if (cz.isArray())
-            return false;
-
-        do {
-            if (context.isTreatsAsPrimitive(cz)
-                    || context.isTreatsAsPrimitive(cz.getPackage())
-            )
-                return true;
-
-            if (cz == Object.class)
-                return false;
-
-            Class<?>[] ifs = cz.getInterfaces();
-            for (Class<?> anIf : ifs)
-                if (canTreatClassAsPrimitive(context, anIf))
-                    return true;
-
-            cz = cz.getSuperclass();
-        } while (cz != null);
-        return false;
-    }
-
-    boolean looksLikePrimitiveArray(Object obj, Context context) {
-        Class<?> c = obj.getClass();
-        if (c.getComponentType().isPrimitive())
-            return true;
-
-        for (int i = 0, len = Array.getLength(obj); i < len; i++)
-            if (!canTreatAsPrimitive(context, Array.get(obj, i)))
-                return false;
-        return true;
-    }
-
-    private void generateDotInternal(Context ctx, Object obj, StringBuilder out) {
-        if (obj == null)
-            out.append(dotName(null)).append("[label=\"null\"").append(", shape=plaintext];\n");
-        else if (!objectsId.containsKey(obj)) {
-            Class<?> c = obj.getClass();
-            if (c.isArray()) {
-                if (looksLikePrimitiveArray(obj, ctx))
-                    processPrimitiveArray(obj, out);
-                else
-                    processObjectArray(ctx, obj, out);
-            } else {
-                Field[] fs = c.getDeclaredFields();
-                if (!ctx.isIgnorePrivateFields())
-                    AccessibleObject.setAccessible(fs, true);
-
-                if (hasPrimitiveFields(ctx, fs, obj))
-                    labelObjectWithSomePrimitiveFields(ctx, obj, fs, out);
-                else
-                    labelObjectWithNoPrimitiveFields(ctx, obj, out);
-
-                processFields(ctx, obj, fs, out);
-            }
-        }
+    public LJV addClassAttribute(Class<?> cz, String attrib) {
+        this.setClassAttribute(cz, attrib);
+        return this;
     }
 
     /**
-     * Write a DOT digraph specification of the graph rooted at
-     * <tt>obj</tt> to <tt>out</tt>.
+     * Set the DOT attributes for a specific field. This allows you to
+     * change the appearance of certain edges in the output, but requires
+     * that you know something about dot attributes.  Simple attributes
+     * are, e.g., "color=blue".
      */
-    private void generateDOT(Context ctx, Object obj, StringBuilder out) {
-        out.append("digraph Java {\n");
-        generateDotInternal(ctx, obj, out);
-        out.append("}\n");
+    public LJV addFieldAttribute(Field field, String attrib) {
+        this.fieldAttributeMap.put(field, attrib);
+        return this;
+    }
+
+    public String getFieldAttribute(Field field) {
+        return fieldAttributeMap.get(field);
+    }
+
+    /**
+     * Set the DOT attributes for all fields with this name.
+     */
+    public String getFieldAttribute(String field) {
+        return fieldAttributeMap.get(field);
+    }
+
+    public LJV addFieldAttribute(String field, String attrib) {
+        this.fieldAttributeMap.put(field, attrib);
+        return this;
+    }
+
+    /**
+     * Do not display this field.
+     */
+    public LJV addIgnoreField(Field field) {
+        this.ignoreSet.add(field);
+        return this;
+    }
+
+    /**
+     * Do not display any fields with this name.
+     */
+    public LJV addIgnoreField(String field) {
+        this.ignoreSet.add(field);
+        return this;
+    }
+
+    /**
+     * Do not display any fields from this class.
+     */
+    public LJV addIgnoreFields(Class<?> cz) {
+        Field[] fs = cz.getDeclaredFields();
+        for (Field f : fs) this.addIgnoreField(f);
+        return this;
+    }
+
+    /**
+     * Do not display any fields with this type.
+     */
+    public LJV addIgnoreClass(Class<?> cz) {
+        this.ignoreSet.add(cz);
+        return this;
+    }
+
+    /**
+     * Do not display any fields that have a type from this package.
+     */
+    public LJV addIgnorePackage(Package pk) {
+        this.ignoreSet.add(pk);
+        return this;
+    }
+
+    public boolean canIgnoreField(Field field) {
+        return
+                Modifier.isStatic(field.getModifiers())
+                        || ignoreSet.contains(field)
+                        || ignoreSet.contains(field.getName())
+                        || ignoreSet.contains(field.getType())
+                        || ignoreSet.contains(field.getType().getPackage())
+                ;
+    }
+
+    /**
+     * Treat objects of this class as primitives; i.e., <code>toString</code>
+     * is called on the object, and the result displayed in the label like
+     * a primitive field.
+     */
+    public LJV setTreatAsPrimitive(Class<?> cz) {
+        this.pretendPrimitiveSet.add(cz);
+        return this;
+    }
+
+    public boolean isTreatsAsPrimitive(Class<?> cz) {
+        return pretendPrimitiveSet.contains(cz);
+    }
+
+    /**
+     * Treat objects from this package as primitives; i.e.,
+     * <code>toString</code> is called on the object, and the result displayed
+     * in the label like a primitive field.
+     */
+    public LJV setTreatAsPrimitive(Package pk) {
+        this.pretendPrimitiveSet.add(pk);
+        return this;
+    }
+
+    public boolean isTreatsAsPrimitive(Package pk) {
+        return pretendPrimitiveSet.contains(pk);
+    }
+
+    private void setOption(boolean flag, Options option) {
+        if (flag) {
+            oSet.add(option);
+        }
+        else {
+            oSet.remove(option);
+        }
+    }
+
+    public LJV setIgnorePrivateFields(boolean ignorePrivateFields) {
+        setOption(ignorePrivateFields, Options.IGNOREPRIVATEFIELDS);
+        return this;
+    }
+
+    public boolean isIgnorePrivateFields() {
+        return oSet.contains(Options.IGNOREPRIVATEFIELDS);
+    }
+
+    public LJV setShowFieldNamesInLabels(boolean showFieldNamesInLabels) {
+        setOption(showFieldNamesInLabels, Options.SHOWFIELDNAMESINLABELS);
+        return this;
+    }
+
+    public boolean isShowFieldNamesInLabels() {
+        return oSet.contains(Options.SHOWFIELDNAMESINLABELS);
+    }
+
+    public LJV setQualifyNestedClassNames(boolean qualifyNestedClassNames) {
+        setOption(qualifyNestedClassNames, Options.QUALIFYNESTEDCLASSNAMES);
+        return this;
+    }
+
+    public boolean isQualifyNestedClassNames() {
+        return oSet.contains(Options.QUALIFYNESTEDCLASSNAMES);
+    }
+
+
+    public LJV setShowPackageNamesInClasses(boolean showPackageNamesInClasses) {
+        setOption(showPackageNamesInClasses, Options.SHOWPACKAGENAMESINCLASSES);
+        return this;
+    }
+
+    public boolean isShowPackageNamesInClasses() {
+        return oSet.contains(Options.SHOWPACKAGENAMESINCLASSES);
     }
 
     /**
      * Create a graph of the object rooted at <tt>obj</tt>.
      */
-    public String drawGraph(Context ctx, Object obj) {
-        StringBuilder out = new StringBuilder();
-        generateDOT(ctx, obj, out);
-        return out.toString();
-    }
-
     public String drawGraph(Object obj) {
-        return drawGraph(new Context(), obj);
+        return new GraphBuilder(this).generateDOT(obj);
     }
 }

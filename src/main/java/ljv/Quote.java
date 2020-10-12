@@ -1,6 +1,10 @@
 package ljv;
 
-public class Quote {
+final class Quote {
+
+    private Quote(){
+
+    }
 
     private static final String quotable = "\"<>{}|";
 
