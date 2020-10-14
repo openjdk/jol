@@ -75,10 +75,21 @@ abstract class AbstractGraphWalker {
             }
         }
 
-        Field[] arr = results.toArray(new Field[0]);
-        fieldsCache.put(klass, arr);
+        Field[] fArr = results.toArray(new Field[0]);
 
-        return arr;
+        // The walkers would access through these fields.
+        // Try to make them accessible right now.
+        for (Field f : fArr) {
+            try {
+                f.setAccessible(true);
+            } catch (Exception e) {
+                // No biggie, walker code would try something else.
+            }
+        }
+
+        fieldsCache.put(klass, fArr);
+
+        return fArr;
     }
 
 }

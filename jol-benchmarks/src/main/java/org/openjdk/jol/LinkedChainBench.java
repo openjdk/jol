@@ -52,7 +52,7 @@ public class LinkedChainBench {
     }
 
     public static class Node {
-        Node n;
+        private Node n;
         Node(Node n) { this.n = n; }
     }
 
