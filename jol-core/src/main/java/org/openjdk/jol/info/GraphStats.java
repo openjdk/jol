@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Red Hat Inc. All rights reserved.
+ * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,43 +22,46 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol;
+package org.openjdk.jol.info;
 
-import org.openjdk.jmh.annotations.*;
-import org.openjdk.jol.info.GraphLayout;
-import org.openjdk.jol.info.GraphStats;
+/**
+ * Light-weight statistics about the object graph.
+ */
+public class GraphStats {
 
-import java.util.concurrent.TimeUnit;
-
-@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(1)
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.NANOSECONDS)
-@State(Scope.Benchmark)
-public class LinkedChainBench {
-
-    @Param("1000")
-    private int size;
-
-    Node linkedChain;
-
-    @Setup
-    public void setup() {
-        linkedChain = new Node(null);
-        for (int c = 0; c < size; c++) {
-            linkedChain = new Node(linkedChain);
-        }
+    /**
+     * Parse the object graph starting from the given instance.
+     *
+     * @param roots root instances to start from
+     * @return object graph
+     */
+    public static GraphStats parseInstance(Object... roots) {
+        return new GraphStatsWalker().walk(roots);
     }
 
-    public static class Node {
-        Node n;
-        Node(Node n) { this.n = n; }
+    private long totalCount;
+    private long totalSize;
+
+    void addRecord(long size) {
+        totalCount++;
+        totalSize += size;
     }
 
-    @Benchmark
-    public long linkedChain() {
-        return GraphStats.parseInstance(linkedChain).totalSize();
+    /**
+     * Answer the total instance count
+     *
+     * @return total instance count
+     */
+    public long totalCount() {
+        return totalCount;
     }
 
+    /**
+     * Answer the total instance footprint
+     *
+     * @return total instance footprint, bytes
+     */
+    public long totalSize() {
+        return totalSize;
+    }
 }
