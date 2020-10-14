@@ -71,7 +71,7 @@ public class GraphStatsWalker extends AbstractGraphWalker {
                     }
                 }
             } else {
-                for (Field f : getAllReferences(cl)) {
+                for (Field f : getAllReferenceFields(cl)) {
                     Object e = ObjectUtils.value(o, f);
                     if (e != null && visited.add(e)) {
                         data.addRecord(vm.sizeOf(e));

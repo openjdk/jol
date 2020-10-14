@@ -35,11 +35,7 @@ import java.util.*;
  */
 abstract class AbstractGraphWalker {
 
-    private final Map<Class<?>, Field[]> fieldsCache;
-
-    public AbstractGraphWalker() {
-        fieldsCache = new HashMap<>();
-    }
+    private static final ReferenceFieldsClassValue CLASS_REFERENCE_FIELDS = new ReferenceFieldsClassValue();
 
     protected void verifyRoots(Object... roots) {
         if (roots == null) {
@@ -52,44 +48,43 @@ abstract class AbstractGraphWalker {
         }
     }
 
-    protected Field[] getAllReferences(Class<?> klass) {
-        Field[] exist = fieldsCache.get(klass);
-        if (exist != null) {
-            return exist;
-        }
+    private static class ReferenceFieldsClassValue extends ClassValue<Field[]> {
+        @Override
+        protected Field[] computeValue(Class<?> klass) {
+            List<Field> results = new ArrayList<>();
 
-        List<Field> results = new ArrayList<>();
-
-        for (Field f : klass.getDeclaredFields()) {
-            if (Modifier.isStatic(f.getModifiers())) continue;
-            if (f.getType().isPrimitive()) continue;
-            results.add(f);
-        }
-
-        Class<?> superKlass = klass;
-        while ((superKlass = superKlass.getSuperclass()) != null) {
-            for (Field f : superKlass.getDeclaredFields()) {
+            for (Field f : klass.getDeclaredFields()) {
                 if (Modifier.isStatic(f.getModifiers())) continue;
                 if (f.getType().isPrimitive()) continue;
                 results.add(f);
             }
-        }
 
-        Field[] fArr = results.toArray(new Field[0]);
-
-        // The walkers would access through these fields.
-        // Try to make them accessible right now.
-        for (Field f : fArr) {
-            try {
-                f.setAccessible(true);
-            } catch (Exception e) {
-                // No biggie, walker code would try something else.
+            Class<?> superKlass = klass;
+            while ((superKlass = superKlass.getSuperclass()) != null) {
+                for (Field f : superKlass.getDeclaredFields()) {
+                    if (Modifier.isStatic(f.getModifiers())) continue;
+                    if (f.getType().isPrimitive()) continue;
+                    results.add(f);
+                }
             }
+
+            Field[] fArr = results.toArray(new Field[0]);
+
+            // The walkers would access through these fields.
+            // Try to make them accessible right now.
+            for (Field f : fArr) {
+                try {
+                    f.setAccessible(true);
+                } catch (Exception e) {
+                    // No biggie, walker code would try something else.
+                }
+            }
+            return fArr;
         }
+    }
 
-        fieldsCache.put(klass, fArr);
-
-        return fArr;
+    protected Field[] getAllReferenceFields(Class<?> cl) {
+        return CLASS_REFERENCE_FIELDS.get(cl);
     }
 
 }

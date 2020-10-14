@@ -95,7 +95,7 @@ public class GraphWalker extends AbstractGraphWalker {
                 }
                 cGpr.setSize(knownSize);
 
-                for (Field f : getAllReferences(cl)) {
+                for (Field f : getAllReferenceFields(cl)) {
                     Object e = ObjectUtils.value(o, f);
                     if (e != null && visited.add(e)) {
                         GraphPathRecord gpr = new FieldGraphPathRecord(cGpr, f.getName(), cGpr.depth() + 1, e);
