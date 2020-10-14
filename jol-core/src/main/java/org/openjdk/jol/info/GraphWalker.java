@@ -24,6 +24,7 @@
  */
 package org.openjdk.jol.info;
 
+import org.openjdk.jol.util.SimpleIdentityHashSet;
 import org.openjdk.jol.util.ObjectUtils;
 import org.openjdk.jol.util.SimpleStack;
 import org.openjdk.jol.vm.VM;
@@ -50,7 +51,7 @@ public class GraphWalker extends AbstractGraphWalker {
 
         GraphLayout data = new GraphLayout(roots);
 
-        IdentityHashSet visited = new IdentityHashSet();
+        SimpleIdentityHashSet visited = new SimpleIdentityHashSet();
         SimpleStack<GraphPathRecord> s = new SimpleStack<>();
 
         int rootId = 1;
