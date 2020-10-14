@@ -65,16 +65,13 @@ public class GraphStatsWalker extends AbstractGraphWalker {
                     continue;
                 }
 
-                Object[] arr = (Object[]) o;
-
-                for (Object e : arr) {
+                for (Object e : (Object[]) o) {
                     if (e != null && visited.add(e)) {
                         s.push(e);
                     }
                 }
             } else {
-                Field[] fields = getAllReferences(cl);
-                for (Field f : fields) {
+                for (Field f : getAllReferences(cl)) {
                     Object e = ObjectUtils.value(o, f);
                     if (e != null && visited.add(e)) {
                         data.addRecord(vm.sizeOf(e));
