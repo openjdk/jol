@@ -25,11 +25,11 @@
 package org.openjdk.jol.info;
 
 import org.openjdk.jol.util.ObjectUtils;
+import org.openjdk.jol.util.SimpleStack;
 import org.openjdk.jol.vm.VM;
 import org.openjdk.jol.vm.VirtualMachine;
 
 import java.lang.reflect.Field;
-import java.util.*;
 
 /**
  * Walker for graph statistics.
@@ -44,18 +44,18 @@ public class GraphStatsWalker extends AbstractGraphWalker {
         GraphStats data = new GraphStats();
 
         IdentityHashSet visited = new IdentityHashSet();
-        ArrayDeque<Object> q = new ArrayDeque<>();
+        SimpleStack<Object> s = new SimpleStack<>();
         VirtualMachine vm = VM.current();
 
         for (Object root : roots) {
             if (visited.add(root)) {
                 data.addRecord(vm.sizeOf(root));
-                q.push(root);
+                s.push(root);
             }
         }
 
-        while (!q.isEmpty()) {
-            Object o = q.pop();
+        while (!s.isEmpty()) {
+            Object o = s.pop();
             Class<?> cl = o.getClass();
 
             if (cl.isArray()) {
@@ -68,7 +68,7 @@ public class GraphStatsWalker extends AbstractGraphWalker {
 
                 for (Object e : arr) {
                     if (e != null && visited.add(e)) {
-                        q.push(e);
+                        s.push(e);
                     }
                 }
             } else {
@@ -77,7 +77,7 @@ public class GraphStatsWalker extends AbstractGraphWalker {
                     Object e = ObjectUtils.value(o, f);
                     if (e != null && visited.add(e)) {
                         data.addRecord(vm.sizeOf(e));
-                        q.push(e);
+                        s.push(e);
                     }
                 }
             }

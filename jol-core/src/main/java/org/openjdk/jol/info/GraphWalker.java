@@ -25,10 +25,10 @@
 package org.openjdk.jol.info;
 
 import org.openjdk.jol.util.ObjectUtils;
+import org.openjdk.jol.util.SimpleStack;
 import org.openjdk.jol.vm.VM;
 
 import java.lang.reflect.Field;
-import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +51,7 @@ public class GraphWalker extends AbstractGraphWalker {
         GraphLayout data = new GraphLayout(roots);
 
         IdentityHashSet visited = new IdentityHashSet();
-        ArrayDeque<GraphPathRecord> q = new ArrayDeque<>();
+        SimpleStack<GraphPathRecord> s = new SimpleStack<>();
 
         int rootId = 1;
         boolean single = (roots.length == 1);
@@ -60,13 +60,13 @@ public class GraphWalker extends AbstractGraphWalker {
             GraphPathRecord e = new FieldGraphPathRecord(null, label, 0, root);
             if (visited.add(root)) {
                 data.addRecord(e);
-                q.add(e);
+                s.push(e);
             }
             rootId++;
         }
 
-        while (!q.isEmpty()) {
-            GraphPathRecord cGpr = q.pop();
+        while (!s.isEmpty()) {
+            GraphPathRecord cGpr = s.pop();
             Object o = cGpr.obj();
             Class<?> cl = o.getClass();
 
@@ -83,7 +83,7 @@ public class GraphWalker extends AbstractGraphWalker {
                     if (e != null && visited.add(e)) {
                         GraphPathRecord gpr = new ArrayGraphPathRecord(cGpr, i, cGpr.depth() + 1, e);
                         data.addRecord(gpr);
-                        q.push(gpr);
+                        s.push(gpr);
                     }
                 }
             } else {
@@ -100,7 +100,7 @@ public class GraphWalker extends AbstractGraphWalker {
                     if (e != null && visited.add(e)) {
                         GraphPathRecord gpr = new FieldGraphPathRecord(cGpr, f.getName(), cGpr.depth() + 1, e);
                         data.addRecord(gpr);
-                        q.push(gpr);
+                        s.push(gpr);
                     }
                 }
             }
