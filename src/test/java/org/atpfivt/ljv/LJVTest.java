@@ -1,4 +1,4 @@
-package ljv;
+package org.atpfivt.ljv;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
