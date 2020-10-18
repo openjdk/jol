@@ -17,6 +17,12 @@
         <url>https://mipt.ru/education/chairs/programmingtechnolgy/</url>
     </organization>
 
+    <scm>
+        <url>https://github.com/ljviz/ljv.git</url>
+        <connection>scm:git:git://github.com/ljviz/ljv.git</connection>
+        <developerConnection>scm:git:git://github.com/ljviz/ljv.git</developerConnection>
+    </scm>
+
     <developers>
         <developer>
             <name>John Hamer</name>
@@ -72,8 +78,14 @@
         </dependency>
     </dependencies>
 
-    <build>
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -108,6 +120,31 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
             </plugin>
         </plugins>
     </build>
