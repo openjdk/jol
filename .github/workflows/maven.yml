@@ -17,6 +17,8 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11.0.x
+    - name: Set up dot
+      run: sudo apt-get install -y graphviz
     - uses: actions/cache@v1
       with:
         path: ~/.m2/repository
@@ -24,3 +26,12 @@ jobs:
         restore-keys: ${{ runner.os }}-maven-
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+
+    - name: Deploy to GitHub Pages
+      if: success() && github.ref == 'ref/head/master'
+      uses: crazy-max/ghaction-github-pages@v2
+      with:
+        target_branch: gh-pages
+        build_dir: doc/target/generated-docs
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
