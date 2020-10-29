@@ -1,13 +1,19 @@
 package org.atpfivt.ljv;
 
+enum Gender {
+    MALE,
+    FEMALE,
+    OTHER,
+}
+
 class Person {
     private String name;
-    private boolean isMale;
+    private Gender gender;
     private int age;
 
-    public Person(String n, boolean m, int a) {
+    public Person(String n, Gender g, int a) {
         setName(n);
-        setMale(m);
+        setGender(g);
         setAge(a);
     }
 
@@ -19,12 +25,12 @@ class Person {
         this.age = age;
     }
 
-    public boolean isMale() {
-        return isMale;
+    public Gender getGender() {
+        return gender;
     }
 
-    public void setMale(boolean isMale) {
-        this.isMale = isMale;
+    public void setGender(Gender gender) {
+        this.gender = gender;
     }
 
     public String getName() {

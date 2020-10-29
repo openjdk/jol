@@ -7,5 +7,5 @@ public enum Direction {
     BT,
     LR,
     TB,
-    RL;
+    RL
 }

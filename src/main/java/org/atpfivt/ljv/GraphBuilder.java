@@ -26,8 +26,8 @@ final class GraphBuilder {
                 .append("\t\t\t<tr>\n");
         for (int i = 0, len = Array.getLength(obj); i < len; i++) {
             out.append("\t\t\t\t<td>")
-                .append(Quote.quote(String.valueOf(Array.get(obj, i))))
-                .append("</td>\n");
+                    .append(Quote.quote(String.valueOf(Array.get(obj, i))))
+                    .append("</td>\n");
         }
         out.append("\t\t\t</tr>\n\t\t</table>\n\t>];\n");
     }
@@ -60,7 +60,7 @@ final class GraphBuilder {
         }
     }
 
-    private int getFieldSize(Object obj, Field[] fs) {
+    private int getFieldSize(LJV ljv, Object obj, Field[] fs) {
         int size = 0;
         for (Field field: fs) {
             if (!ljv.canIgnoreField(field))
@@ -80,32 +80,31 @@ final class GraphBuilder {
                 .append(dotName(obj))
                 .append("[label=<\n")
                 .append("\t\t<table border='0' cellborder='1' cellspacing='0'>\n")
-                .append("\t\t\t<tr>\n\t\t\t\t<td colspan='")
-                .append(getFieldSize(obj, fs))
+                .append("\t\t\t<tr>\n\t\t\t\t<td rowspan='")
+                .append(getFieldSize(ljv, obj, fs) + 1)
                 .append("'>")
                 .append(oSettings.className(obj, false))
-                .append("</td>\n\t\t\t</tr>\n")
-                .append("\t\t\t<tr>\n");
+                .append("</td>\n\t\t\t</tr>\n");
         Object cabs = ljv.getClassAttribute(obj.getClass());
         for (Field field : fs) {
             if (!ljv.canIgnoreField(field))
                 try {
                     Object ref = field.get(obj);
                     if (field.getType().isPrimitive() || oSettings.canTreatAsPrimitive(ref)) {
-                        out.append("\t\t\t\t<td>");
+                        out.append("\t\t\t<tr>\n\t\t\t\t<td>");
                         if (ljv.isShowFieldNamesInLabels())
                             out.append(field.getName()).append(": ").append(Quote.quote(String.valueOf(ref)));
                         else
                             out.append(Quote.quote(String.valueOf(ref)));
-                        out.append("</td>\n");                            
+                        out.append("</td>\n\t\t\t</tr>\n");
                     }
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
         }
-        out.append("\t\t\t</tr>\n\t\t</table>\n\t>")
-            .append(cabs == null ? "" : "," + cabs)
-            .append("];\n");
+        out.append("\t\t</table>\n\t>")
+                .append(cabs == null ? "" : "," + cabs)
+                .append("];\n");
     }
 
 
@@ -185,7 +184,7 @@ final class GraphBuilder {
                 .append("\tnode[shape=plaintext]\n");
         generateDotInternal(obj);
         return out
-            .append("}\n")
-            .toString();
+                .append("}\n")
+                .toString();
     }
 }

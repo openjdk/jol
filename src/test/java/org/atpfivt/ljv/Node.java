@@ -3,13 +3,24 @@ package org.atpfivt.ljv;
 class Node {
     String name;
     int level;
-    boolean ok;
+    AnotherNode left, right;
+
+    public Node(String n) {
+        name = n;
+    }
+
+    public String toString() {
+        return "";
+    }
+}
+
+class AnotherNode {
+    String name;
+    int level;
     Node left, right;
 
-    public Node(String n, int l) {
+    public AnotherNode(String n) {
         name = n;
-        level = l;
-        ok = l % 2 == 0;
     }
 
     public String toString() {
