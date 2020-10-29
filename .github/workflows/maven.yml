@@ -28,7 +28,7 @@ jobs:
       run: mvn -B package --file pom.xml
 
     - name: Deploy to GitHub Pages
-      if: success() && github.ref == 'ref/head/master'
+      if: success() && github.ref == 'refs/heads/master'
       uses: crazy-max/ghaction-github-pages@v2
       with:
         target_branch: gh-pages
