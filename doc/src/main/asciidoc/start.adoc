@@ -1,9 +1,6 @@
 = Lightweight Java Visualizer
 :imagesdir: images
-
-link:https://search.maven.org/artifact/org.atp-fivt/ljv/1.0/jar[Maven Central]
-
-
+:toc: left
 
 == Getting started
 

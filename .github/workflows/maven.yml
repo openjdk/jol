@@ -26,7 +26,10 @@ jobs:
         restore-keys: ${{ runner.os }}-maven-
     - name: Build with Maven
       run: mvn -B package --file pom.xml
-
+    - name: Move Javadocs
+      run: mv ljv/target/apidocs doc/target/generated-docs/apidocs
+    - name: Move slides
+      run: mv slides/target/generated-slides doc/target/generated-docs/slides
     - name: Deploy to GitHub Pages
       if: success() && github.ref == 'refs/heads/master'
       uses: crazy-max/ghaction-github-pages@v2

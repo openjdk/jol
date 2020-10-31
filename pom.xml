@@ -60,10 +60,13 @@
 
     <properties>
         <revision>1.01</revision>
+        <asciidoctor.maven.plugin.version>2.1.0</asciidoctor.maven.plugin.version>
+        <asciidoctorj-diagram.version>2.0.5</asciidoctorj-diagram.version>
     </properties>
 
     <modules>
         <module>doc</module>
+        <module>slides</module>
         <module>ljv</module>
     </modules>
 </project>

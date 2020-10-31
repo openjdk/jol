@@ -1,0 +1,63 @@
+= Kafka Streams Testing: A Deep Dive
+Ivan Ponomarev, John Roesler
+:revealjs_theme: black
+:revealjs_customtheme: white_course.css
+:revealjs_slideNumber:
+:revealjs_history:
+:revealjs_progress:
+:encoding: UTF-8
+:lang: ru
+include::_doc_general_attributes.adoc[]
+:doctype: article
+:toclevels: 3
+:imagesdir: images
+:source-highlighter: highlightjs
+:highlightjsdir: highlight
+:icons: font
+:iconfont-remote!:
+:iconfont-name: font-awesome-4.7.0/css/font-awesome
+:revealjs_mouseWheel: true
+:revealjs_center: false
+:revealjs_transition: none
+:revealjs_width: 1600
+:revealjs_height: 900
+:stem: latexmath
+
+
+//== Часть 1. Введение
+:!figure-caption:
+
+
+== Who Are We
+
+[cols="20a,80a"]
+|===
+|asdfasdfsa
+|
+Ivan Ponomarev:
+
+* Software Engineer at KURS, tutor at MIPT
+* Apache Kafka Contributor
+|===
+
+[.notes]
+--
+John introduces Ivan
+--
+
+== Who Are We
+
+[cols="20a,80a"]
+|===
+| asdfasdfas
+|
+John Roesler:
+
+* Software Engineer at Confluent
+* Apache Kafka Committer and PMC member
+|===
+
+
+== Blah-blah
+
+aasadf asdfasdfas

@@ -1,0 +1,65 @@
+:encoding: utf-8
+:caution-caption: Предостережение
+:important-caption: Важно
+:note-caption: Замечание
+:tip-caption: Подсказка
+:warning-caption: Внимание
+:!figure-caption:
+:figure-caption:
+:table-caption: Таблица
+:example-caption: Пример
+:toc-title: Содержание
+:appendix-caption: Приложение
+:hyph: &#173;
+:zsp: &#8203;
+:numbered:
+:toc: center
+ifdef::basebackend-docbook[]
+:for-print:
+endif::[]
+:image-140-width: width="100%"
+:image-130-width: width="100%"
+:image-120-width: width="100%"
+:image-110-width: width="100%"
+:image-100-width: width="100%"
+:image-90-width: width="90%"
+:image-80-width: width="80%"
+:image-70-width: width="70%"
+:image-60-width: width="60%"
+:image-50-width: width="50%"
+:image-40-width: width="40%"
+:image-30-width: width="30%"
+:image-20-width: width="20%"
+:image-10-width: width="10%"
+:image-5-width: width="5%"
+ifdef::for-print[]
+:image-140-width: width="238mm"
+:image-130-width: width="221mm"
+:image-120-width: width="204mm"
+:image-110-width: width="187mm"
+:image-100-width: width="170mm"
+:image-90-width: width="153mm"
+:image-80-width: width="136mm"
+:image-70-width: width="119mm"
+:image-60-width: width="102mm"
+:image-50-width: width="85mm"
+:image-40-width: width="68mm"
+:image-30-width: width="51mm"
+:image-20-width: width="34mm"
+:image-10-width: width="17mm"
+:image-5-width: width="8.5mm"
+:scr-image-140-width: width="238mm"
+:scr-image-130-width: width="221mm"
+:scr-image-120-width: width="204mm"
+:scr-image-110-width: width="187mm"
+:scr-image-100-width: width="17cm"
+:scr-image-90-width: width="153mm"
+:scr-image-80-width: width="136mm"
+:scr-image-70-width: width="119mm"
+:scr-image-60-width: width="102mm"
+:scr-image-50-width: width="85mm"
+:scr-image-40-width: width="68mm"
+:scr-image-30-width: width="51mm"
+:scr-image-20-width: width="34mm"
+:scr-image-20-width: width="17mm"
+endif::[]
