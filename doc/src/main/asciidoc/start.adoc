@@ -1,47 +1,59 @@
 = Lightweight Java Visualizer
 :imagesdir: images
+:source-highlighter: highlightjs
 :toc: left
+:toclevels: 3
 
-== Getting started
+== User Guide
 
-Simple example
+=== What is LJV?
+
+LJV is a tool for visualizing Java data structures, using Reflection API and http://graphviz.gitlab.io/[Graphviz]. Its original version was developed by John Hamer in 2004 and released under GNU GPL (see the https://www.cs.auckland.ac.nz/~j-hamer/LJV.html[original project page]).
+
+This project aims to upgrade this tool to modern Java and make it an open source library in the modern sense of the word.
+
+=== Getting started
+
+You can use Maven or Gradle to import the LJV dependency:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.atp-fivt</groupId>
+  <artifactId>ljv</artifactId>
+  <version>1.0</version>
+</dependency>
+----
+
+Then use `drawGraph` method of `LJV` class to get graphviz representation of any Java `Object`:
 [source, java]
 ----
-String graph = new LJV().drawGraph("Hello");
+import org.atpfivt.ljv.LJV;
+
+...
+
+System.out.println(new LJV().drawGraph("Hello"));
 ----
-`Graph` contains the generated graphviz object structure, which we pass to `drawGraph ()`
-[source, graphviz]
+
+The printed result will look like following:
+
+[source, dot]
 ----
 digraph Java {
     rankdir="TB";
     node[shape=plaintext]
-    n1[label=<
-        <table border='0' cellborder='1' cellspacing='0'>
-            <tr>
-                <td colspan='2'>java.lang.String</td>
-            </tr>
-            <tr>
-                <td>coder: 0</td>
-                <td>hash: 0</td>
-            </tr>
-        </table>
-    >];
-    n2[label=<
-        <table border='0' cellborder='1' cellspacing='0'>
-            <tr>
-                <td>72</td>
-                <td>101</td>
-                <td>108</td>
-                <td>108</td>
-                <td>111</td>
-            </tr>
-        </table>
-    >];
-    n1 -> n2[label="value",fontsize=12];
+    . . .
 }
 ----
-The resulting string can be uploaded to link:https://dreampuf.github.io/GraphvizOnline/[online services]
-for GraphViz and visualized like this:
+
+This is a graph definition in DOT graph description language. This script can be converted into a bitmap  or vector image using `dot` utility from `graphviz` package:
+
+[source,bash]
+----
+dot -Tpng myfile.dot > myfile.png
+----
+
+Or, even simpler, the resulting script can be pasted to link:https://dreampuf.github.io/GraphvizOnline/[GraphViz Online] and visualized like this:
 
 [graphviz]
 ----
@@ -74,42 +86,16 @@ digraph Java {
 	>];
 	n1 -> n2[label="value",fontsize=12];
 }
-
 ----
 
-This is what a string in Java 8 looked like:
+This diagram can be interpreted as following:
 
-[graphviz]
---
-digraph Java {
-    rankdir="TB";
-    node[shape=plaintext]
-    n1[label=<
-        <table border='0' cellborder='1' cellspacing='0'>
-            <tr>
-                <td colspan='1'>java.lang.String</td>
-            </tr>
-            <tr>
-                <td>hash: 0</td>
-            </tr>
-        </table>
-    >];
-    n2[label=<
-        <table border='0' cellborder='1' cellspacing='0'>
-            <tr>
-                <td>H</td>
-                <td>e</td>
-                <td>l</td>
-                <td>l</td>
-                <td>o</td>
-            </tr>
-        </table>
-    >];
-    n1 -> n2[label="value",fontsize=12];
-}
---
+* The `String` object that we are visualizing is represented as a 'root' node of the graph 
+* This object has two fields of primitive types (`coder` and `hash`), with values set to zero.
+* This object through the field `value` references another object of an array type. This array has 5 elements.
+* Elements of the array are primitive values 72, 101, 108, 108 and 111.
 
-== Customization
+=== Diagram customization
 
 LJV has the ability to customize the view of the graph.
 
@@ -338,7 +324,80 @@ digraph Java {
 
 ----
 
-== String interning
+== Usage 
+
+=== Java 8 vs. Java 9+ string (compacted strings)
+
+
+[graphviz]
+----
+digraph Java {
+	rankdir="TB";
+	node[shape=plaintext]
+	n1[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='3'>java.lang.String</td>
+			</tr>
+			<tr>
+				<td>coder: 0</td>
+			</tr>
+			<tr>
+				<td>hash: 0</td>
+			</tr>
+		</table>
+	>];
+	n2[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td>72</td>
+				<td>101</td>
+				<td>108</td>
+				<td>108</td>
+				<td>111</td>
+			</tr>
+		</table>
+	>];
+	n1 -> n2[label="value",fontsize=12];
+}
+
+----
+
+
+
+This is what a string in Java 8 looked like:
+
+[graphviz]
+--
+digraph Java {
+    rankdir="TB";
+    node[shape=plaintext]
+    n1[label=<
+        <table border='0' cellborder='1' cellspacing='0'>
+            <tr>
+                <td colspan='1'>java.lang.String</td>
+            </tr>
+            <tr>
+                <td>hash: 0</td>
+            </tr>
+        </table>
+    >];
+    n2[label=<
+        <table border='0' cellborder='1' cellspacing='0'>
+            <tr>
+                <td>H</td>
+                <td>e</td>
+                <td>l</td>
+                <td>l</td>
+                <td>o</td>
+            </tr>
+        </table>
+    >];
+    n1 -> n2[label="value",fontsize=12];
+}
+--
+
+=== String interning
 
 [source,java]
 ----
@@ -501,7 +560,7 @@ digraph Java {
 
 ----
 
-== Wrapped object caching
+=== Wrapped object caching
 
 [source,java]
 ----
@@ -568,7 +627,7 @@ digraph Java {
 
 ----
 
-== ArrayDeque
+=== ArrayDeque
 
 [source,java]
 ----
@@ -831,7 +890,7 @@ digraph Java {
 
 ----
 
-== LinkedList
+=== LinkedList
 
 [source, java]
 ----
@@ -910,7 +969,7 @@ digraph Java {
 
 ----
 
-== HashMap
+=== HashMap
 
 [source,java]
 ----
@@ -1056,7 +1115,7 @@ digraph Java {
 }
 ----
 
-=== Collision...
+==== Collision...
 
 [source,java]
 ----
@@ -1181,7 +1240,7 @@ digraph Java {
 
 ----
 
-=== Collision with 13 elements and tree map
+==== Collision with 13 elements and tree map
 
 [source, java]
 ----
@@ -1515,7 +1574,7 @@ digraph Java {
 
 ----
 
-=== Hash collision for god of hash collision
+==== Hash collision for god of hash collision
 
 [source, java]
 ----
@@ -2184,7 +2243,7 @@ digraph Java {
 }
 ----
 
-== Treemap
+=== Treemap
 [source, java]
 ----
 TreeMap<String, Integer> map = new TreeMap<>();
@@ -2323,7 +2382,7 @@ digraph Java {
 
 ----
 
-== ConcurrentSkipListMap
+=== ConcurrentSkipListMap
 [source, java]
 ----
 ConcurrentSkipListMap<String, Integer> map = new ConcurrentSkipListMap<>();
@@ -2339,7 +2398,7 @@ String actualGraph = new LJV()
         .drawGraph(map);
 ----
 
-=== First start
+==== First start
 
 [graphviz]
 ----
@@ -2544,7 +2603,7 @@ digraph Java {
 }
 ----
 
-=== Second start
+==== Second start
 
 [graphviz]
 ----
