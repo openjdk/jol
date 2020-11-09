@@ -146,7 +146,7 @@ digraph Java {
 
 ----
 
-You can also flip the structure:
+You can also change the drawing direction:
 [source, java]
 ----
 ArrayList<Object> a = new ArrayList<>();
@@ -156,19 +156,21 @@ ArrayList<Object> a = new ArrayList<>();
 
 String graph = new LJV()
         .setTreatAsPrimitive(String.class)
-        .setDirection(Direction.LR) # <1>
+        .setDirection(Direction.LR)
         .drawGraph(a);
 ----
-* Direction - this is enum with 4 types:
-** TB - by default, draws from top to bottom
-** BT - draws from bottom to top
-** LR - draws from left to right
-** RL - draws from right to left
+
+`Direction` is `enum` with 4 values:
+
+** `TB` - by default, draws from top to bottom
+** `BT` - draws from bottom to top
+** `LR` - draws from left to right
+** `RL` - draws from right to left
 
 [graphviz]
 ----
 digraph Java {
-	rankdir="TB";
+	rankdir="LR";
 	node[shape=plaintext]
 	n1[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
@@ -327,6 +329,10 @@ digraph Java {
 == Usage 
 
 === Java 8 vs. Java 9+ string (compacted strings)
+
+The most widely used type of data in Java is `String`.
+Starting from Java 9, the internal representation of `String` has changed: `char[]` was replaced by `byte[]`, and `coder` flag was introduced in order to switch between 8-bit and 16-bit character representation. Thus we have achieved significant memory optimization for strings that contain only LATIN-1 charset characters: 
+
 
 
 [graphviz]
