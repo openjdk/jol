@@ -328,12 +328,65 @@ digraph Java {
 
 == Usage 
 
-=== Java 8 vs. Java 9+ string (compacted strings)
+=== java.util.String before and after Java 9
 
-The most widely used type of data in Java is `String`.
-Starting from Java 9, the internal representation of `String` has changed: `char[]` was replaced by `byte[]`, and `coder` flag was introduced in order to switch between 8-bit and 16-bit character representation. Thus we have achieved significant memory optimization for strings that contain only LATIN-1 charset characters: 
+The most widely used type of data in Java is, of course, `String`.
+Starting from Java 9, the internal representation of `String` has changed: `char[]` was replaced by `byte[]`, and `coder` flag was introduced in order to switch between 8-bit and 16-bit character representation. This allowed  significant memory optimization for strings that contain only LATIN-1 charset characters: 
 
 
+[cols="33a,33a,33a"]
+|===
+|
+
+[source,java]
+----
+/*Java 8-: one 16-bit char per character*/
+new LJV().drawGraph("Hello Привет");
+----
+
+[graphviz]
+--
+digraph Java {
+    rankdir="TB";
+    node[shape=plaintext]
+    n1[label=<
+        <table border='0' cellborder='1' cellspacing='0'>
+            <tr>
+                <td colspan='1'>java.lang.String</td>
+            </tr>
+            <tr>
+                <td>hash: 0</td>
+            </tr>
+        </table>
+    >];
+    n2[label=<
+        <table border='0' cellborder='1' cellspacing='0'>
+            <tr>
+                <td>H</td>
+                <td>e</td>
+                <td>l</td>
+                <td>l</td>
+                <td>o</td>
+                <td> </td>
+                <td>П</td>
+                <td>р</td>
+                <td>и</td>
+                <td>в</td>
+                <td>е</td>
+                <td>т</td>
+            </tr>
+        </table>
+    >];
+    n1 -> n2[label="value",fontsize=12];
+}
+--
+|
+
+[source,java]
+----
+/*Java 9+: coder set to 0 and one byte per LATIN-1 character*/
+new LJV().drawGraph("Hello");
+----
 
 [graphviz]
 ----
@@ -366,106 +419,77 @@ digraph Java {
 	>];
 	n1 -> n2[label="value",fontsize=12];
 }
-
 ----
 
 
 
-This is what a string in Java 8 looked like:
 
-[graphviz]
---
-digraph Java {
-    rankdir="TB";
-    node[shape=plaintext]
-    n1[label=<
-        <table border='0' cellborder='1' cellspacing='0'>
-            <tr>
-                <td colspan='1'>java.lang.String</td>
-            </tr>
-            <tr>
-                <td>hash: 0</td>
-            </tr>
-        </table>
-    >];
-    n2[label=<
-        <table border='0' cellborder='1' cellspacing='0'>
-            <tr>
-                <td>H</td>
-                <td>e</td>
-                <td>l</td>
-                <td>l</td>
-                <td>o</td>
-            </tr>
-        </table>
-    >];
-    n1 -> n2[label="value",fontsize=12];
-}
---
-
-=== String interning
+|
 
 [source,java]
 ----
-String x = "Hello";
-String y = x;
-String graph = new LJV().drawGraph(new Object[]{x, y});
+/*Java 9+: coder set to 1 
+and 2 bytes per character 
+if there are symbols outside 
+LATIN-1 set*/
+new LJV().drawGraph("Привет");
 ----
 
 [graphviz]
-----
+--
 digraph Java {
 	rankdir="TB";
 	node[shape=plaintext]
 	n1[label=<
-		<table border='0' cellborder='1' cellspacing='0' cellpadding='9'>
+		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
-				<td port="f0"></td>
-				<td port="f1"></td>
+				<td colspan='2'>java.lang.String</td>
+			</tr>
+			<tr>
+				<td>coder: 1</td>
+				<td>hash: 0</td>
 			</tr>
 		</table>
 	>];
 	n2[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
-				<td rowspan='3'>java.lang.String</td>
-			</tr>
-			<tr>
-				<td>coder: 0</td>
-			</tr>
-			<tr>
-				<td>hash: 0</td>
-			</tr>
-		</table>
-	>];
-	n3[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
-				<td>72</td>
-				<td>101</td>
-				<td>108</td>
-				<td>108</td>
-				<td>111</td>
+				<td>31</td>
+				<td>4</td>
+				<td>64</td>
+				<td>4</td>
+				<td>56</td>
+				<td>4</td>
+				<td>50</td>
+				<td>4</td>
+				<td>53</td>
+				<td>4</td>
+				<td>66</td>
+				<td>4</td>
 			</tr>
 		</table>
 	>];
-	n2 -> n3[label="value",fontsize=12];
-	n1:f0 -> n2[label="0",fontsize=12];
-	n1:f1 -> n2[label="1",fontsize=12];
+	n1 -> n2[label="value",fontsize=12];
 }
+--
 
-----
+|===
+
+=== String creation
+
+One rarely (or should I say 'never'?) needs to create `String` using `new` operator, however it's worth noticing that `String(String original)` constructor reuses the internal byte array of its argument. Concatenation (even with an empty string!) always produce a full new copy:
 
 [source,java]
-----
+--
 String x = "Hello";
-String y = new String(x);
-String graph1 = new LJV().drawGraph(new Object[]{x, y});
-String graph2 = new LJV().drawGraph(new Object[]{x, y.intern()});
-----
+new LJV().drawGraph(new String[]{
+    x, new String(x),
+    new String(x.toCharArray()),
+    x + ""}));
+--
 
 [graphviz]
-----
+--
 digraph Java {
 	rankdir="TB";
 	node[shape=plaintext]
@@ -474,6 +498,8 @@ digraph Java {
 			<tr>
 				<td port="f0"></td>
 				<td port="f1"></td>
+				<td port="f2"></td>
+				<td port="f3"></td>
 			</tr>
 		</table>
 	>];
@@ -518,8 +544,73 @@ digraph Java {
 	>];
 	n4 -> n3[label="value",fontsize=12];
 	n1:f1 -> n4[label="1",fontsize=12];
+	n5[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='3'>java.lang.String</td>
+			</tr>
+			<tr>
+				<td>coder: 0</td>
+			</tr>
+			<tr>
+				<td>hash: 0</td>
+			</tr>
+		</table>
+	>];
+	n6[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td>72</td>
+				<td>101</td>
+				<td>108</td>
+				<td>108</td>
+				<td>111</td>
+			</tr>
+		</table>
+	>];
+	n5 -> n6[label="value",fontsize=12];
+	n1:f2 -> n5[label="2",fontsize=12];
+	n7[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='3'>java.lang.String</td>
+			</tr>
+			<tr>
+				<td>coder: 0</td>
+			</tr>
+			<tr>
+				<td>hash: 0</td>
+			</tr>
+		</table>
+	>];
+	n8[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td>72</td>
+				<td>101</td>
+				<td>108</td>
+				<td>108</td>
+				<td>111</td>
+			</tr>
+		</table>
+	>];
+	n7 -> n8[label="value",fontsize=12];
+	n1:f3 -> n7[label="3",fontsize=12];
 }
 
+--
+
+== String interning
+
+Calling `intern()` deduplicates all the `String` objects and reduce them to a single value kept in the `String` pool (compare with the previous example): 
+
+[source,java]
+----
+String x = "Hello";
+new LJV().drawGraph(new String[]{
+  x, new String(x).intern(),
+  new String(x.toCharArray()).intern(),
+  (x + "").intern()}));
 ----
 
 [graphviz]
@@ -532,6 +623,8 @@ digraph Java {
 			<tr>
 				<td port="f0"></td>
 				<td port="f1"></td>
+				<td port="f2"></td>
+				<td port="f3"></td>
 			</tr>
 		</table>
 	>];
@@ -562,25 +655,26 @@ digraph Java {
 	n2 -> n3[label="value",fontsize=12];
 	n1:f0 -> n2[label="0",fontsize=12];
 	n1:f1 -> n2[label="1",fontsize=12];
-}
-
-----
-
-=== Wrapped object caching
-
-[source,java]
-----
-public class Example {
-    private Integer i1 = 42;
-    private Integer i2 = 42;
-    private Integer i3 = 2020;
-    private Integer i4 = 2020;
+	n1:f2 -> n2[label="2",fontsize=12];
+	n1:f3 -> n2[label="3",fontsize=12];
 }
 ----
 
+=== Boxed primitives caching
+
+Usually we create boxed primitives via autoboxing. In rare cases when we do need to create e. g. `Integer` object explicitly, the correct way to do this is with `Integer.valueOf` method. This method deduplicates values in the range from -128 to 127 or `-XX:AutoBoxCacheMax` value.
+
+Values outside this range will not be deduplicated even when autoboxing is used.
+
+`Integer` created with constructor will never be deduplicated, and this constructor is deprecated since Java 9.
+
 [source,java]
 ----
-String graph = new LJV().drawGraph(new Example());
+new LJV().drawGraph(new Integer[]{
+    42, Integer.valueOf(42),
+    new Integer(42),
+    -4242, -4242
+}));
 ----
 
 [graphviz]
@@ -589,9 +683,13 @@ digraph Java {
 	rankdir="TB";
 	node[shape=plaintext]
 	n1[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
+		<table border='0' cellborder='1' cellspacing='0' cellpadding='9'>
 			<tr>
-				<td>Example</td>
+				<td port="f0"></td>
+				<td port="f1"></td>
+				<td port="f2"></td>
+				<td port="f3"></td>
+				<td port="f4"></td>
 			</tr>
 		</table>
 	>];
@@ -605,35 +703,123 @@ digraph Java {
 			</tr>
 		</table>
 	>];
-	n1 -> n2[label="i1",fontsize=12];
-	n1 -> n2[label="i2",fontsize=12];
+	n1:f0 -> n2[label="0",fontsize=12];
+	n1:f1 -> n2[label="1",fontsize=12];
 	n3[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
 				<td rowspan='2'>java.lang.Integer</td>
 			</tr>
 			<tr>
-				<td>value: 2020</td>
+				<td>value: 42</td>
 			</tr>
 		</table>
 	>];
-	n1 -> n3[label="i3",fontsize=12];
+	n1:f2 -> n3[label="2",fontsize=12];
 	n4[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
 				<td rowspan='2'>java.lang.Integer</td>
 			</tr>
 			<tr>
-				<td>value: 2020</td>
+				<td>value: -4242</td>
 			</tr>
 		</table>
 	>];
-	n1 -> n4[label="i4",fontsize=12];
+	n1:f3 -> n4[label="3",fontsize=12];
+	n5[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>java.lang.Integer</td>
+			</tr>
+			<tr>
+				<td>value: -4242</td>
+			</tr>
+		</table>
+	>];
+	n1:f4 -> n5[label="4",fontsize=12];
 }
-
 ----
 
+=== LinkedList
+
+Linked list is a data structure with theoretical O(1) efficiency for adding/removing its random node that can acts both as `List` and `Deque`. In Java practice, however, `LinkedList` is superceded by `ArrayList` and `ArrayDeque` in all the cases, and it's https://twitter.com/joshbloch/status/583813919019573248[questionable] whether this class is needed in standard library at all.
+
+[source, java]
+----
+List<Integer> list = new LinkedList<>(); 
+list.add(1); list.add(42); list.add(21);
+
+new LJV()
+  .setTreatAsPrimitive(Integer.class)
+  .setDirection(Direction.LR)
+  .drawGraph(list));
+----
+
+[graphviz]
+----
+digraph Java {
+	rankdir="LR";
+	node[shape=plaintext]
+	n1[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>java.util.LinkedList</td>
+			</tr>
+			<tr>
+				<td>size: 3</td>
+			</tr>
+		</table>
+	>];
+	n2[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='3'>java.util.LinkedList$Node</td>
+			</tr>
+			<tr>
+				<td>item: 1</td>
+			</tr>
+			<tr>
+				<td>prev: null</td>
+			</tr>
+		</table>
+	>];
+	n3[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>java.util.LinkedList$Node</td>
+			</tr>
+			<tr>
+				<td>item: 42</td>
+			</tr>
+		</table>
+	>];
+	n4[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='3'>java.util.LinkedList$Node</td>
+			</tr>
+			<tr>
+				<td>item: 21</td>
+			</tr>
+			<tr>
+				<td>next: null</td>
+			</tr>
+		</table>
+	>];
+	n4 -> n3[label="prev",fontsize=12];
+	n3 -> n4[label="next",fontsize=12];
+	n3 -> n2[label="prev",fontsize=12];
+	n2 -> n3[label="next",fontsize=12];
+	n1 -> n2[label="first",fontsize=12];
+	n1 -> n4[label="last",fontsize=12];
+}
+----
+
+
 === ArrayDeque
+
+This structure uses 'looped' buffer in order to implement queue  capabilities. If maximum number of elements in the queue does not grow over time, this data structure works very fast and memory efficient, with constant time for every operation.
 
 [source,java]
 ----
@@ -896,86 +1082,10 @@ digraph Java {
 
 ----
 
-=== LinkedList
-
-[source, java]
-----
-LinkedList<Integer> linkedList = new LinkedList<>();
-linkedList.add(1);
-linkedList.add(42);
-linkedList.add(21);
-
-String graph = new LJV()
-        .setTreatAsPrimitive(Integer.class)
-        .addFieldAttribute("next", "color=red,fontcolor=red")
-        .addFieldAttribute("prev", "color=blue,fontcolor=blue")
-        .addFieldAttribute("first", "color=red,fontcolor=red")
-        .addFieldAttribute("last", "color=red,fontcolor=red")
-        .drawGraph(linkedList);
-----
-
-[graphviz]
-----
-digraph Java {
-	rankdir="TB";
-	node[shape=plaintext]
-	n1[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
-				<td rowspan='2'>java.util.LinkedList</td>
-			</tr>
-			<tr>
-				<td>size: 3</td>
-			</tr>
-		</table>
-	>];
-	n2[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
-				<td rowspan='3'>java.util.LinkedList$Node</td>
-			</tr>
-			<tr>
-				<td>item: 1</td>
-			</tr>
-			<tr>
-				<td>prev: null</td>
-			</tr>
-		</table>
-	>];
-	n3[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
-				<td rowspan='2'>java.util.LinkedList$Node</td>
-			</tr>
-			<tr>
-				<td>item: 42</td>
-			</tr>
-		</table>
-	>];
-	n4[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
-				<td rowspan='3'>java.util.LinkedList$Node</td>
-			</tr>
-			<tr>
-				<td>item: 21</td>
-			</tr>
-			<tr>
-				<td>next: null</td>
-			</tr>
-		</table>
-	>];
-	n4 -> n3[label="prev",fontsize=12,color=blue,fontcolor=blue];
-	n3 -> n4[label="next",fontsize=12,color=red,fontcolor=red];
-	n3 -> n2[label="prev",fontsize=12,color=blue,fontcolor=blue];
-	n2 -> n3[label="next",fontsize=12,color=red,fontcolor=red];
-	n1 -> n2[label="first",fontsize=12,color=red,fontcolor=red];
-	n1 -> n4[label="last",fontsize=12,color=red,fontcolor=red];
-}
-
-----
 
 === HashMap
+
+`HashMap` is a widely used data structure in Java. There are a number of ways to implement hash collisions resolution in a hash map, developers of Java platform chose using linked lists:
 
 [source,java]
 ----
@@ -1121,7 +1231,9 @@ digraph Java {
 }
 ----
 
-==== Collision...
+==== Collision
+
+While the number of collisions on a  `HashMap` bucket is small, the linked list is growing:
 
 [source,java]
 ----
@@ -1247,6 +1359,10 @@ digraph Java {
 ----
 
 ==== Collision with 13 elements and tree map
+
+However, if a single bucket becomes overloaded with collisions, and keys implement `Comparable` interface, the linked list turns to a tree.
+
+This reduces the search time in a bucket from O(N) to O(log(N)) and mitigates a certain kind of DDoS attacks: 
 
 [source, java]
 ----
@@ -2249,7 +2365,12 @@ digraph Java {
 }
 ----
 
-=== Treemap
+=== TreeMap
+
+`TreeMap` in Java is a Red-Black tree that implements `NavigableMap`. This implementation provides guaranteed O(log(N)) time cost for get/put/remove operations, which in practice is inferior to `HashMap`.
+
+We use `TreeMap` when we need `lowerKey(..)`, `higherKey(..)` and other `NavigableMap` capabilities not provided by a simple `Map`.
+
 [source, java]
 ----
 TreeMap<String, Integer> map = new TreeMap<>();
@@ -2389,6 +2510,9 @@ digraph Java {
 ----
 
 === ConcurrentSkipListMap
+
+`ConcurrentSkipListMap` is a thread-safe `NavigableMap` implementation.
+
 [source, java]
 ----
 ConcurrentSkipListMap<String, Integer> map = new ConcurrentSkipListMap<>();
