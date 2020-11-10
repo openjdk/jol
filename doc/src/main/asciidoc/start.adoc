@@ -600,7 +600,7 @@ digraph Java {
 
 --
 
-== String interning
+=== String interning
 
 Calling `intern()` deduplicates all the `String` objects and reduce them to a single value kept in the `String` pool (compare with the previous example): 
 
