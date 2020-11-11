@@ -1,13 +1,10 @@
-= Kafka Streams Testing: A Deep Dive
-Ivan Ponomarev, John Roesler
-:revealjs_theme: black
+//:revealjs_theme: white
 :revealjs_customtheme: white_course.css
 :revealjs_slideNumber:
 :revealjs_history:
 :revealjs_progress:
 :encoding: UTF-8
 :lang: ru
-include::_doc_general_attributes.adoc[]
 :doctype: article
 :toclevels: 3
 :imagesdir: images
@@ -22,42 +19,609 @@ include::_doc_general_attributes.adoc[]
 :revealjs_width: 1600
 :revealjs_height: 900
 :stem: latexmath
+:hardbreaks: true
+:source-highlighter: highlightjs
+:highlightjs-languages: java, kotlin, scala, groovy, graphviz
+:customcss: slides.css
 
+include::_doc_general_attributes.adoc[]
 
-//== Часть 1. Введение
+= The Lightweight Java Visualizer (LJV)
+
 :!figure-caption:
 
-
-== Who Are We
+== Кто мы
 
 [cols="20a,80a"]
 |===
-|asdfasdfsa
-|
-Ivan Ponomarev:
+.^| image::ponomarev.jpg[Иван,width=220]
+.^|
+Иван Пономарев:
+- Software Engineer at KURS, tutor at MIPT
 
-* Software Engineer at KURS, tutor at MIPT
-* Apache Kafka Contributor
+.^| image::ivchenko.jpg[Олег,width=220]
+.^|
+Олег Ивченко:
+- Tutor at MIPT
+|===
+
+== Кто мы
+
+[cols="20a,80a"]
+|===
+.^| image::selivanov.png[Илья,width=220]
+.^|
+Илья Селиванов:
+- Студент МФТИ
+
+.^| image::nogaev.png[Нурас,width=220]
+.^|
+Нурас Ногаев:
+- Студент МФТИ
+|===
+
+== Идея
+
+* В режиме runtime построить внутреннее представление графа объектов памяти.
+
+* Инструмент в глубину проходит граф объектов с помощью Reflection API и генерирует DOT код c необходимыми полями и классами.
+
+* Полученный DOT код можно загрузить в https://dreampuf.github.io/[онлайн-сервисы]
+
+* DOT - язык описания графов.
+
+[.notes]
+--
+Идея заключается в том, что с помощью ReflectionAPI показывать внутренности объектов и строить граф в GraphViz'e
+reflection api На рисунке визуализирован хэшмап с огромной коллизией, и как он смог его переделать в тримап
+--
+
+== Идея
+
+[.stetch]
+[graphviz]
+----
+include::code/hashmap_many_collissions.graphviz[]
+----
+
+[.notes]
+--
+reflection api На рисунке визуализирован хэшмап с огромной коллизией, и как он смог его переделать в тримап
+--
+
+== До нас
+
+Инструмент был разработан Джоном Xамером в 2004 году на *Java 1.4*
+
+[%hardbreaks]
+[%hardbreaks]
+[%hardbreaks]
+
+*John Hamer.* “Visualising Java Data Structures as Graphs”
+
+https://www.cs.auckland.ac.nz/~j-hamer/ACE04-paper.pdf
+
+== Проблемы
+
+[%step]
+* Неудобство пользования
+* Отсутствие поддержки инструмента
+* Изменение графвиза
+* Отсутствие ряда возможностей
+
+[.notes]
+--
+1) Код теперь выглядит правильнее и удобнее 2) АПИ был старым и неудобным 3) Теперь каждый может легко получить доступ к инструменту и вносить вклад 4) теперь пакетные менеджеры могут легко скачать инструмент 5) Теперь используем новые фичи графвиза, html like labels
+--
+
+== Решения
+
+[%step]
+* Обновление до Java 11
+* Изменение API инструмента (method chaining)
+* Выложили на https://github.com/atp-mipt/ljv[GitHub]
+* Выложили на https://search.maven.org/artifact/org.atp-fivt/ljv[Maven Central]
+* Полностью изменена генерация графа
+
+[.notes]
+--
+1) Код теперь выглядит правильнее и удобнее 2) АПИ был старым и неудобным 3) Теперь каждый может легко получить доступ к инструменту и вносить вклад 4) теперь пакетные менеджеры могут легко скачать инструмент 5) Теперь используем новые фичи графвиза, html like labels.
+Переписали генерацию
+--
+
+== Зачем он нужен
+
+* Реверс инжиниринг кода
+* Преподавание
+
+[.notes]
+--
+1) Можно изучить строение любого(?) объекта в джаве 2) Благодаря визуальному отображению "внутренностей" кода, студентам будет проще понимать структуры данных
+--
+
+== Как использовать
+
+[cols="a"]
+|===
+^|
+[source,java]
+----
+String graph = new LJV().drawGraph("Hello");
+----
+^|
+[graphviz]
+----
+include::code/string_java_8.graphviz[]
+----
+
+[.notes]
+--
+упомянуть подключение через pom.xml
+--
+
+|===
+
+=== Исходный код на языке DOT
+
+[.small]
+[source]
+----
+include::code/string_java_8.graphviz[]
+----
+
+== Настройки графа
+
+Базовые типы Java можно представить в более удобном виде
+
+[cols="a"]
+|===
+^|
+[source,java]
+----
+String graph = new LJV()
+  .setTreatAsPrimitive(String.class)
+  .drawGraph(
+     new Object[]{new String[]{"a", "b", "c"}, new int[]{1, 2, 3}}
+  );
+----
+^|
+[graphviz]
+----
+include::code/as_primitive.graphviz[]
+----
+|===
+
+[%notitle]
+=== Поворот
+
+Есть возможность перевернуть структуру
+
+[cols="a"]
+|===
+.^| [source,java]
+----
+ArrayList<Object> a = new ArrayList<>();
+        a.add(new Person("Albert", true, 35));
+        a.add(new Person("Betty", false, 20));
+        a.add(new java.awt.Point(100, -100));
+
+String graph = new LJV()
+        .setTreatAsPrimitive(String.class)
+        .setDirection(Direction.LR)
+        .drawGraph(a);
+----
+
+^| [.column]
+[graphviz]
+----
+include::code/arraylist_set_direction_lr.graphviz[]
+----
+|===
+
+[%notitle]
+=== Цвета
+
+Можно разукрасить отдельные части графа
+
+[cols="a"]
+|===
+^|
+[source,java]
+----
+Node n1 = new Node("A");
+...
+n1.right.right = n1;
+
+String graph = new LJV()
+    .addFieldAttribute("left", "color=red,fontcolor=red")
+    .addFieldAttribute("right", "color=blue,fontcolor=blue")
+    .addClassAttribute(Node.class, "color=pink,style=filled")
+    .addIgnoreField("level")
+    .setTreatAsPrimitive(String.class)
+    .setShowFieldNamesInLabels(false).drawGraph(n1);
+----
+^|
+[graphviz]
+----
+include::code/node_set_color.graphviz[]
+----
+|===
+
+== Интернирование строк
+
+[source,java]
+----
+String x = "Hello";
+String y = x;
+String graph = new LJV().drawGraph(new Object[]{x, y});
+----
+
+[graphviz]
+----
+include::code/string_interning_equate.graphviz[]
+----
+
+[.notes]
+--
+Как видим на слайде мы создаем экземпляр класса String и ссылаемся на него из двух переменных
+--
+
+[%notitle]
+=== Copy
+
+[source,java]
+----
+String x = "Hello";
+String y = new String(x);
+String graph1 = new LJV().drawGraph(new Object[]{x, y});
+----
+
+[graphviz]
+----
+include::code/string_interning_new.graphviz[]
+----
+
+[.notes]
+--
+А здесь происходит копирование экземпляра класса, но каждый из экземпляров все еще ссылается полем value на один и тот же массив байт
+--
+
+[%notitle]
+=== Copy and intern
+
+[source,java]
+----
+String x = "Hello";
+String y = "Hello";
+String actual_graph = new LJV().drawGraph(new Object[]{x, y.intern()});
+----
+
+[graphviz]
+----
+include::code/string_interning_new_intern.graphviz[]
+----
+
+[.notes]
+--
+Ситуация более интересная, мы вызываем на переменной y метод intern и получаем ссылку на один экземпляр.
+При этом в переменных x и у до вызова метода хранятся два разных экземпляра класса со своими массивами байт Как видим LJV с этим справляется
+--
+
+== Кэширование объектов класса
+
+[source,java]
+----
+public class Example {
+  private Integer i1 = 42;     private Integer i2 = 42;
+  private Integer i3 = 2020;   private Integer i4 = 2020;
+  private String s1 = "HelloWorld";
+  private String s2 = "HELL O";
+  private String s3 = "HelloWorld";
+}
+//...
+String graph = new LJV().drawGraph(new Example());
+----
+
+[graphviz]
+----
+include::code/integer_caching.graphvize[]
+----
+
+[.notes]
+--
+Про интернирование строк не забыли и сейчас видим нечто похожее, при автобоксинге переменные целых типов ссылаются на одни и те же экзмепляры класса, работает это в диапазоне от -128 до + 127 и относится ко всем классам целых чисел
+--
+
+== ArrayDeque
+
+[source,java]
+----
+ArrayDeque<Integer> arrayDeque = new ArrayDeque<>();
+
+String graph = new LJV().drawGraph(arrayDeque);
+----
+
+[graphviz]
+----
+include::code/arraydeque_empty.graphviz[]
+----
+
+[.notes]
+--
+Вот так выглядит пустая двухсторонняя очередь на основе массива Objectов
+Давайте добавим парочку элементов
+--
+
+[%notitle]
+=== Add few elemnts
+
+[source,java]
+----
+ArrayDeque<Integer> arrayDeque = new ArrayDeque<>();
+arrayDeque.addLast(1);
+arrayDeque.addLast(2);
+
+String graph = new LJV()
+        .setTreatAsPrimitive(Integer.class)
+        .drawGraph(arrayDeque);
+----
+
+[graphviz]
+----
+include::code/arraydeque_few_elements.graphviz[]
+----
+
+[.notes]
+--
+Уже интересно
+А что если добавить много элементов, например штук 20
+--
+
+[%notitle]
+=== Add many elements
+
+[source,java]
+----
+ArrayDeque<Integer> arrayDeque = new ArrayDeque<>();
+for (int i = 0; i < 20; i++) {
+    arrayDeque.addLast(i);
+}
+
+String graph = new LJV()
+        .setTreatAsPrimitive(Integer.class)
+        .drawGraph(arrayDeque);
+----
+
+[graphviz]
+----
+include::code/arraydeque_many_elements.graphviz[]
+----
+
+[.notes]
+--
+Как видим массив Objectов пришлось переалоцировать, скопировать элементы в конец
+Кроме того можно заметить интересную особенность, массив замкнут и если в начала есть свободные места, то указатель конца перейдет туда
+Такая структура позволяет добавлять и удалять элементы в начало и конец очереди
+Продемонстрируем это
+--
+[%notitle]
+=== Add many and remove
+
+[cols="a"]
+|===
+|
+[source,java]
+----
+ArrayDeque<Integer> arrayDeque = new ArrayDeque<>();
+for (int i = 0; i < 20; i++) {
+    arrayDeque.addLast(i);
+}
+for (int i = 0; i < 18; i++) {
+    arrayDeque.removeFirst();
+}
+
+String graph = new LJV()
+        .setTreatAsPrimitive(Integer.class)
+        .drawGraph(arrayDeque);
+----
+
+[.notes]
+--
+Добавили 20 в конец и удалили 18 с начала
+Теперь указатель начала указывает на 2 элемент, а указатель конца на 4
+--
+
+^|
+[graphviz]
+----
+include::code/arraydeque_add_many_and_remove.graphviz[]
+----
+|===
+
+== LinkedList
+
+[cols="a"]
+|===
+^|
+[source,java]
+----
+LinkedList<Integer> linkedList = new LinkedList<>();
+linkedList.add(1);
+linkedList.add(42);
+linkedList.add(21);
+
+String graph = new LJV()
+        .setTreatAsPrimitive(Integer.class)
+        .addFieldAttribute("next", "color=red,fontcolor=red")
+        .addFieldAttribute("prev", "color=blue,fontcolor=blue")
+        .addFieldAttribute("first", "color=red,fontcolor=red")
+        .addFieldAttribute("last", "color=red,fontcolor=red")
+        .drawGraph(linkedList);
+----
+^|
+[graphviz]
+----
+include::code/linkedlist.graphviz[]
+----
 |===
 
 [.notes]
 --
-John introduces Ivan
+Не менее интересный класс, экземпляр которого хранит ссылки на первые и последний экзмепляры приватного статического класса Node, которые и образуют двусвязный список
 --
 
-== Who Are We
+== Treemap
 
-[cols="20a,80a"]
+[cols="a"]
 |===
-| asdfasdfas
 |
-John Roesler:
+[source,java]
+----
+TreeMap<String, Integer> map = new TreeMap<>();
+map.put("one", 1);    map.put("two", 2);
+map.put("three", 3);  map.put("four", 4);
+String actualGraph = new LJV()
+        .setTreatAsPrimitive(Integer.class)
+        .setTreatAsPrimitive(String.class)
+        .drawGraph(map);
+----
 
-* Software Engineer at Confluent
-* Apache Kafka Committer and PMC member
+^|
+[graphviz]
+----
+include::code/treemap.graphviz[]
+----
 |===
 
+== HashMap
 
-== Blah-blah
+[cols="a"]
+|===
+^|
+[source,java]
+----
+HashMap<String, Integer> map = new HashMap<>();
+map.put("one", 1);   map.put("two", 2);
+map.put("three", 3); map.put("four", 4);
+String graph = new LJV()
+        .setTreatAsPrimitive(Integer.class)
+        .setTreatAsPrimitive(String.class)
+        .drawGraph(map);
+----
 
-aasadf asdfasdfas
+^|
+[graphviz]
+----
+include::code/hashmap.graphviz[]
+----
+|===
+
+[.notes]
+--
+Хэш-таблица, каждый объект ложится в свой бакет по хэшу, каждый отдельный бакет представляет собой LinkedList, где хранятся разные объекты с одинаковым хэшом
+--
+
+=== Collision...
+
+[cols="a"]
+|===
+^|
+[source,java]
+----
+List<String> collisionString = new HashCodeCollision().genCollisionString(3);
+HashMap<String, Integer> map = new HashMap<>();
+
+for (int i = 0; i < collisionString.size(); i++) {
+    map.put(collisionString.get(i), i);
+}
+
+String graph = new LJV()
+        .setTreatAsPrimitive(Integer.class)
+        .setTreatAsPrimitive(String.class)
+        .drawGraph(map);
+----
+
+^|
+[graphviz]
+----
+include::code/hashmap_3_collissions.graphviz[]
+----
+|===
+
+[.notes]
+--
+Определенным образом можно сгенерировать множество строк у которых хэш будет одинаковым
+--
+
+=== Collision with 13 elements and tree map
+
+[graphviz]
+----
+include::code/hashmap_13_collissions.graphviz[]
+----
+
+[.notes]
+--
+Очень много строк
+Как видим несмотря на то, что элементы складываются в один бакет из-за коллизий хэша
+Java все еще увеличивает размер массива, где хранит ссылки на LinkedList
+Хотя у нас получился странный LinkedList, если приглядется, то окажется, что наши объекты уже хранятся в TreeMap
+Неожиданно и приятно
+--
+
+=== Hash collision for god of hash collision
+
+[graphviz]
+----
+include::code/hashmap_many_collissions.graphviz[]
+----
+
+[.notes]
+--
+Хэш коллизии для бога хэш коллизий
+--
+
+== ConcurrentSkipListMap
+
+[source,java]
+----
+ConcurrentSkipListMap<String, Integer> map = new ConcurrentSkipListMap<>();
+
+map.put("one", 1);
+map.put("two", 2);
+map.put("three", 3);
+map.put("four", 4);
+
+String actualGraph = new LJV()
+        .setTreatAsPrimitive(Integer.class)
+        .setTreatAsPrimitive(String.class)
+        .drawGraph(map);
+----
+
+[.notes]
+--
+
+--
+
+=== First start
+
+[graphviz]
+----
+include::code/concurrentskiplistmap_first_start.graphviz[]
+----
+
+=== Second start
+
+[graphviz]
+----
+include::code/concurrentskiplistmap_second_start.graphviz[]
+----
+
+== Благодарности
+
+Отдельные благодарности Джону Хамеру и Олегу Ивченко
+
+== Github
+
+* Документация: https://atp-mipt.github.io/ljv[atp-mipt.github.io/ljv]
+* Исходники: https://github.com/atp-mipt/ljv[github.com/atp-mipt/ljv]

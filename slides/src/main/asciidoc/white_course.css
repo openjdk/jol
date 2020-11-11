@@ -204,6 +204,10 @@ body {
   /* box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3); */
 }
 
+.reveal pre.small {
+  font-size: 0.3em;
+}
+
 .reveal code {
     font-family: monospace;
     line-height: initial;

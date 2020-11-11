@@ -1,0 +1,118 @@
+digraph Java {
+	rankdir="LR";
+	node[shape=plaintext]
+	n1[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='7'>TreeMap</td>
+			</tr>
+			<tr>
+				<td>comparator: null</td>
+			</tr>
+			<tr>
+				<td>size: 4</td>
+			</tr>
+			<tr>
+				<td>modCount: 4</td>
+			</tr>
+			<tr>
+				<td>entrySet: null</td>
+			</tr>
+			<tr>
+				<td>navigableKeySet: null</td>
+			</tr>
+			<tr>
+				<td>descendingMap: null</td>
+			</tr>
+		</table>
+	>];
+	n2[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='5'>TreeMap$Entry</td>
+			</tr>
+			<tr>
+				<td>key: three</td>
+			</tr>
+			<tr>
+				<td>value: 3</td>
+			</tr>
+			<tr>
+				<td>parent: null</td>
+			</tr>
+			<tr>
+				<td>color: true</td>
+			</tr>
+		</table>
+	>];
+	n3[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='5'>TreeMap$Entry</td>
+			</tr>
+			<tr>
+				<td>key: one</td>
+			</tr>
+			<tr>
+				<td>value: 1</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>color: true</td>
+			</tr>
+		</table>
+	>];
+	n4[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='6'>TreeMap$Entry</td>
+			</tr>
+			<tr>
+				<td>key: four</td>
+			</tr>
+			<tr>
+				<td>value: 4</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>color: false</td>
+			</tr>
+		</table>
+	>];
+	n4 -> n3[label="parent",fontsize=12];
+	n3 -> n4[label="left",fontsize=12];
+	n3 -> n2[label="parent",fontsize=12];
+	n2 -> n3[label="left",fontsize=12];
+	n5[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='6'>TreeMap$Entry</td>
+			</tr>
+			<tr>
+				<td>key: two</td>
+			</tr>
+			<tr>
+				<td>value: 2</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>color: true</td>
+			</tr>
+		</table>
+	>];
+	n5 -> n2[label="parent",fontsize=12];
+	n2 -> n5[label="right",fontsize=12];
+	n1 -> n2[label="root",fontsize=12];
+}

@@ -72,7 +72,7 @@ public final class LJV {
         SHOWFIELDNAMESINLABELS,
     }
 
-    private final EnumSet<Options> oSet = EnumSet.of(Options.SHOWPACKAGENAMESINCLASSES, Options.SHOWFIELDNAMESINLABELS);
+    private final EnumSet<Options> oSet = EnumSet.of(Options.SHOWFIELDNAMESINLABELS);
 
     /**
      * Set the DOT attributes for a class.  This allows you to change the

@@ -1,0 +1,103 @@
+digraph Java {
+	rankdir="LR";
+	node[shape=plaintext]
+	n1[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='6'>HashMap</td>
+			</tr>
+			<tr>
+				<td>entrySet: null</td>
+			</tr>
+			<tr>
+				<td>size: 3</td>
+			</tr>
+			<tr>
+				<td>modCount: 3</td>
+			</tr>
+			<tr>
+				<td>threshold: 12</td>
+			</tr>
+			<tr>
+				<td>loadFactor: 0.75</td>
+			</tr>
+		</table>
+	>];
+	n2[label=<
+		<table border='0' cellborder='1' cellspacing='0' cellpadding='9'>
+			<tr>
+				<td port="f0"></td>
+				<td port="f1"></td>
+				<td port="f2"></td>
+				<td port="f3"></td>
+				<td port="f4"></td>
+				<td port="f5"></td>
+				<td port="f6"></td>
+				<td port="f7"></td>
+				<td port="f8"></td>
+				<td port="f9"></td>
+				<td port="f10"></td>
+				<td port="f11"></td>
+				<td port="f12"></td>
+				<td port="f13"></td>
+				<td port="f14"></td>
+				<td port="f15"></td>
+			</tr>
+		</table>
+	>];
+	n3[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>HashMap$Node</td>
+			</tr>
+			<tr>
+				<td>hash: 96320</td>
+			</tr>
+			<tr>
+				<td>key: aaa</td>
+			</tr>
+			<tr>
+				<td>value: 0</td>
+			</tr>
+		</table>
+	>];
+	n4[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>HashMap$Node</td>
+			</tr>
+			<tr>
+				<td>hash: 96320</td>
+			</tr>
+			<tr>
+				<td>key: abB</td>
+			</tr>
+			<tr>
+				<td>value: 1</td>
+			</tr>
+		</table>
+	>];
+	n5[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='5'>HashMap$Node</td>
+			</tr>
+			<tr>
+				<td>hash: 96320</td>
+			</tr>
+			<tr>
+				<td>key: bBa</td>
+			</tr>
+			<tr>
+				<td>value: 2</td>
+			</tr>
+			<tr>
+				<td>next: null</td>
+			</tr>
+		</table>
+	>];
+	n4 -> n5[label="next",fontsize=12];
+	n3 -> n4[label="next",fontsize=12];
+	n2:f0 -> n3[label="0",fontsize=12];
+	n1 -> n2[label="table",fontsize=12];
+}

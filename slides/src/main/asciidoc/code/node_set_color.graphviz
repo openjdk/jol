@@ -1,0 +1,44 @@
+digraph Java {
+	rankdir="TB";
+	node[shape=plaintext]
+	n1[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>Node</td>
+			</tr>
+			<tr>
+				<td>A</td>
+			</tr>
+		</table>
+	>,color=pink,style=filled];
+	n2[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>AnotherNode</td>
+			</tr>
+			<tr>
+				<td>B</td>
+			</tr>
+			<tr>
+				<td>null</td>
+			</tr>
+			<tr>
+				<td>null</td>
+			</tr>
+		</table>
+	>];
+	n1 -> n2[label="left",fontsize=12,color=red,fontcolor=red];
+	n3[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>AnotherNode</td>
+			</tr>
+			<tr>
+				<td>C</td>
+			</tr>
+		</table>
+	>];
+	n3 -> n1[label="left",fontsize=12,color=red,fontcolor=red];
+	n3 -> n1[label="right",fontsize=12,color=blue,fontcolor=blue];
+	n1 -> n3[label="right",fontsize=12,color=blue,fontcolor=blue];
+}
