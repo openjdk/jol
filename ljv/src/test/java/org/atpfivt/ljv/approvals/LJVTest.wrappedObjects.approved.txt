@@ -1,0 +1,104 @@
+digraph Java {
+	rankdir="TB";
+	node[shape=plaintext]
+	n1[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td>Example</td>
+			</tr>
+		</table>
+	>];
+	n2[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='3'>String</td>
+			</tr>
+			<tr>
+				<td>hash: 0</td>
+			</tr>
+			<tr>
+				<td>coder: 0</td>
+			</tr>
+		</table>
+	>];
+	n3[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td>72</td>
+				<td>101</td>
+				<td>108</td>
+				<td>108</td>
+				<td>111</td>
+				<td>87</td>
+				<td>111</td>
+				<td>114</td>
+				<td>108</td>
+				<td>100</td>
+			</tr>
+		</table>
+	>];
+	n2 -> n3[label="value",fontsize=12];
+	n1 -> n2[label="s3",fontsize=12];
+	n1 -> n2[label="s1",fontsize=12];
+	n4[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='3'>String</td>
+			</tr>
+			<tr>
+				<td>hash: 0</td>
+			</tr>
+			<tr>
+				<td>coder: 0</td>
+			</tr>
+		</table>
+	>];
+	n5[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td>72</td>
+				<td>69</td>
+				<td>76</td>
+				<td>76</td>
+				<td>32</td>
+				<td>79</td>
+			</tr>
+		</table>
+	>];
+	n4 -> n5[label="value",fontsize=12];
+	n1 -> n4[label="s2",fontsize=12];
+	n6[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>Integer</td>
+			</tr>
+			<tr>
+				<td>value: 42</td>
+			</tr>
+		</table>
+	>];
+	n1 -> n6[label="i1",fontsize=12];
+	n1 -> n6[label="i2",fontsize=12];
+	n7[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>Integer</td>
+			</tr>
+			<tr>
+				<td>value: 2020</td>
+			</tr>
+		</table>
+	>];
+	n1 -> n7[label="i3",fontsize=12];
+	n8[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>Integer</td>
+			</tr>
+			<tr>
+				<td>value: 2020</td>
+			</tr>
+		</table>
+	>];
+	n1 -> n8[label="i4",fontsize=12];
+}

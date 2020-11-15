@@ -590,9 +590,6 @@ digraph Java {
 	n1:f3 -> n7[label="3",fontsize=12];
 }
 
-
-Process finished with exit code 0
-
 --
 
 === String interning
