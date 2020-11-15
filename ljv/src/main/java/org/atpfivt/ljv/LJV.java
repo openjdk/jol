@@ -70,6 +70,10 @@ public final class LJV {
          * set on a per-class basis.
          */
         SHOWFIELDNAMESINLABELS,
+        /**
+         * Toggle whether to ignore fields with null values
+         */
+        IGNORENULLVALUEDFIELDS,
     }
 
     private final EnumSet<Options> oSet = EnumSet.of(Options.SHOWFIELDNAMESINLABELS);
@@ -273,6 +277,14 @@ public final class LJV {
 
     public boolean isShowPackageNamesInClasses() {
         return oSet.contains(Options.SHOWPACKAGENAMESINCLASSES);
+    }
+
+    public LJV setIgnoreNullValuedFields(boolean ignoreNullValuedFields){
+        setOption(ignoreNullValuedFields, Options.IGNORENULLVALUEDFIELDS);
+        return this;
+    }
+    public boolean isIgnoreNullValuedFields(){
+        return oSet.contains(Options.IGNORENULLVALUEDFIELDS);
     }
 
     /**

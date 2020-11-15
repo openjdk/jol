@@ -1,7 +1,11 @@
 package org.atpfivt.ljv;
 
-import java.lang.reflect.*;
-import java.util.*;
+import org.reflections.ReflectionUtils;
+
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.util.IdentityHashMap;
 
 final class GraphBuilder {
     private final IdentityHashMap<Object, String> objectsId = new IdentityHashMap<>();
@@ -62,7 +66,7 @@ final class GraphBuilder {
 
     private int getFieldSize(LJV ljv, Object obj, Field[] fs) {
         int size = 0;
-        for (Field field: fs) {
+        for (Field field : fs) {
             if (!ljv.canIgnoreField(field))
                 try {
                     Object ref = field.get(obj);
@@ -162,7 +166,21 @@ final class GraphBuilder {
                 else
                     processObjectArray(obj);
             } else {
-                Field[] fs = c.getDeclaredFields();
+                Field[] fs = ReflectionUtils.getAllFields(c,
+                        f -> {
+                            if (ljv.isIgnoreNullValuedFields()) {
+                                try {
+                                    f.setAccessible(true);
+                                    return f.get(obj) != null;
+                                } catch (IllegalAccessException e) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        }
+                ).toArray(new Field[0]);
+
+
                 if (!ljv.isIgnorePrivateFields())
                     AccessibleObject.setAccessible(fs, true);
 
