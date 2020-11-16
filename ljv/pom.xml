@@ -9,7 +9,7 @@
         <artifactId>ljv-parent</artifactId>
         <version>${revision}</version>
     </parent>
-    
+
     <artifactId>ljv</artifactId>
     <packaging>jar</packaging>
     <name>ljv</name>

@@ -23,6 +23,7 @@
 :source-highlighter: highlightjs
 :highlightjs-languages: java, kotlin, scala, groovy, graphviz
 :customcss: slides.css
+:graphviz_code: graphviz
 
 include::_doc_general_attributes.adoc[]
 
@@ -37,12 +38,14 @@ include::_doc_general_attributes.adoc[]
 .^| image::ponomarev.jpg[Иван,width=220]
 .^|
 Иван Пономарев:
-- Software Engineer at KURS, tutor at MIPT
+- Разработчик ПО в KURS
+- Преподаватель МФТИ
 
 .^| image::ivchenko.jpg[Олег,width=220]
 .^|
 Олег Ивченко:
-- Tutor at MIPT
+- Системный администратор инфраструктуры ШАД (Яндекс)
+- Старший преподаватель АТП ФПМИ МФТИ
 |===
 
 == Кто мы
@@ -52,7 +55,7 @@ include::_doc_general_attributes.adoc[]
 .^| image::selivanov.png[Илья,width=220]
 .^|
 Илья Селиванов:
-- Студент МФТИ
+- Студент CSC и МФТИ
 
 .^| image::nogaev.png[Нурас,width=220]
 .^|
@@ -64,14 +67,12 @@ include::_doc_general_attributes.adoc[]
 
 * В режиме runtime построить внутреннее представление графа объектов памяти.
 
-* Инструмент в глубину проходит граф объектов с помощью Reflection API и генерирует DOT код c необходимыми полями и классами.
-
-* Полученный DOT код можно загрузить в https://dreampuf.github.io/[онлайн-сервисы]
-
-* DOT - язык описания графов.
+* Полученную можно загрузить в https://dreampuf.github.io/[онлайн-сервисы]
 
 [.notes]
 --
+Инструмент в глубину проходит граф объектов с помощью Reflection API и генерирует DOT код c необходимыми полями и классами.
+DOT - язык описания графов.
 Идея заключается в том, что с помощью ReflectionAPI показывать внутренности объектов и строить граф в GraphViz'e
 reflection api На рисунке визуализирован хэшмап с огромной коллизией, и как он смог его переделать в тримап
 --
@@ -106,7 +107,7 @@ https://www.cs.auckland.ac.nz/~j-hamer/ACE04-paper.pdf
 [%step]
 * Неудобство пользования
 * Отсутствие поддержки инструмента
-* Изменение графвиза
+* Изменение Graphviz
 * Отсутствие ряда возможностей
 
 [.notes]
@@ -117,7 +118,7 @@ https://www.cs.auckland.ac.nz/~j-hamer/ACE04-paper.pdf
 == Решения
 
 [%step]
-* Обновление до Java 11
+* Обновление до *Java 11*
 * Изменение API инструмента (method chaining)
 * Выложили на https://github.com/atp-mipt/ljv[GitHub]
 * Выложили на https://search.maven.org/artifact/org.atp-fivt/ljv[Maven Central]
@@ -131,6 +132,7 @@ https://www.cs.auckland.ac.nz/~j-hamer/ACE04-paper.pdf
 
 == Зачем он нужен
 
+[%step]
 * Реверс инжиниринг кода
 * Преподавание
 
@@ -263,7 +265,13 @@ include::code/string_interning_equate.graphviz[]
 
 [.notes]
 --
-Как видим на слайде мы создаем экземпляр класса String и ссылаемся на него из двух переменных
+Спасибо, Нурас)
+Дальше я вам покажу несколько примеров работы LJV [ЭлДжиВи]
+-
+Такие же примеры вы можете получить запустив LJV на своих классах и загрузив итоговый DOT код в GraphvizOnline или другой подобный сервис для отрисовки
+-
+Как видим на слайде, мы создаем экземпляр класса String и ссылаемся на него из двух переменных
+Так выглядит отрисовка графа объектов в памяти
 --
 
 [%notitle]
@@ -278,13 +286,37 @@ String graph1 = new LJV().drawGraph(new Object[]{x, y});
 
 [graphviz]
 ----
-include::code/string_interning_new.graphviz[]
+include::{graphviz_code}/assignmentDoesNotCreateANewObject[]
 ----
 
 [.notes]
 --
-А здесь происходит копирование экземпляра класса, но каждый из экземпляров все еще ссылается полем value на один и тот же массив байт
+Пойдем дальше
+Здесь происходит создание нового экземпляра класса с помощью оператора new,
+но конструктор класса переиспользует внутренний массив байт
+и поле value ссылается на один и тот же массив
 --
+
+[%notitle]
+=== Конкатенация с пустой строкой
+
+[source,java]
+----
+String x = "Hello";
+String y = x + "";
+String graph1 = new LJV().drawGraph(new Object[]{x, y});
+----
+
+[graphviz]
+----
+include::{graphviz_code}/assignmentWithConcatenation[]
+----
+
+[.notes]
+--
+Конкатенация же со строкой, в том числе пустой, приводит к созданию нового внутреннего массива байт
+--
+
 
 [%notitle]
 === Copy and intern
@@ -292,22 +324,29 @@ include::code/string_interning_new.graphviz[]
 [source,java]
 ----
 String x = "Hello";
-String y = "Hello";
-String actual_graph = new LJV().drawGraph(new Object[]{x, y.intern()});
+
+String actualGraph = new LJV().drawGraph(
+    new String[]{
+        x,
+        new String(x).intern(),
+        new String(x.toCharArray()).intern(),
+        (x + "").intern()
+    }
+);
 ----
 
 [graphviz]
 ----
-include::code/string_interning_new_intern.graphviz[]
+include::{graphviz_code}/stringIntern[]
 ----
 
 [.notes]
 --
-Ситуация более интересная, мы вызываем на переменной y метод intern и получаем ссылку на один экземпляр.
-При этом в переменных x и у до вызова метода хранятся два разных экземпляра класса со своими массивами байт Как видим LJV с этим справляется
+Используя метод intern, можно дедуплицировать строки до одного массива байт хранящегося в Строковом пуле
+Это бывает полезно, если у вас много строк одного размера и вы часто сравниваете их
 --
 
-== Кэширование объектов класса
+== Кеширование примитивов
 
 [source,java]
 ----
@@ -324,119 +363,15 @@ String graph = new LJV().drawGraph(new Example());
 
 [graphviz]
 ----
-include::code/integer_caching.graphvize[]
+include::{graphviz_code}/wrappedObjects[]
 ----
 
 [.notes]
 --
-Про интернирование строк не забыли и сейчас видим нечто похожее, при автобоксинге переменные целых типов ссылаются на одни и те же экзмепляры класса, работает это в диапазоне от -128 до + 127 и относится ко всем классам целых чисел
+Обычно мы создаем целочисленные примитивы используя автобоксинг, а не оператор new
+У данного  метода есть осебенность, он дедуплицирует значения целочисленных типов в диапазоне от -128 до 127
+Кроме того максимальное значения данного диапазона можно увеличить с помощью JVM опции AutoBoxCacheMax
 --
-
-== ArrayDeque
-
-[source,java]
-----
-ArrayDeque<Integer> arrayDeque = new ArrayDeque<>();
-
-String graph = new LJV().drawGraph(arrayDeque);
-----
-
-[graphviz]
-----
-include::code/arraydeque_empty.graphviz[]
-----
-
-[.notes]
---
-Вот так выглядит пустая двухсторонняя очередь на основе массива Objectов
-Давайте добавим парочку элементов
---
-
-[%notitle]
-=== Add few elemnts
-
-[source,java]
-----
-ArrayDeque<Integer> arrayDeque = new ArrayDeque<>();
-arrayDeque.addLast(1);
-arrayDeque.addLast(2);
-
-String graph = new LJV()
-        .setTreatAsPrimitive(Integer.class)
-        .drawGraph(arrayDeque);
-----
-
-[graphviz]
-----
-include::code/arraydeque_few_elements.graphviz[]
-----
-
-[.notes]
---
-Уже интересно
-А что если добавить много элементов, например штук 20
---
-
-[%notitle]
-=== Add many elements
-
-[source,java]
-----
-ArrayDeque<Integer> arrayDeque = new ArrayDeque<>();
-for (int i = 0; i < 20; i++) {
-    arrayDeque.addLast(i);
-}
-
-String graph = new LJV()
-        .setTreatAsPrimitive(Integer.class)
-        .drawGraph(arrayDeque);
-----
-
-[graphviz]
-----
-include::code/arraydeque_many_elements.graphviz[]
-----
-
-[.notes]
---
-Как видим массив Objectов пришлось переалоцировать, скопировать элементы в конец
-Кроме того можно заметить интересную особенность, массив замкнут и если в начала есть свободные места, то указатель конца перейдет туда
-Такая структура позволяет добавлять и удалять элементы в начало и конец очереди
-Продемонстрируем это
---
-[%notitle]
-=== Add many and remove
-
-[cols="a"]
-|===
-|
-[source,java]
-----
-ArrayDeque<Integer> arrayDeque = new ArrayDeque<>();
-for (int i = 0; i < 20; i++) {
-    arrayDeque.addLast(i);
-}
-for (int i = 0; i < 18; i++) {
-    arrayDeque.removeFirst();
-}
-
-String graph = new LJV()
-        .setTreatAsPrimitive(Integer.class)
-        .drawGraph(arrayDeque);
-----
-
-[.notes]
---
-Добавили 20 в конец и удалили 18 с начала
-Теперь указатель начала указывает на 2 элемент, а указатель конца на 4
---
-
-^|
-[graphviz]
-----
-include::code/arraydeque_add_many_and_remove.graphviz[]
-----
-|===
 
 == LinkedList
 
@@ -467,7 +402,113 @@ include::code/linkedlist.graphviz[]
 
 [.notes]
 --
-Не менее интересный класс, экземпляр которого хранит ссылки на первые и последний экзмепляры приватного статического класса Node, которые и образуют двусвязный список
+Связный список - структура с оценкой сложности O(1) для операций добавление и удаление случайного узла
+Может быть использована как список или двухсторонняя очередь
+Но не позволяет быстро получать элемент по индексу
+На практике вместо него чаще используются ArrayList и ArrayDeque,
+т.к. в этой структуре данных много ссылок, а случайный доступ к RAM медленнее последовательного доступа
+--
+
+== ArrayDeque
+
+[source,java]
+----
+ArrayDeque<Integer> arrayDeque = new ArrayDeque<>(2);
+
+String graph = new LJV().drawGraph(arrayDeque);
+----
+
+[graphviz]
+----
+include::{graphviz_code}/arrayDequeEmpty[]
+----
+
+[.notes]
+--
+ArrayDeque использует "зацикленный" буфер для реализации структуры данных Очередь.
+--
+
+[%notitle]
+=== Add few elemnts
+
+[source,java]
+----
+ArrayDeque<Integer> arrayDeque = new ArrayDeque<>(2);
+for (int i = 0; i < 4; i++) {
+    arrayDeque.addLast(i);
+}
+
+String graph = new LJV()
+        .setTreatAsPrimitive(Integer.class)
+        .drawGraph(arrayDeque);
+----
+
+[graphviz]
+----
+include::{graphviz_code}/arrayDequeAddFewElements[]
+----
+
+[.notes]
+--
+Даже при увеличении буфера данная структура данных амортизированно работает за O(1)
+--
+
+[%notitle]
+=== Add many elements
+
+[source,java]
+----
+ArrayDeque<Integer> arrayDeque = new ArrayDeque<>(2);
+for (int i = 0; i < 20; i++) {
+    arrayDeque.addLast(i);
+}
+
+String graph = new LJV()
+        .setTreatAsPrimitive(Integer.class)
+        .drawGraph(arrayDeque);
+----
+
+[graphviz]
+----
+include::{graphviz_code}/arrayDequeAddManyElements[]
+----
+
+[.notes]
+--
+Нивелирует случайные чтения, т.к. данные хранятся последовательно
+--
+[%notitle]
+=== Add many and remove
+
+[cols="a"]
+|===
+|
+[source,java]
+----
+ArrayDeque<Integer> arrayDeque = new ArrayDeque<>(2);
+for (int i = 0; i < 20; i++) {
+    arrayDeque.addLast(i);
+}
+for (int i = 0; i < 18; i++) {
+    arrayDeque.removeFirst();
+}
+
+String graph = new LJV()
+        .setTreatAsPrimitive(Integer.class)
+        .drawGraph(arrayDeque);
+----
+
+^|
+[graphviz]
+----
+include::{graphviz_code}/arrayDequeAddManyDeleteManyElements[]
+----
+|===
+
+[.notes]
+--
+Но если аллоцировалось много элементов под нагрузкой, а потом нагрузка спала и очередь очистилась,
+то ArrayDeque не станет уменьшать количество занимаемой памяти, в стандартной реализации он может только расти
 --
 
 == Treemap
@@ -481,17 +522,25 @@ TreeMap<String, Integer> map = new TreeMap<>();
 map.put("one", 1);    map.put("two", 2);
 map.put("three", 3);  map.put("four", 4);
 String actualGraph = new LJV()
-        .setTreatAsPrimitive(Integer.class)
-        .setTreatAsPrimitive(String.class)
-        .drawGraph(map);
+    .setTreatAsPrimitive(Integer.class)
+    .setTreatAsPrimitive(String.class)
+    .setDirection(Direction.LR)
+    .drawGraph(map);
 ----
 
 ^|
 [graphviz]
 ----
-include::code/treemap.graphviz[]
+include::{graphviz_code}/treeMap[]
 ----
 |===
+
+[.notes]
+--
+TreeMap в Java - это красно-черное дерево, такая реализация обеспечивает сложность O(Log N) для операций получения, вставки и удаления
+На практике это работает медленнее HashMap
+Но в отличии от него TreeMap задает порядок на данных и позволяет получать меньший или больший ключ от текущего
+--
 
 == HashMap
 
@@ -504,9 +553,8 @@ HashMap<String, Integer> map = new HashMap<>();
 map.put("one", 1);   map.put("two", 2);
 map.put("three", 3); map.put("four", 4);
 String graph = new LJV()
-        .setTreatAsPrimitive(Integer.class)
-        .setTreatAsPrimitive(String.class)
-        .drawGraph(map);
+///...
+    .drawGraph(map);
 ----
 
 ^|
@@ -518,74 +566,58 @@ include::code/hashmap.graphviz[]
 
 [.notes]
 --
-Хэш-таблица, каждый объект ложится в свой бакет по хэшу, каждый отдельный бакет представляет собой LinkedList, где хранятся разные объекты с одинаковым хэшом
+HashMap широко используемая структура данных.
+Существует несколько способов разрешения коллизий по хэшу в HashMap, по умолчанию разработчиками Java был выбран LinkedList
+Для того, чтобы взять или положить значению по ключу,
+от ключа вычисляется хэш и ключ со значением кладутся в массив бакетов, где индексом является этот хэш
 --
 
 === Collision...
 
-[cols="a"]
-|===
-^|
-[source,java]
-----
-List<String> collisionString = new HashCodeCollision().genCollisionString(3);
-HashMap<String, Integer> map = new HashMap<>();
-
-for (int i = 0; i < collisionString.size(); i++) {
-    map.put(collisionString.get(i), i);
-}
-
-String graph = new LJV()
-        .setTreatAsPrimitive(Integer.class)
-        .setTreatAsPrimitive(String.class)
-        .drawGraph(map);
-----
-
-^|
 [graphviz]
 ----
-include::code/hashmap_3_collissions.graphviz[]
+include::{graphviz_code}/hashMapCollision2[]
 ----
-|===
 
 [.notes]
 --
-Определенным образом можно сгенерировать множество строк у которых хэш будет одинаковым
+Если количество коллизий растет, то растет и LinkedList
 --
 
 === Collision with 13 elements and tree map
 
 [graphviz]
 ----
-include::code/hashmap_13_collissions.graphviz[]
+include::{graphviz_code}/hashMapCollision3[]
 ----
 
 [.notes]
 --
-Очень много строк
-Как видим несмотря на то, что элементы складываются в один бакет из-за коллизий хэша
-Java все еще увеличивает размер массива, где хранит ссылки на LinkedList
-Хотя у нас получился странный LinkedList, если приглядется, то окажется, что наши объекты уже хранятся в TreeMap
-Неожиданно и приятно
+Если отдельный бакет становится перегруженным конфликтами по хешу,
+а ключи реализуют интерфейс Comparable, LinkedList превращается в дерево.
+
+Это сокращает время поиска в бакете с O (N) до O (log (N))
+и на практике снижает вероятность DDoS-атак определенного типа
 --
 
 === Hash collision for god of hash collision
 
 [graphviz]
 ----
-include::code/hashmap_many_collissions.graphviz[]
+include::{graphviz_code}/hashMapCollision4[]
 ----
 
 [.notes]
 --
-Хэш коллизии для бога хэш коллизий
+Иногда хэш коллизий бывает действительно много
 --
 
 == ConcurrentSkipListMap
 
 [source,java]
 ----
-ConcurrentSkipListMap<String, Integer> map = new ConcurrentSkipListMap<>();
+ConcurrentSkipListMap<String, Integer> map =
+    new ConcurrentSkipListMap<>();
 
 map.put("one", 1);
 map.put("two", 2);
@@ -600,7 +632,9 @@ String actualGraph = new LJV()
 
 [.notes]
 --
-
+[КонкарентСкипЛистМап]ConcurrentSkipListMap это масштабируемая параллельная реализация Словаря
+Операции добавления, получения и удаления в нем работают за O(log n) и кроме того могут быть безопасно вызваны из нескольких одновременно выполняющихся потоков
+Также данный словарь задает порядок на данных, как и TreeMap
 --
 
 === First start
@@ -610,6 +644,11 @@ String actualGraph = new LJV()
 include::code/concurrentskiplistmap_first_start.graphviz[]
 ----
 
+[.notes]
+--
+Первое создание экземпляра класса [КонкарентСкипЛистМап]ConcurrentSkipListMap
+--
+
 === Second start
 
 [graphviz]
@@ -617,11 +656,39 @@ include::code/concurrentskiplistmap_first_start.graphviz[]
 include::code/concurrentskiplistmap_second_start.graphviz[]
 ----
 
-== Благодарности
+[.notes]
+--
+Второе создание экземпляра класса
+Данный класс является вероятностным и зависит от [ТредЛокалРандом]ThreadLocalRandom
+Тем самым при каждом создании мы будем получать чуть-чуть разные классы, но с одной и той же функциональностью и содержимым
+--
 
-Отдельные благодарности Джону Хамеру и Олегу Ивченко
+== Итоги
 
-== Github
 
+[cols="20a,60a,20a"]
+|===
+.^|image::github.png[]
+.^a|
+
+* Переписали на Java 11
+* Изменили генерацию graphviz DOT кода
+* Обновили API
+* Выложили на Maven Central
 * Документация: https://atp-mipt.github.io/ljv[atp-mipt.github.io/ljv]
 * Исходники: https://github.com/atp-mipt/ljv[github.com/atp-mipt/ljv]
+* Презентация: https://atp-mipt.github.io/ljv/slides/[atp-mipt.github.io/ljv/slides]
+.^|image::github.png[]
+|===
+
+
+[.notes]
+--
+Мы планируем продолжить развивать этот проект
+* Добавить фильтры для Kotlin и Scala
+* Выпустить статью на ДиЗон[Dzone] и Habr
+* [И] Добавить конфигурацию на уровне отдельных классов
+Призываем вас использовать и давать обратную связь
+Документацию с примерами и саму презентацию вы сможете найти на github pages
+Спасибо за внимание
+--

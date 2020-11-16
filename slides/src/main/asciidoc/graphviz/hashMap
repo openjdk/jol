@@ -1,0 +1,126 @@
+digraph Java {
+	rankdir="LR";
+	node[shape=plaintext]
+	n1[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='6'>HashMap</td>
+			</tr>
+			<tr>
+				<td>entrySet: null</td>
+			</tr>
+			<tr>
+				<td>size: 4</td>
+			</tr>
+			<tr>
+				<td>modCount: 4</td>
+			</tr>
+			<tr>
+				<td>threshold: 12</td>
+			</tr>
+			<tr>
+				<td>loadFactor: 0.75</td>
+			</tr>
+		</table>
+	>];
+	n2[label=<
+		<table border='0' cellborder='1' cellspacing='0' cellpadding='9'>
+			<tr>
+				<td port="f0"></td>
+				<td port="f1"></td>
+				<td port="f2"></td>
+				<td port="f3"></td>
+				<td port="f4"></td>
+				<td port="f5"></td>
+				<td port="f6"></td>
+				<td port="f7"></td>
+				<td port="f8"></td>
+				<td port="f9"></td>
+				<td port="f10"></td>
+				<td port="f11"></td>
+				<td port="f12"></td>
+				<td port="f13"></td>
+				<td port="f14"></td>
+				<td port="f15"></td>
+			</tr>
+		</table>
+	>];
+	n3[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='5'>Node</td>
+			</tr>
+			<tr>
+				<td>hash: 3149078</td>
+			</tr>
+			<tr>
+				<td>key: four</td>
+			</tr>
+			<tr>
+				<td>value: 4</td>
+			</tr>
+			<tr>
+				<td>next: null</td>
+			</tr>
+		</table>
+	>];
+	n2:f6 -> n3[label="6",fontsize=12];
+	n4[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='5'>Node</td>
+			</tr>
+			<tr>
+				<td>hash: 110183</td>
+			</tr>
+			<tr>
+				<td>key: one</td>
+			</tr>
+			<tr>
+				<td>value: 1</td>
+			</tr>
+			<tr>
+				<td>next: null</td>
+			</tr>
+		</table>
+	>];
+	n2:f7 -> n4[label="7",fontsize=12];
+	n5[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Node</td>
+			</tr>
+			<tr>
+				<td>hash: 115277</td>
+			</tr>
+			<tr>
+				<td>key: two</td>
+			</tr>
+			<tr>
+				<td>value: 2</td>
+			</tr>
+		</table>
+	>];
+	n6[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='5'>Node</td>
+			</tr>
+			<tr>
+				<td>hash: 110338829</td>
+			</tr>
+			<tr>
+				<td>key: three</td>
+			</tr>
+			<tr>
+				<td>value: 3</td>
+			</tr>
+			<tr>
+				<td>next: null</td>
+			</tr>
+		</table>
+	>];
+	n5 -> n6[label="next",fontsize=12];
+	n2:f13 -> n5[label="13",fontsize=12];
+	n1 -> n2[label="table",fontsize=12];
+}
