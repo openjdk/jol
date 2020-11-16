@@ -9,4 +9,4 @@ It was developed by John Hamer in 2004 and released under GNU GPL (see the [orig
 
 This project aims to upgrade this tool to modern Java and make it an open source library in the modern sense of the word.
 
-See [documentation](https://atp-mipt.github.io/ljv/).
+See [documentation](https://atp-mipt.github.io/ljv/) and [JavaDoc](https://atp-mipt.github.io/ljv/apidocs/).
