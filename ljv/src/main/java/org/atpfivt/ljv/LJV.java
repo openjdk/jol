@@ -2,7 +2,6 @@ package org.atpfivt.ljv;
 
 //- Author:     John Hamer <J.Hamer@cs.auckland.ac.nz>
 //- Created:    Sat May 10 15:27:48 2003
-//- Time-stamp: <2004-08-23 12:47:06 jham005>
 
 //- Copyright (C) 2004  John Hamer, University of Auckland
 //-
@@ -201,7 +200,7 @@ public final class LJV {
     }
 
     /**
-     * Treat objects of this class as primitives; i.e., <code>toString</code>
+     * Treat objects of this class as primitives; i.e., {@code toString}
      * is called on the object, and the result displayed in the label like
      * a primitive field.
      *
@@ -219,7 +218,7 @@ public final class LJV {
 
     /**
      * Treat objects from this package as primitives; i.e.,
-     * <code>toString</code> is called on the object, and the result displayed
+     * {@code toString} is called on the object, and the result displayed
      * in the label like a primitive field.
      *
      * @param pk Package with classes to treated as primitive
@@ -279,6 +278,13 @@ public final class LJV {
         return oSet.contains(Options.SHOWPACKAGENAMESINCLASSES);
     }
 
+    /**
+     * Toggle whether to ignore fields with null values.
+     *
+     * @param  ignoreNullValuedFields {@code true}, if we want to hide the fields with null values.
+     *
+     * @return this
+     */
     public LJV setIgnoreNullValuedFields(boolean ignoreNullValuedFields){
         setOption(ignoreNullValuedFields, Options.IGNORENULLVALUEDFIELDS);
         return this;
@@ -288,7 +294,7 @@ public final class LJV {
     }
 
     /**
-     * Create a graph of the object rooted at @code{obj}.
+     * Create a graph of the object rooted at {@code obj}.
      *
      * @param obj object to be visualized
      * @return String representation containing DOT commands to build the graph

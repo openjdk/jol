@@ -3,6 +3,7 @@
 :source-highlighter: highlightjs
 :toc: left
 :toclevels: 3
+:apidocs: https://atp-mipt.github.io/ljv/apidocs/
 
 == User Guide
 
@@ -14,18 +15,18 @@ This project aims to upgrade this tool to modern Java and make it an open source
 
 === Getting started
 
-You can use Maven or Gradle to import the LJV dependency:
+You can use Maven or Gradle to import the https://search.maven.org/artifact/org.atp-fivt/ljv[LJV dependency]:
 
 [source,xml]
 ----
 <dependency>
   <groupId>org.atp-fivt</groupId>
   <artifactId>ljv</artifactId>
-  <version>1.0</version>
+  <version>1.01</version>
 </dependency>
 ----
 
-Then use `drawGraph` method of `LJV` class to get graphviz representation of any Java `Object`:
+Then use {apidocs}org/atpfivt/ljv/LJV.html#drawGraph(java.lang.Object)[`drawGraph`] method of {apidocs}org/atpfivt/ljv/LJV.html[`LJV`] class to get graphviz representation of any Java `Object`:
 [source, java]
 ----
 import org.atpfivt.ljv.LJV;
@@ -99,7 +100,7 @@ This diagram can be interpreted as following:
 
 LJV has the ability to customize the view of the graph.
 
-For example, you can specify any class to be treated as a  primitive type. In this case, the result of `toString` call will be used as its value:
+For example, you can specify any class to be treated as a  primitive type with {apidocs}org/atpfivt/ljv/LJV.html#setTreatAsPrimitive(java.lang.Class)[`setTreatAsPrimitive`] method. In this case, the result of `toString` call will be used as its value:
 [source,java]
 ----
 String graph = new LJV()
@@ -160,12 +161,7 @@ String graph = new LJV()
         .drawGraph(a);
 ----
 
-`Direction` is `enum` with 4 values:
-
-** `TB` - by default, draws from top to bottom
-** `BT` - draws from bottom to top
-** `LR` - draws from left to right
-** `RL` - draws from right to left
+{apidocs}org/atpfivt/ljv/Direction.html[`Direction`] is an `enum` with four values that define the graph drawing direction (top to bottom, left to right, etc):
 
 [graphviz]
 ----
