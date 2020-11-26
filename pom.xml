@@ -11,7 +11,7 @@
     
     <name>ljv parent pom</name>
     <description>Lightweight Java Visualizer</description>
-    <url>https://github.com/ljviz/ljv</url>
+    <url>https://github.com/atp-mipt/ljv</url>
 
     <organization>
         <name>MIPT/FIVT/ATP</name>
@@ -19,9 +19,9 @@
     </organization>
 
     <scm>
-        <url>https://github.com/ljviz/ljv.git</url>
-        <connection>scm:git:git://github.com/ljviz/ljv.git</connection>
-        <developerConnection>scm:git:git://github.com/ljviz/ljv.git</developerConnection>
+        <url>https://github.com/atp-mipt/ljv.git</url>
+        <connection>scm:git:git://github.com/atp-mipt/ljv.git</connection>
+        <developerConnection>scm:git:git://github.com/atp-mipt/ljv.git</developerConnection>
     </scm>
 
     <developers>
