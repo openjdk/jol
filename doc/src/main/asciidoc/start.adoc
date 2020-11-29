@@ -9,7 +9,8 @@
 
 === What is LJV?
 
-LJV is a tool for visualizing Java data structures, using Reflection API and http://graphviz.gitlab.io/[Graphviz]. Its original version was developed by John Hamer in 2004 and released under GNU GPL (see the https://www.cs.auckland.ac.nz/~j-hamer/LJV.html[original project page]).
+https://github.com/atp-mipt/ljv[LJV] is a tool for visualizing Java data structures, using Reflection API and http://graphviz.gitlab.io/[Graphviz].
+Its original version was developed by John Hamer in 2004 and released under GNU GPL (see the https://www.cs.auckland.ac.nz/~j-hamer/LJV.html[original project page]).
 
 This project aims to upgrade this tool to modern Java and make it an open source library in the modern sense of the word.
 
@@ -22,7 +23,7 @@ You can use Maven or Gradle to import the https://search.maven.org/artifact/org.
 <dependency>
   <groupId>org.atp-fivt</groupId>
   <artifactId>ljv</artifactId>
-  <version>1.01</version>
+  <version>1.02</version>
 </dependency>
 ----
 
@@ -465,7 +466,8 @@ digraph Java {
 
 === String creation
 
-One rarely (or should I say 'never'?) needs to create `String` using `new` operator, however it's worth noticing that `String(String original)` constructor reuses the internal byte array of its argument. Concatenation (even with an empty string!) always produce a full new copy:
+One rarely needs to create `String` using `new` operator, however it's worth noticing that `String(String original)` constructor reuses the internal byte array of its argument. 
+Concatenation (even with an empty string!) always produces a full new copy:
 
 [source,java]
 --
@@ -1917,7 +1919,7 @@ String actualGraph = new LJV()
         .drawGraph(map);
 ----
 
-==== First start
+==== First run
 
 [graphviz]
 ----
@@ -2095,7 +2097,7 @@ digraph Java {
 
 ----
 
-==== Second start
+==== Second run
 
 [graphviz]
 ----

@@ -4,15 +4,60 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.atp-fivt</groupId>
-        <artifactId>ljv-parent</artifactId>
-        <version>${revision}</version>
-    </parent>
-
+    <groupId>org.atp-fivt</groupId>
     <artifactId>ljv</artifactId>
     <packaging>jar</packaging>
     <name>ljv</name>
+    <version>1.02</version>
+
+    <description>Lightweight Java Visualizer</description>
+    <url>https://github.com/atp-mipt/ljv</url>
+
+    <organization>
+        <name>MIPT/FIVT/ATP</name>
+        <url>https://mipt.ru/education/chairs/programmingtechnolgy/</url>
+    </organization>
+
+    <scm>
+        <url>https://github.com/atp-mipt/ljv.git</url>
+        <connection>scm:git:git://github.com/atp-mipt/ljv.git</connection>
+        <developerConnection>scm:git:git://github.com/atp-mipt/ljv.git</developerConnection>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>John Hamer</name>
+            <email>J.Hamer@cs.auckland.ac.nz</email>
+        </developer>
+        <developer>
+            <name>Ivan Ponomarev</name>
+            <email>ponomarev@phystech.edu</email>
+        </developer>
+        <developer>
+            <name>Nuras Nogayev</name>
+            <email>nogayev.nuras@gmail.com</email>
+        </developer>
+        <developer>
+            <name>Ilya Selivanov</name>
+            <email>ilyaspacemail@gmail.com</email>
+        </developer>
+    </developers>
+
+    <contributors>
+        <contributor>
+            <name>Oleg Ivchenko</name>
+            <email>oleg.ivchenko@phystech.edu</email>
+        </contributor>
+    </contributors>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License (GPL), Version 3</name>
+            <url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
 
     <properties>
         <java.version>11</java.version>
@@ -118,7 +163,6 @@
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 </project>
