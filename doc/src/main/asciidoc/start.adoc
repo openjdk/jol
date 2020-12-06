@@ -10,13 +10,13 @@
 === What is LJV?
 
 https://github.com/atp-mipt/ljv[LJV] is a tool for visualizing Java data structures, using Reflection API and http://graphviz.gitlab.io/[Graphviz].
-Its original version was developed by John Hamer in 2004 and released under GNU GPL (see the https://www.cs.auckland.ac.nz/~j-hamer/LJV.html[original project page]).
+Its original version was developed by https://www.gla.ac.uk/schools/computing/staff/?webapp=staffcontact&action=person&id=4cdcebe68a94[John Hamer] in 2004 and released under GNU GPL (see the https://www.cs.auckland.ac.nz/~j-hamer/LJV.html[original project page]).
 
 This project aims to upgrade this tool to modern Java and make it an open source library in the modern sense of the word.
 
 === Getting started
 
-You can use Maven or Gradle to import the https://search.maven.org/artifact/org.atp-fivt/ljv[LJV dependency]:
+The tool requires Java 11 or later version. You can use Maven or Gradle to import the https://search.maven.org/artifact/org.atp-fivt/ljv[LJV dependency]:
 
 [source,xml]
 ----
@@ -90,12 +90,31 @@ digraph Java {
 }
 ----
 
-This diagram can be interpreted as following:
+Or, even more simpler, you may use the following utility function in order to save some tedious copy-pasting:
+
+[source,java]
+----
+public static void browse(LJV ljv, Object obj) {
+    try {
+        var dot = URLEncoder.encode(
+              ljv.drawGraph(obj), "UTF8").replaceAll("\\+", "%20");
+        Desktop.getDesktop().browse(
+              new URI("https://dreampuf.github.io/GraphvizOnline/#" 
+                      + dot));
+    } catch (Exception e) {
+        throw new IllegalStateException(e);
+    }
+}
+----
+
+
+The diagram can be interpreted as following:
 
 * The `String` object that we are visualizing is represented as a 'root' node of the graph 
 * This object has two fields of primitive types (`coder` and `hash`), with values set to zero.
 * This object through the field `value` references another object of an array type. This array has 5 elements.
 * Elements of the array are primitive values 72, 101, 108, 108 and 111.
+
 
 === Diagram customization
 
