@@ -5,9 +5,7 @@ import org.reflections.ReflectionUtils;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.IdentityHashMap;
-import java.util.stream.Collectors;
 
 final class GraphBuilder {
     private final IdentityHashMap<Object, String> objectsId = new IdentityHashMap<>();
@@ -121,7 +119,7 @@ final class GraphBuilder {
                 .append("[label=<\n")
                 .append("\t\t<table border='0' cellborder='1' cellspacing='0'>\n")
                 .append("\t\t\t<tr>\n\t\t\t\t<td>")
-                .append(oSettings.className(obj, true))
+                .append(oSettings.className(obj, false))
                 .append("</td>\n\t\t\t</tr>\n\t\t</table>\n\t>")
                 .append(cabs.isEmpty() ? "" : "," + cabs)
                 .append("];\n");
