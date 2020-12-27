@@ -2,13 +2,12 @@ package org.atpfivt.ljv;
 
 import org.approvaltests.Approvals;
 import org.junit.jupiter.api.Test;
+import org.reflections.ReflectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TreeMap;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URISyntaxException;
+import java.util.*;
 
 public class LJVTest {
 
@@ -124,9 +123,29 @@ public class LJVTest {
         String actualGraph = new LJV()
                 .setTreatAsPrimitive(Integer.class)
                 .setTreatAsPrimitive(String.class)
+                .addObjectAttributesProvider(this::redBlack)
                 .drawGraph(map);
         Approvals.verify(actualGraph);
     }
+
+    private String redBlack(Object o) {
+        Set<Field> colorFields = ReflectionUtils.getAllFields(o.getClass(),
+                f -> "color".equals(f.getName())
+                        && f.getType().equals(boolean.class));
+        if (colorFields.isEmpty()) {
+            return "";
+        } else {
+            Field colorField = colorFields.iterator().next();
+            colorField.setAccessible(true);
+            try {
+                boolean b = colorField.getBoolean(o);
+                return b ? "color=black" : "color=red";
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
 
     @Test
     void linkedHashMap() {
@@ -201,5 +220,4 @@ public class LJVTest {
                 .drawGraph(linkedList);
         Approvals.verify(actual_graph);
     }
-
 }

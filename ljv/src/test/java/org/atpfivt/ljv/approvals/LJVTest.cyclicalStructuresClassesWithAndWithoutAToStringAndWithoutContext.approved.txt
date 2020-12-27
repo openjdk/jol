@@ -14,19 +14,6 @@ digraph Java {
 	n2[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
-				<td rowspan='2'>AnotherNode</td>
-			</tr>
-			<tr>
-				<td>C</td>
-			</tr>
-		</table>
-	>];
-	n2 -> n1[label="left",fontsize=12,color=red,fontcolor=red];
-	n2 -> n1[label="right",fontsize=12,color=blue,fontcolor=blue];
-	n1 -> n2[label="right",fontsize=12,color=blue,fontcolor=blue];
-	n3[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
 				<td rowspan='4'>AnotherNode</td>
 			</tr>
 			<tr>
@@ -40,5 +27,18 @@ digraph Java {
 			</tr>
 		</table>
 	>];
-	n1 -> n3[label="left",fontsize=12,color=red,fontcolor=red];
+	n1 -> n2[label="left",fontsize=12,color=red,fontcolor=red];
+	n3[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>AnotherNode</td>
+			</tr>
+			<tr>
+				<td>C</td>
+			</tr>
+		</table>
+	>];
+	n3 -> n1[label="left",fontsize=12,color=red,fontcolor=red];
+	n3 -> n1[label="right",fontsize=12,color=blue,fontcolor=blue];
+	n1 -> n3[label="right",fontsize=12,color=blue,fontcolor=blue];
 }

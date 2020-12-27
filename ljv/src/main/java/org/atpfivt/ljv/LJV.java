@@ -21,13 +21,15 @@ package org.atpfivt.ljv;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Lightweight Java Visualizer.
  */
 public final class LJV {
-    private final Map<Object, String> classAttributeMap = new HashMap<>();
-    private final Map<Object, String> fieldAttributeMap = new HashMap<>();
+    private final List<ObjectAttributesProvider> objectAttributesProviders = new ArrayList<>();
+    private final List<FieldAttributesProvider> fieldAttributesProviders = new ArrayList<>();
     private final Set<Object> pretendPrimitiveSet = new HashSet<>();
     private final Set<Object> ignoreSet = new HashSet<>();
     private Direction direction = Direction.TB;
@@ -86,18 +88,23 @@ public final class LJV {
      * @param cz     class to set attribute for.
      * @param attrib DOT attributes for a class.
      */
-    public void setClassAttribute(Class<?> cz, String attrib) {
-        classAttributeMap.put(cz, attrib);
-    }
-
-    public String getClassAttribute(Class<?> cz) {
-        return classAttributeMap.get(cz);
-    }
-
     public LJV addClassAttribute(Class<?> cz, String attrib) {
-        this.setClassAttribute(cz, attrib);
+        objectAttributesProviders.add(new FixedValueClassAttributes(cz, attrib));
         return this;
     }
+
+    public LJV addObjectAttributesProvider(ObjectAttributesProvider provider) {
+        objectAttributesProviders.add(Objects.requireNonNull(provider));
+        return this;
+    }
+
+    public String getObjectAttributes(Object o) {
+        return objectAttributesProviders.stream()
+                .map(p -> p.getAttribute(o))
+                .filter(s -> !(s == null || s.isEmpty()))
+                .collect(Collectors.joining(","));
+    }
+
 
     /**
      * Set the DOT attributes for a specific field. This allows you to
@@ -110,26 +117,25 @@ public final class LJV {
      * @return this
      */
     public LJV addFieldAttribute(Field field, String attrib) {
-        this.fieldAttributeMap.put(field, attrib);
+        this.fieldAttributesProviders.add(new FixedFieldAttributesProvider(field, attrib));
         return this;
     }
 
-    public String getFieldAttribute(Field field) {
-        return fieldAttributeMap.get(field);
+    public String getFieldAttributes(Field field, Object value) {
+        return fieldAttributesProviders.stream()
+                .map(p -> p.getAttribute(field, value))
+                .filter(s -> !(s == null || s.isEmpty()))
+                .collect(Collectors.joining(","));
     }
 
     /**
      * Set the DOT attributes for all fields with this name.
      *
-     * @param field field name to set attributes to
-     * @return attributes
+     * @param field  field name to set attributes to
+     * @param attrib attributes
      */
-    public String getFieldAttribute(String field) {
-        return fieldAttributeMap.get(field);
-    }
-
     public LJV addFieldAttribute(String field, String attrib) {
-        this.fieldAttributeMap.put(field, attrib);
+        this.fieldAttributesProviders.add(new FixedFieldNameAttributesProvider(field, attrib));
         return this;
     }
 
@@ -281,15 +287,15 @@ public final class LJV {
     /**
      * Toggle whether to ignore fields with null values.
      *
-     * @param  ignoreNullValuedFields {@code true}, if we want to hide the fields with null values.
-     *
+     * @param ignoreNullValuedFields {@code true}, if we want to hide the fields with null values.
      * @return this
      */
-    public LJV setIgnoreNullValuedFields(boolean ignoreNullValuedFields){
+    public LJV setIgnoreNullValuedFields(boolean ignoreNullValuedFields) {
         setOption(ignoreNullValuedFields, Options.IGNORENULLVALUEDFIELDS);
         return this;
     }
-    public boolean isIgnoreNullValuedFields(){
+
+    public boolean isIgnoreNullValuedFields() {
         return oSet.contains(Options.IGNORENULLVALUEDFIELDS);
     }
 
