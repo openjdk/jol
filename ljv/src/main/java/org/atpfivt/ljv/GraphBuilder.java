@@ -89,7 +89,7 @@ final class GraphBuilder {
                 .append("'>")
                 .append(oSettings.className(obj, false))
                 .append("</td>\n\t\t\t</tr>\n");
-        Object cabs = ljv.getClassAttribute(obj.getClass());
+        String cabs = ljv.getObjectAttributes(obj);
         for (Field field : fs) {
             if (!ljv.canIgnoreField(field))
                 try {
@@ -107,21 +107,21 @@ final class GraphBuilder {
                 }
         }
         out.append("\t\t</table>\n\t>")
-                .append(cabs == null ? "" : "," + cabs)
+                .append(cabs.isEmpty() ? "" : "," + cabs)
                 .append("];\n");
     }
 
 
     private void labelObjectWithNoPrimitiveFields(Object obj) {
-        Object cabs = ljv.getClassAttribute(obj.getClass());
+        String cabs = ljv.getObjectAttributes(obj);
         out.append("\t")
                 .append(dotName(obj))
                 .append("[label=<\n")
                 .append("\t\t<table border='0' cellborder='1' cellspacing='0'>\n")
                 .append("\t\t\t<tr>\n\t\t\t\t<td>")
-                .append(oSettings.className(obj, true))
+                .append(oSettings.className(obj, false))
                 .append("</td>\n\t\t\t</tr>\n\t\t</table>\n\t>")
-                .append(cabs == null ? "" : "," + cabs)
+                .append(cabs.isEmpty() ? "" : "," + cabs)
                 .append("];\n");
     }
 
@@ -135,9 +135,7 @@ final class GraphBuilder {
                         //- object may be, say, a String.
                         continue;
                     String name = field.getName();
-                    Object fabs = ljv.getFieldAttribute(field);
-                    if (fabs == null)
-                        fabs = ljv.getFieldAttribute(name);
+                    String fabs = ljv.getFieldAttributes(field, ref);
                     generateDotInternal(ref);
                     out.append("\t")
                             .append(dotName(obj))
@@ -146,7 +144,7 @@ final class GraphBuilder {
                             .append("[label=\"")
                             .append(name)
                             .append("\",fontsize=12")
-                            .append(fabs == null ? "" : "," + fabs)
+                            .append(fabs.isEmpty() ? "" : "," + fabs)
                             .append("];\n");
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
@@ -180,7 +178,7 @@ final class GraphBuilder {
                         }
                 ).toArray(new Field[0]);
 
-
+                normalizeFieldsOrder(fs);
                 if (!ljv.isIgnorePrivateFields())
                     AccessibleObject.setAccessible(fs, true);
 
@@ -191,6 +189,31 @@ final class GraphBuilder {
 
                 processFields(obj, fs);
             }
+        }
+    }
+
+    private static void normalizeFieldsOrder(Field[] fs) {
+        /*Ensure that 'left' field is always processed before 'right'.
+        The problem is that ReflectionUtils.getAllFields uses HashSet, not LinkedHashSet,
+        and loses information about fields order.
+
+        This is a hard-coded logic and should be removed in the future.
+         */
+        int i = 0, left = -1, right = -1;
+        for (Field f : fs) {
+            if ("left".equals(f.getName())) {
+                left = i;
+                break;
+            } else if ("right".equals(f.getName())) {
+                right = i;
+            }
+            i++;
+        }
+        if (right > -1 && left > right) {
+            //swap left & right
+            Field f = fs[left];
+            fs[left] = fs[right];
+            fs[right] = f;
         }
     }
 

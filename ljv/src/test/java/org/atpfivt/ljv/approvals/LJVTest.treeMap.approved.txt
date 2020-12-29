@@ -50,38 +50,11 @@ digraph Java {
 				<td>color: true</td>
 			</tr>
 		</table>
-	>];
+	>,color=black];
 	n3[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
-				<td rowspan='6'>Entry</td>
-			</tr>
-			<tr>
-				<td>right: null</td>
-			</tr>
-			<tr>
-				<td>key: two</td>
-			</tr>
-			<tr>
-				<td>value: 2</td>
-			</tr>
-			<tr>
-				<td>left: null</td>
-			</tr>
-			<tr>
-				<td>color: true</td>
-			</tr>
-		</table>
-	>];
-	n3 -> n2[label="parent",fontsize=12];
-	n2 -> n3[label="right",fontsize=12];
-	n4[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
 				<td rowspan='5'>Entry</td>
-			</tr>
-			<tr>
-				<td>right: null</td>
 			</tr>
 			<tr>
 				<td>key: one</td>
@@ -90,18 +63,20 @@ digraph Java {
 				<td>value: 1</td>
 			</tr>
 			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
 				<td>color: true</td>
 			</tr>
 		</table>
-	>];
-	n4 -> n2[label="parent",fontsize=12];
-	n5[label=<
+	>,color=black];
+	n4[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
 				<td rowspan='6'>Entry</td>
 			</tr>
 			<tr>
-				<td>right: null</td>
+				<td>left: null</td>
 			</tr>
 			<tr>
 				<td>key: four</td>
@@ -110,15 +85,40 @@ digraph Java {
 				<td>value: 4</td>
 			</tr>
 			<tr>
-				<td>left: null</td>
+				<td>right: null</td>
 			</tr>
 			<tr>
 				<td>color: false</td>
 			</tr>
 		</table>
-	>];
-	n5 -> n4[label="parent",fontsize=12];
-	n4 -> n5[label="left",fontsize=12];
-	n2 -> n4[label="left",fontsize=12];
+	>,color=red];
+	n4 -> n3[label="parent",fontsize=12];
+	n3 -> n4[label="left",fontsize=12];
+	n3 -> n2[label="parent",fontsize=12];
+	n2 -> n3[label="left",fontsize=12];
+	n5[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='6'>Entry</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>key: two</td>
+			</tr>
+			<tr>
+				<td>value: 2</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>color: true</td>
+			</tr>
+		</table>
+	>,color=black];
+	n5 -> n2[label="parent",fontsize=12];
+	n2 -> n5[label="right",fontsize=12];
 	n1 -> n2[label="root",fontsize=12];
 }
