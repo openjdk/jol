@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 public final class LJV {
     private final List<ObjectAttributesProvider> objectAttributesProviders = new ArrayList<>();
     private final List<FieldAttributesProvider> fieldAttributesProviders = new ArrayList<>();
+    private final List<ArrayElementAttributeProvider> arrayElementAttributeProviders = new ArrayList<>();
     private final Set<Object> pretendPrimitiveSet = new HashSet<>();
     private final Set<Object> ignoreSet = new HashSet<>();
     private Direction direction = Direction.TB;
@@ -203,6 +204,28 @@ public final class LJV {
                         || ignoreSet.contains(field.getType())
                         || ignoreSet.contains(field.getType().getPackage())
                 ;
+    }
+
+    public LJV addArrayElementAttributeProvider(ArrayElementAttributeProvider provider) {
+        arrayElementAttributeProviders.add(Objects.requireNonNull(provider));
+        return this;
+    }
+
+    public LJV highlightChangingArrayElements() {
+        addArrayElementAttributeProvider(new ComparingArrayElementAttributeProvider());
+        return this;
+    }
+
+    public String getArrayElementAttributes(Object array, int index) {
+        String result = arrayElementAttributeProviders.stream()
+                .map(p -> p.getAttribute(array, index))
+                .filter(s -> !(s == null || s.isEmpty()))
+                .collect(Collectors.joining(" "));
+        if (!result.isEmpty()) {
+            return " " + result;
+        } else {
+            return "";
+        }
     }
 
     /**
