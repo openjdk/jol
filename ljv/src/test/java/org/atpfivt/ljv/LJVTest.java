@@ -220,4 +220,19 @@ public class LJVTest {
                 .drawGraph(linkedList);
         Approvals.verify(actual_graph);
     }
+
+    @Test
+    void testArrayWithHighlighting() {
+        LJV ljv = new LJV()
+                .setTreatAsPrimitive(Integer.class)
+                .highlightChangingArrayElements();
+        Deque<Integer> arrayDeque = new ArrayDeque<>(4);
+        arrayDeque.add(1);
+        arrayDeque.add(2);
+        arrayDeque.add(3);
+        ljv.drawGraph(arrayDeque);
+        arrayDeque.poll();
+        arrayDeque.poll();
+        Approvals.verify(ljv.drawGraph(arrayDeque));
+    }
 }

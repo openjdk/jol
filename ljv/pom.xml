@@ -8,7 +8,7 @@
     <artifactId>ljv</artifactId>
     <packaging>jar</packaging>
     <name>ljv</name>
-    <version>1.02</version>
+    <version>1.03</version>
 
     <description>Lightweight Java Visualizer</description>
     <url>https://github.com/atp-mipt/ljv</url>

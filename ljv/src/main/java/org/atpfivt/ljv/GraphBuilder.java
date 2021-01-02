@@ -29,7 +29,9 @@ final class GraphBuilder {
                 .append("\t\t<table border='0' cellborder='1' cellspacing='0'>\n")
                 .append("\t\t\t<tr>\n");
         for (int i = 0, len = Array.getLength(obj); i < len; i++) {
-            out.append("\t\t\t\t<td>")
+            out.append("\t\t\t\t<td")
+                    .append(ljv.getArrayElementAttributes(obj, i))
+                    .append(">")
                     .append(Quote.quote(String.valueOf(Array.get(obj, i))))
                     .append("</td>\n");
         }
@@ -44,7 +46,9 @@ final class GraphBuilder {
                 .append("\t\t\t<tr>\n");
         int len = Array.getLength(obj);
         for (int i = 0; i < len; i++) {
-            out.append("\t\t\t\t<td port=\"f").append(i).append("\"></td>\n");
+            out.append("\t\t\t\t<td port=\"f").append(i).append("\"")
+                    .append(ljv.getArrayElementAttributes(obj, i))
+                    .append("></td>\n");
         }
         out.append("\t\t\t</tr>\n\t\t</table>\n\t>];\n");
         for (int i = 0; i < len; i++) {
