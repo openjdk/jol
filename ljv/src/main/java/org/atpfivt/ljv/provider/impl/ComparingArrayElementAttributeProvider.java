@@ -1,8 +1,8 @@
-package org.atpfivt.ljv;
+package org.atpfivt.ljv.provider.impl;
 
-import javax.naming.spi.ObjectFactoryBuilder;
+import org.atpfivt.ljv.provider.ArrayElementAttributeProvider;
+
 import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;

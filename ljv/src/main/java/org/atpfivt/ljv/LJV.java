@@ -19,9 +19,16 @@ package org.atpfivt.ljv;
 //-   with this program; if not, write to the Free Software Foundation, Inc.,
 //-   59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+import org.atpfivt.ljv.provider.ArrayElementAttributeProvider;
+import org.atpfivt.ljv.provider.FieldAttributesProvider;
+import org.atpfivt.ljv.provider.ObjectAttributesProvider;
+import org.atpfivt.ljv.provider.impl.ComparingArrayElementAttributeProvider;
+import org.atpfivt.ljv.provider.impl.FixedFieldAttributesProvider;
+import org.atpfivt.ljv.provider.impl.FixedFieldNameAttributesProvider;
+import org.atpfivt.ljv.provider.impl.FixedValueClassAttributes;
+
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -119,6 +126,11 @@ public final class LJV {
      */
     public LJV addFieldAttribute(Field field, String attrib) {
         this.fieldAttributesProviders.add(new FixedFieldAttributesProvider(field, attrib));
+        return this;
+    }
+
+    public LJV addFieldAttributesProvider(FieldAttributesProvider provider) {
+        this.fieldAttributesProviders.add(provider);
         return this;
     }
 

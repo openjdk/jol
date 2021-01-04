@@ -1,5 +1,6 @@
 package org.atpfivt.ljv;
 
+import org.atpfivt.ljv.provider.impl.ComparingArrayElementAttributeProvider;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
