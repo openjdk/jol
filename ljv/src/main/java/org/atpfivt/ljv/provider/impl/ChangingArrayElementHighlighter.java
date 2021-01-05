@@ -7,7 +7,9 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class ComparingArrayElementAttributeProvider implements ArrayElementAttributeProvider {
+public class ChangingArrayElementHighlighter implements ArrayElementAttributeProvider {
+    public static final String HIGHLIGHT = "bgcolor=\"yellow\"";
+
     Map<Object, Object> refCopy = new IdentityHashMap<>();
 
     Object cloneArray(Object arr) {
@@ -27,7 +29,7 @@ public class ComparingArrayElementAttributeProvider implements ArrayElementAttri
         Object newValue = Array.get(array, index);
         if(!Objects.equals(newValue, Array.get(copy, index))){
             Array.set(copy, index, newValue);
-            return "bgcolor=\"yellow\"";
+            return HIGHLIGHT;
         } else {
             return "";
         }

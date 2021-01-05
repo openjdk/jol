@@ -22,10 +22,7 @@ package org.atpfivt.ljv;
 import org.atpfivt.ljv.provider.ArrayElementAttributeProvider;
 import org.atpfivt.ljv.provider.FieldAttributesProvider;
 import org.atpfivt.ljv.provider.ObjectAttributesProvider;
-import org.atpfivt.ljv.provider.impl.ComparingArrayElementAttributeProvider;
-import org.atpfivt.ljv.provider.impl.FixedFieldAttributesProvider;
-import org.atpfivt.ljv.provider.impl.FixedFieldNameAttributesProvider;
-import org.atpfivt.ljv.provider.impl.FixedValueClassAttributes;
+import org.atpfivt.ljv.provider.impl.*;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -95,6 +92,7 @@ public final class LJV {
      *
      * @param cz     class to set attribute for.
      * @param attrib DOT attributes for a class.
+     * @return current LJV object
      */
     public LJV addClassAttribute(Class<?> cz, String attrib) {
         objectAttributesProviders.add(new FixedValueClassAttributes(cz, attrib));
@@ -146,6 +144,7 @@ public final class LJV {
      *
      * @param field  field name to set attributes to
      * @param attrib attributes
+     * @return current ljv object
      */
     public LJV addFieldAttribute(String field, String attrib) {
         this.fieldAttributesProviders.add(new FixedFieldNameAttributesProvider(field, attrib));
@@ -223,8 +222,21 @@ public final class LJV {
         return this;
     }
 
+    /**
+     * Enable highlighting array elements that was changed since previous run of ljv.
+     * @return current ljv object
+     */
     public LJV highlightChangingArrayElements() {
-        addArrayElementAttributeProvider(new ComparingArrayElementAttributeProvider());
+        addArrayElementAttributeProvider(new ChangingArrayElementHighlighter());
+        return this;
+    }
+
+    /**
+     * Enable highlighting of new objects that appeared since previous run of ljv.
+     * @return current ljv object
+     */
+    public LJV highlightNewObjects() {
+        addObjectAttributesProvider(new NewObjectHighlighter());
         return this;
     }
 

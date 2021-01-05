@@ -1,6 +1,7 @@
 package org.atpfivt.ljv;
 
 import org.approvaltests.Approvals;
+import org.atpfivt.ljv.provider.impl.NewObjectHighlighter;
 import org.junit.jupiter.api.Test;
 import org.reflections.ReflectionUtils;
 
@@ -234,5 +235,23 @@ public class LJVTest {
         arrayDeque.poll();
         arrayDeque.poll();
         Approvals.verify(ljv.drawGraph(arrayDeque));
+    }
+
+    @Test
+    void testNewObjectsHighlighting() {
+        LJV ljv = new LJV()
+                .setTreatAsPrimitive(Integer.class)
+                .setTreatAsPrimitive(String.class)
+                .setIgnoreNullValuedFields(true)
+                .addIgnoreField("color")
+                .highlightNewObjects();
+
+        Map<String, Integer> map = new TreeMap<>();
+        map.put("one", 1);
+        map.put("two", 2);
+        map.put("three", 3);
+        ljv.drawGraph(map);
+        map.put("four", 4);
+        Approvals.verify(ljv.drawGraph(map));
     }
 }
