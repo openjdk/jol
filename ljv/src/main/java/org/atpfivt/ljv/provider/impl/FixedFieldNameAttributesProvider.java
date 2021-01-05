@@ -1,4 +1,6 @@
-package org.atpfivt.ljv;
+package org.atpfivt.ljv.provider.impl;
+
+import org.atpfivt.ljv.provider.FieldAttributesProvider;
 
 import java.lang.reflect.Field;
 import java.util.Objects;

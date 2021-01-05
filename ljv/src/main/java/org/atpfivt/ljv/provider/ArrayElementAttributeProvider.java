@@ -1,4 +1,4 @@
-package org.atpfivt.ljv;
+package org.atpfivt.ljv.provider;
 
 @FunctionalInterface
 public interface ArrayElementAttributeProvider {

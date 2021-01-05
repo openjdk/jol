@@ -1,7 +1,7 @@
-package org.atpfivt.ljv;
+package org.atpfivt.ljv.provider.impl;
 
-import java.util.Collections;
-import java.util.Map;
+import org.atpfivt.ljv.provider.ObjectAttributesProvider;
+
 import java.util.Objects;
 
 public class FixedValueClassAttributes implements ObjectAttributesProvider {

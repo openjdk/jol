@@ -19,9 +19,13 @@ package org.atpfivt.ljv;
 //-   with this program; if not, write to the Free Software Foundation, Inc.,
 //-   59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+import org.atpfivt.ljv.provider.ArrayElementAttributeProvider;
+import org.atpfivt.ljv.provider.FieldAttributesProvider;
+import org.atpfivt.ljv.provider.ObjectAttributesProvider;
+import org.atpfivt.ljv.provider.impl.*;
+
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -88,6 +92,7 @@ public final class LJV {
      *
      * @param cz     class to set attribute for.
      * @param attrib DOT attributes for a class.
+     * @return current LJV object
      */
     public LJV addClassAttribute(Class<?> cz, String attrib) {
         objectAttributesProviders.add(new FixedValueClassAttributes(cz, attrib));
@@ -122,6 +127,11 @@ public final class LJV {
         return this;
     }
 
+    public LJV addFieldAttributesProvider(FieldAttributesProvider provider) {
+        this.fieldAttributesProviders.add(provider);
+        return this;
+    }
+
     public String getFieldAttributes(Field field, Object value) {
         return fieldAttributesProviders.stream()
                 .map(p -> p.getAttribute(field, value))
@@ -134,6 +144,7 @@ public final class LJV {
      *
      * @param field  field name to set attributes to
      * @param attrib attributes
+     * @return current ljv object
      */
     public LJV addFieldAttribute(String field, String attrib) {
         this.fieldAttributesProviders.add(new FixedFieldNameAttributesProvider(field, attrib));
@@ -211,8 +222,21 @@ public final class LJV {
         return this;
     }
 
+    /**
+     * Enable highlighting array elements that was changed since previous run of ljv.
+     * @return current ljv object
+     */
     public LJV highlightChangingArrayElements() {
-        addArrayElementAttributeProvider(new ComparingArrayElementAttributeProvider());
+        addArrayElementAttributeProvider(new ChangingArrayElementHighlighter());
+        return this;
+    }
+
+    /**
+     * Enable highlighting of new objects that appeared since previous run of ljv.
+     * @return current ljv object
+     */
+    public LJV highlightNewObjects() {
+        addObjectAttributesProvider(new NewObjectHighlighter());
         return this;
     }
 

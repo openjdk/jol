@@ -1,4 +1,4 @@
-package org.atpfivt.ljv;
+package org.atpfivt.ljv.provider;
 
 /**
  * Provides DOT attributes (color, font etc.) for a given object.
