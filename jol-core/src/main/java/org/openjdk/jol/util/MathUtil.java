@@ -62,19 +62,27 @@ public class MathUtil {
         return p;
     }
 
-    public static int align(int addr, int align) {
-        if ((addr % align) == 0) {
-            return addr;
-        } else {
-            return ((addr / align) + 1) * align;
-        }
+    /**
+     * Aligns the argument to the given alignment.
+     * Alignment should be a power of two.
+     *
+     * @param v value to align
+     * @param a alignment, should be power of two
+     * @return aligned value
+     */
+    public static int align(int v, int a) {
+        return (v + a - 1) & -a;
     }
 
-    public static long align(long addr, int align) {
-        if ((addr % align) == 0) {
-            return addr;
-        } else {
-            return ((addr / align) + 1) * align;
-        }
+    /**
+     * Aligns the argument to the given alignment.
+     * Alignment should be a power of two.
+     *
+     * @param v value to align
+     * @param a alignment, should be power of two
+     * @return aligned value
+     */
+    public static long align(long v, int a) {
+        return (v + a - 1) & -a;
     }
 }

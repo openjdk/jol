@@ -22,43 +22,44 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol;
+package org.openjdk.jol.util;
 
-import org.openjdk.jmh.annotations.*;
-import org.openjdk.jol.info.GraphLayout;
-import org.openjdk.jol.info.GraphStats;
+import java.util.Arrays;
 
-import java.util.concurrent.TimeUnit;
+/**
+ * Stack implementation optimized for JOL uses. Cuts corners where it can.
+ * @param <E>
+ */
+public class SimpleStack<E> {
+    Object[] elements;
+    int head;
 
-@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(1)
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.NANOSECONDS)
-@State(Scope.Benchmark)
-public class LinkedChainBench {
+    public SimpleStack() {
+        head = -1;
+        elements = new Object[2];
+    }
 
-    @Param("1000")
-    private int size;
+    private void resize() {
+        elements = Arrays.copyOf(elements, elements.length * 2);
+    }
 
-    Node linkedChain;
+    public boolean isEmpty() {
+        return head == -1;
+    }
 
-    @Setup
-    public void setup() {
-        linkedChain = new Node(null);
-        for (int c = 0; c < size; c++) {
-            linkedChain = new Node(linkedChain);
+    public void push(E e) {
+        head++;
+        if (head == elements.length) {
+            resize();
         }
+        elements[head] = e;
     }
 
-    public static class Node {
-        private Node n;
-        Node(Node n) { this.n = n; }
-    }
-
-    @Benchmark
-    public long linkedChain() {
-        return GraphStats.parseInstance(linkedChain).totalSize();
+    public E pop() {
+        Object e = elements[head];
+        elements[head] = null;
+        head--;
+        return (E) e;
     }
 
 }

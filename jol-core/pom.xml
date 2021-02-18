@@ -30,7 +30,7 @@ questions.
     <parent>
         <groupId>org.openjdk.jol</groupId>
         <artifactId>jol-parent</artifactId>
-        <version>0.14-SNAPSHOT</version>
+        <version>0.15-SNAPSHOT</version>
     </parent>
 
     <artifactId>jol-core</artifactId>
@@ -66,6 +66,9 @@ questions.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                </configuration>
                 <executions>
                     <execution>
                         <id>default-test</id>
@@ -81,7 +84,8 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-XX:-UseCompressedOops -Xmx1g</argLine>
-                            <forkMode>always</forkMode>
+                            <forkCount>4</forkCount>
+                            <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                     <execution>
@@ -92,7 +96,8 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-XX:+UseCompressedOops -Xmx1g</argLine>
-                            <forkMode>always</forkMode>
+                            <forkCount>4</forkCount>
+                            <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                     <execution>
@@ -103,7 +108,8 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-XX:+UseCompressedOops -Xmx4g</argLine>
-                            <forkMode>always</forkMode>
+                            <forkCount>1</forkCount>
+                            <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                     <execution>
@@ -114,7 +120,8 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-XX:-UseCompressedOops -Xmx1g -XX:ObjectAlignmentInBytes=16</argLine>
-                            <forkMode>always</forkMode>
+                            <forkCount>4</forkCount>
+                            <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                     <execution>
@@ -125,7 +132,8 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-XX:+UseCompressedOops -Xmx1g -XX:ObjectAlignmentInBytes=16</argLine>
-                            <forkMode>always</forkMode>
+                            <forkCount>4</forkCount>
+                            <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                     <execution>
@@ -136,7 +144,8 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-XX:+UseCompressedOops -Xmx4g -XX:ObjectAlignmentInBytes=16</argLine>
-                            <forkMode>always</forkMode>
+                            <forkCount>1</forkCount>
+                            <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                 </executions>

@@ -25,7 +25,7 @@
 
 package org.openjdk.jol.jvms;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.openjdk.jol.info.ClassLayout;
 

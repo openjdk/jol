@@ -28,47 +28,35 @@ import org.openjdk.jol.util.SimpleIdentityHashSet;
 import org.openjdk.jol.util.ObjectUtils;
 import org.openjdk.jol.util.SimpleStack;
 import org.openjdk.jol.vm.VM;
+import org.openjdk.jol.vm.VirtualMachine;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * Concrete class to walk object graphs.
+ * Walker for graph statistics.
  *
  * @author Aleksey Shipilev
  */
-public class GraphWalker extends AbstractGraphWalker {
+public class GraphStatsWalker extends AbstractGraphWalker {
 
-    private final Map<Class<?>, Long> sizeCache;
-
-    public GraphWalker() {
-        sizeCache = new HashMap<>();
-    }
-
-    public GraphLayout walk(Object... roots) {
+    public GraphStats walk(Object... roots) {
         verifyRoots(roots);
 
-        GraphLayout data = new GraphLayout(roots);
+        GraphStats data = new GraphStats();
 
         SimpleIdentityHashSet visited = new SimpleIdentityHashSet();
-        SimpleStack<GraphPathRecord> s = new SimpleStack<>();
+        SimpleStack<Object> s = new SimpleStack<>();
+        VirtualMachine vm = VM.current();
 
-        int rootId = 1;
-        boolean single = (roots.length == 1);
         for (Object root : roots) {
-            String label = single ? "" : ("<r" + rootId + ">");
-            GraphPathRecord e = new FieldGraphPathRecord(null, label, 0, root);
             if (visited.add(root)) {
-                data.addRecord(e);
-                s.push(e);
+                data.addRecord(vm.sizeOf(root));
+                s.push(root);
             }
-            rootId++;
         }
 
         while (!s.isEmpty()) {
-            GraphPathRecord cGpr = s.pop();
-            Object o = cGpr.obj();
+            Object o = s.pop();
             Class<?> cl = o.getClass();
 
             if (cl.isArray()) {
@@ -77,30 +65,17 @@ public class GraphWalker extends AbstractGraphWalker {
                     continue;
                 }
 
-                Object[] arr = (Object[]) o;
-
-                for (int i = 0; i < arr.length; i++) {
-                    Object e = arr[i];
+                for (Object e : (Object[]) o) {
                     if (e != null && visited.add(e)) {
-                        GraphPathRecord gpr = new ArrayGraphPathRecord(cGpr, i, cGpr.depth() + 1, e);
-                        data.addRecord(gpr);
-                        s.push(gpr);
+                        s.push(e);
                     }
                 }
             } else {
-                Long knownSize = sizeCache.get(cl);
-                if (knownSize == null) {
-                    knownSize = VM.current().sizeOf(o);
-                    sizeCache.put(cl, knownSize);
-                }
-                cGpr.setSize(knownSize);
-
                 for (Field f : getAllReferenceFields(cl)) {
                     Object e = ObjectUtils.value(o, f);
                     if (e != null && visited.add(e)) {
-                        GraphPathRecord gpr = new FieldGraphPathRecord(cGpr, f.getName(), cGpr.depth() + 1, e);
-                        data.addRecord(gpr);
-                        s.push(gpr);
+                        data.addRecord(vm.sizeOf(e));
+                        s.push(e);
                     }
                 }
             }

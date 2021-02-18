@@ -115,9 +115,9 @@ public class ObjectShapes implements Operation {
             URLClassLoader cl = URLClassLoader.newInstance(new URL[]{new URL("jar:file:" + jarName + "!/")});
 
             JarFile jarFile = new JarFile(jarName);
-            Enumeration e = jarFile.entries();
+            Enumeration<JarEntry> e = jarFile.entries();
             while (e.hasMoreElements()) {
-                JarEntry je = (JarEntry) e.nextElement();
+                JarEntry je = e.nextElement();
                 String name = je.getName();
                 if (je.isDirectory()) continue;
                 if (!name.endsWith(".class")) continue;

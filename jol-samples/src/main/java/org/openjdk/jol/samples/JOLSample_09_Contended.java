@@ -64,6 +64,14 @@ public class JOLSample_09_Contended {
 
     public static class B extends A {
         int e;
+        @sun.misc.Contended("first")
+        int f;
+        @sun.misc.Contended("first")
+        int g;
+        @sun.misc.Contended("last")
+        int i;
+        @sun.misc.Contended("last")
+        int k;
     }
 
 }

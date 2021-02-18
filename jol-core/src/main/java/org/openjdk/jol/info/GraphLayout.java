@@ -51,14 +51,6 @@ public class GraphLayout {
      * @return object graph
      */
     public static GraphLayout parseInstance(Object... roots) {
-        if (roots == null) {
-            throw new IllegalArgumentException("Roots are null");
-        }
-        for (Object root : roots) {
-            if (root == null) {
-                throw new IllegalArgumentException("Some root is null");
-            }
-        }
         return new GraphWalker().walk(roots);
     }
 
