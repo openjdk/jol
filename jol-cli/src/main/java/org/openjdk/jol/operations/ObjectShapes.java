@@ -111,10 +111,9 @@ public class ObjectShapes implements Operation {
 
     private Multiset<String> processJAR(String jarName) {
         Multiset<String> shapes = new Multiset<>();
-        try {
-            URLClassLoader cl = URLClassLoader.newInstance(new URL[]{new URL("jar:file:" + jarName + "!/")});
+        try (URLClassLoader cl = URLClassLoader.newInstance(new URL[]{new URL("jar:file:" + jarName + "!/")});
+             JarFile jarFile = new JarFile(jarName)) {
 
-            JarFile jarFile = new JarFile(jarName);
             Enumeration<JarEntry> e = jarFile.entries();
             while (e.hasMoreElements()) {
                 JarEntry je = e.nextElement();
@@ -124,16 +123,14 @@ public class ObjectShapes implements Operation {
 
                 String className = name.substring(0, name.length() - 6).replace('/', '.');
                 try {
-                    Class klass = cl.loadClass(className);
+                    Class<?> klass = cl.loadClass(className);
                     ClassData cd = ClassData.parseClass(klass);
                     String shape = parseClassData(cd);
                     shapes.add(shape);
-                } catch (Error t) {
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    t.printStackTrace(System.err);
                 }
             }
-            jarFile.close();
         } catch (Exception t) {
             // ignore
         }
