@@ -487,12 +487,15 @@ public class GraphLayout {
         g.drawString(String.format("%s", description), SCALE_WIDTH + EXT_PAD, 30);
 
         AffineTransform orig = g.getTransform();
-        g.rotate(-Math.toRadians(90.0), SCALE_WIDTH + EXT_PAD - 5, GRAPH_HEIGHT + EXT_PAD);
-        g.drawString("Actual:", SCALE_WIDTH + EXT_PAD - 5, GRAPH_HEIGHT + EXT_PAD);
+        int x = SCALE_WIDTH + EXT_PAD - 5;
+        int y1 = GRAPH_HEIGHT + EXT_PAD;
+        g.rotate(-Math.toRadians(90.0), x, y1);
+        g.drawString("Actual:", x, y1);
         g.setTransform(orig);
 
-        g.rotate(-Math.toRadians(90.0), SCALE_WIDTH + EXT_PAD - 5, 2 * GRAPH_HEIGHT + EXT_PAD + PAD);
-        g.drawString("Dense:", SCALE_WIDTH + EXT_PAD - 5, 2 * GRAPH_HEIGHT + EXT_PAD + PAD);
+        int y2 = 2 * GRAPH_HEIGHT + EXT_PAD + PAD;
+        g.rotate(-Math.toRadians(90.0), x, y2);
+        g.drawString("Dense:", x, y2);
         g.setTransform(orig);
 
         ImageIO.write(image, "png", new File(fileName));

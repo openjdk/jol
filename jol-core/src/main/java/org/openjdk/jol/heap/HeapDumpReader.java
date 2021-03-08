@@ -237,7 +237,7 @@ public class HeapDumpReader {
         read_U4(); // stack trace
         int elements = (int) read_U4(); // always fits
         read_ID(); // type class
-        read_null(elements * idSize);
+        read_null((long) elements * idSize);
 
         // assume Object, we don't care about the exact types here
         classCounts.add(new ClassData("Object[]", "Object", elements));
