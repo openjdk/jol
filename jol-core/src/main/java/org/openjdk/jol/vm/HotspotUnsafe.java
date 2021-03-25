@@ -121,9 +121,14 @@ class HotspotUnsafe implements VirtualMachine {
         Boolean coops = VMOptions.pollCompressedOops();
         if (coops != null) {
             compressedOopsEnabled = coops;
-            compressedKlassOopsEnabled = coops;
         } else {
             compressedOopsEnabled = (addressSize != oopSize);
+        }
+
+        Boolean ccptrs = VMOptions.pollCompressedClassPointers();
+        if (ccptrs != null) {
+            compressedKlassOopsEnabled = ccptrs;
+        } else {
             compressedKlassOopsEnabled = (addressSize != oopSize);
         }
 
@@ -251,6 +256,16 @@ class HotspotUnsafe implements VirtualMachine {
         } catch (NoSuchFieldException e) {
             throw new IllegalStateException("Infrastructure failure, klass = " + klass, e);
         }
+    }
+
+    @Override
+    public int addressSize() {
+        return addressSize;
+    }
+
+    @Override
+    public boolean compressedKlassPtrs() {
+        return compressedKlassOopsEnabled;
     }
 
     @Override

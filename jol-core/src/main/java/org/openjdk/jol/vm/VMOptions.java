@@ -49,6 +49,15 @@ class VMOptions {
         }
     }
 
+    public static Boolean pollCompressedClassPointers() {
+        try {
+            return Boolean.valueOf(getString("UseCompressedClassPointers"));
+        } catch (Exception exp) {
+            // TODO: log
+            return null;
+        }
+    }
+
     public static Integer pollObjectAlignment() {
         if (Boolean.TRUE.equals(pollCompressedOops())) {
             try {

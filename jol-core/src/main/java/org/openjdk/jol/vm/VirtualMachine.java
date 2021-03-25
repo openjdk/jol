@@ -171,4 +171,8 @@ public interface VirtualMachine {
      * @return String details
      */
     String details();
+
+    int addressSize();
+
+    boolean compressedKlassPtrs();
 }
