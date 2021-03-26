@@ -24,7 +24,8 @@ import org.atpfivt.ljv.provider.FieldAttributesProvider;
 import org.atpfivt.ljv.provider.ObjectAttributesProvider;
 import org.atpfivt.ljv.provider.impl.*;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,7 @@ public final class LJV {
     private final List<ArrayElementAttributeProvider> arrayElementAttributeProviders = new ArrayList<>();
     private final Set<Object> pretendPrimitiveSet = new HashSet<>();
     private final Set<Object> ignoreSet = new HashSet<>();
+    private final List<Object> roots = new ArrayList<>();
     private Direction direction = Direction.TB;
 
     public LJV setDirection(Direction direction) {
@@ -224,6 +226,7 @@ public final class LJV {
 
     /**
      * Enable highlighting array elements that was changed since previous run of ljv.
+     *
      * @return current ljv object
      */
     public LJV highlightChangingArrayElements() {
@@ -233,6 +236,7 @@ public final class LJV {
 
     /**
      * Enable highlighting of new objects that appeared since previous run of ljv.
+     *
      * @return current ljv object
      */
     public LJV highlightNewObjects() {
@@ -250,6 +254,10 @@ public final class LJV {
         } else {
             return "";
         }
+    }
+
+    List<Object> getRoots() {
+        return roots;
     }
 
     /**
@@ -346,6 +354,18 @@ public final class LJV {
         return oSet.contains(Options.IGNORENULLVALUEDFIELDS);
     }
 
+
+    /**
+     * add an Object to {@code roots}
+     *
+     * @param root
+     * @return this
+     */
+    public LJV addRoot(Object root) {
+        this.roots.add(root);
+        return this;
+    }
+
     /**
      * Create a graph of the object rooted at {@code obj}.
      *
@@ -353,6 +373,18 @@ public final class LJV {
      * @return String representation containing DOT commands to build the graph
      */
     public String drawGraph(Object obj) {
-        return new GraphBuilder(this).generateDOT(obj);
+        addRoot(obj);
+        return drawGraph();
     }
+
+    /**
+     * roots {@code roots} references counts can be visualized
+     *
+     * @return String representation containing DOT commands to build the graph
+     */
+    public String drawGraph() {
+        return new GraphBuilder(this).generateDOT();
+    }
+
+
 }

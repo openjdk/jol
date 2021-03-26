@@ -23,7 +23,7 @@ The tool requires Java 11 or later version. You can use Maven or Gradle to impor
 <dependency>
   <groupId>org.atp-fivt</groupId>
   <artifactId>ljv</artifactId>
-  <version>1.02</version>
+  <version>1.03</version>
 </dependency>
 ----
 

@@ -17,7 +17,7 @@ The tool requires Java 11 or later version. Pull in the LJV dependency:
 <dependency>
   <groupId>org.atp-fivt</groupId>
   <artifactId>ljv</artifactId>
-  <version>1.02</version>
+  <version>1.03</version>
 </dependency>
 ```
 Execute the following (`obj` can be any object that you wish to visualize):

@@ -1,13 +1,10 @@
 package org.atpfivt.ljv;
 
 import org.approvaltests.Approvals;
-import org.atpfivt.ljv.provider.impl.NewObjectHighlighter;
 import org.junit.jupiter.api.Test;
 import org.reflections.ReflectionUtils;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.URISyntaxException;
 import java.util.*;
 
 public class LJVTest {
@@ -107,8 +104,30 @@ public class LJVTest {
     }
 
     @Test
+    void multipleRoots() {
+        ArrayList<Object> a = new ArrayList<>();
+        Person p = new Person("Albert", Gender.MALE, 35);
+        Person p2 = new Person("Albert", Gender.MALE, 35);
+        String actual_graph = new LJV().addRoot(p).addRoot(p).addRoot(p).addRoot(p2).drawGraph();
+        Approvals.verify(actual_graph);
+    }
+
+    @Test
     void testNull() {
         String actualGraph = new LJV().drawGraph(null);
+        Approvals.verify(actualGraph);
+    }
+
+    @Test
+    void testMultiNull() {
+        String actualGraph = new LJV().addRoot(null).addRoot(null).drawGraph();
+        Approvals.verify(actualGraph);
+    }
+
+    @Test
+    void testMixedNullsAndNotNulls() {
+        String actualGraph = new LJV().addRoot(null)
+                .addRoot(new Object()).addRoot(new Object()).addRoot(null).drawGraph();
         Approvals.verify(actualGraph);
     }
 

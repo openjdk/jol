@@ -12,6 +12,7 @@ final class GraphBuilder {
     private final ObjSettings oSettings;
     private final StringBuilder out = new StringBuilder();
     private final LJV ljv;
+    private boolean nullNode;
 
     public GraphBuilder(LJV ljv) {
         this.ljv = ljv;
@@ -158,9 +159,12 @@ final class GraphBuilder {
     }
 
     private void generateDotInternal(Object obj) {
-        if (obj == null)
-            out.append("\t").append(dotName(null)).append("[label=\"null\"").append(", shape=plaintext];\n");
-        else if (!objectsId.containsKey(obj)) {
+        if (obj == null) {
+            if (!nullNode) {
+                out.append("\t").append(dotName(null)).append("[label=\"null\"").append(", shape=plaintext];\n");
+                nullNode = true;
+            }
+        } else if (!objectsId.containsKey(obj)) {
             Class<?> c = obj.getClass();
             if (c.isArray()) {
                 if (oSettings.looksLikePrimitiveArray(obj))
@@ -221,15 +225,18 @@ final class GraphBuilder {
         }
     }
 
-    public String generateDOT(Object obj) {
+    public String generateDOT() {
         out.append("digraph Java {\n")
                 .append("\trankdir=\"")
                 .append(ljv.getDirection())
                 .append("\";\n")
                 .append("\tnode[shape=plaintext]\n");
-        generateDotInternal(obj);
+        for (Object obj : ljv.getRoots()) {
+            generateDotInternal(obj);
+        }
         return out
                 .append("}\n")
                 .toString();
     }
+
 }
