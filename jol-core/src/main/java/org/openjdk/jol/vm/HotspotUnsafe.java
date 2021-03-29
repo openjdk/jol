@@ -54,7 +54,6 @@ class HotspotUnsafe implements VirtualMachine {
     private final boolean compressedOopsEnabled;
     private final long    narrowOopBase;
     private final int     narrowOopShift;
-    private final int     klassOopSize;
     private final boolean compressedKlassOopsEnabled;
     private final long    narrowKlassBase;
     private final int     narrowKlassShift;
@@ -86,13 +85,12 @@ class HotspotUnsafe implements VirtualMachine {
 
         addressSize = saDetails.getAddressSize();
         oopSize = saDetails.getOopSize();
-        klassOopSize = saDetails.getKlassOopSize();
 
         objectHeaderSize = guessHeaderSize();
         arrayHeaderSize = objectHeaderSize + 4;
 
         compressedOopsEnabled = saDetails.isCompressedOopsEnabled();
-        compressedKlassOopsEnabled = saDetails.isCompressedKlassOopsEnabled();
+        compressedKlassOopsEnabled = saDetails.isCompressedKlassPtrsEnabled();
 
         objectAlignment = saDetails.getObjectAlignment();
 
@@ -113,7 +111,6 @@ class HotspotUnsafe implements VirtualMachine {
         addressSize = U.addressSize();
 
         oopSize = guessOopSize();
-        klassOopSize = oopSize;
 
         objectHeaderSize = guessHeaderSize();
         arrayHeaderSize = objectHeaderSize + 4;
@@ -264,8 +261,15 @@ class HotspotUnsafe implements VirtualMachine {
     }
 
     @Override
-    public boolean compressedKlassPtrs() {
-        return compressedKlassOopsEnabled;
+    public int classPointerSize() {
+        switch (addressSize) {
+            case 4:
+                return 4;
+            case 8:
+                return compressedKlassOopsEnabled ? 4 : 8;
+            default:
+                throw new IllegalStateException("Unknown address size:" + addressSize);
+        }
     }
 
     @Override
