@@ -54,7 +54,6 @@ class HotspotUnsafe implements VirtualMachine {
     private final boolean compressedOopsEnabled;
     private final long    narrowOopBase;
     private final int     narrowOopShift;
-    private final int     klassOopSize;
     private final boolean compressedKlassOopsEnabled;
     private final long    narrowKlassBase;
     private final int     narrowKlassShift;
@@ -86,13 +85,12 @@ class HotspotUnsafe implements VirtualMachine {
 
         addressSize = saDetails.getAddressSize();
         oopSize = saDetails.getOopSize();
-        klassOopSize = saDetails.getKlassOopSize();
 
         objectHeaderSize = guessHeaderSize();
         arrayHeaderSize = objectHeaderSize + 4;
 
         compressedOopsEnabled = saDetails.isCompressedOopsEnabled();
-        compressedKlassOopsEnabled = saDetails.isCompressedKlassOopsEnabled();
+        compressedKlassOopsEnabled = saDetails.isCompressedKlassPtrsEnabled();
 
         objectAlignment = saDetails.getObjectAlignment();
 
@@ -113,7 +111,6 @@ class HotspotUnsafe implements VirtualMachine {
         addressSize = U.addressSize();
 
         oopSize = guessOopSize();
-        klassOopSize = oopSize;
 
         objectHeaderSize = guessHeaderSize();
         arrayHeaderSize = objectHeaderSize + 4;
@@ -121,9 +118,14 @@ class HotspotUnsafe implements VirtualMachine {
         Boolean coops = VMOptions.pollCompressedOops();
         if (coops != null) {
             compressedOopsEnabled = coops;
-            compressedKlassOopsEnabled = coops;
         } else {
             compressedOopsEnabled = (addressSize != oopSize);
+        }
+
+        Boolean ccptrs = VMOptions.pollCompressedClassPointers();
+        if (ccptrs != null) {
+            compressedKlassOopsEnabled = ccptrs;
+        } else {
             compressedKlassOopsEnabled = (addressSize != oopSize);
         }
 
@@ -250,6 +252,23 @@ class HotspotUnsafe implements VirtualMachine {
             return MathUtil.minDiff(off1, off2, off3, off4);
         } catch (NoSuchFieldException e) {
             throw new IllegalStateException("Infrastructure failure, klass = " + klass, e);
+        }
+    }
+
+    @Override
+    public int addressSize() {
+        return addressSize;
+    }
+
+    @Override
+    public int classPointerSize() {
+        switch (addressSize) {
+            case 4:
+                return 4;
+            case 8:
+                return compressedKlassOopsEnabled ? 4 : 8;
+            default:
+                throw new IllegalStateException("Unknown address size:" + addressSize);
         }
     }
 

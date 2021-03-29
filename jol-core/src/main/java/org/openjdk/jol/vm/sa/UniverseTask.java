@@ -53,14 +53,12 @@ class UniverseTask implements Task {
             Method getNarrowOopBaseMethod = universeClass.getMethod("getNarrowOopBase");
             Method getNarrowOopShiftMethod = universeClass.getMethod("getNarrowOopShift");
 
-            Method getKlassOopSizeMethod = null;
-            Method isCompressedKlassOopsEnabledMethod = null;
+            Method isCompressedKlassPtrsEnabledMethod = null;
             Method getNarrowKlassBaseMethod = null;
             Method getNarrowKlassShiftMethod = null;
 
             try {
-                getKlassOopSizeMethod = vmClass.getMethod("getKlassPtrSize");
-                isCompressedKlassOopsEnabledMethod = vmClass.getMethod("isCompressedKlassPointersEnabled");
+                isCompressedKlassPtrsEnabledMethod = vmClass.getMethod("isCompressedKlassPointersEnabled");
                 getNarrowKlassBaseMethod = universeClass.getMethod("getNarrowKlassBase");
                 getNarrowKlassShiftMethod = universeClass.getMethod("getNarrowKlassShift");
             } catch (NoSuchMethodException e) {
@@ -80,10 +78,8 @@ class UniverseTask implements Task {
              * use compressed oop references values instead of them.
              */
 
-            int klassOopSize = getKlassOopSizeMethod != null ?
-                    (Integer) getKlassOopSizeMethod.invoke(vm) : oopSize;
-            boolean compressedKlassOopsEnabled = isCompressedKlassOopsEnabledMethod != null ?
-                    (Boolean) isCompressedKlassOopsEnabledMethod.invoke(vm) : compressedOopsEnabled;
+            boolean compressedKlassPtrsEnabled = isCompressedKlassPtrsEnabledMethod != null ?
+                    (Boolean) isCompressedKlassPtrsEnabledMethod.invoke(vm) : compressedOopsEnabled;
             long narrowKlassBase = getNarrowKlassBaseMethod != null ?
                     (Long) getNarrowKlassBaseMethod.invoke(null) : narrowOopBase;
             int narrowKlassShift = getNarrowKlassShiftMethod != null ?
@@ -95,8 +91,7 @@ class UniverseTask implements Task {
                                                         compressedOopsEnabled,
                                                         narrowOopBase,
                                                         narrowOopShift,
-                                                        klassOopSize,
-                                                        compressedKlassOopsEnabled,
+                                                        compressedKlassPtrsEnabled,
                                                         narrowKlassBase,
                                                         narrowKlassShift);
         } catch (Throwable t) {

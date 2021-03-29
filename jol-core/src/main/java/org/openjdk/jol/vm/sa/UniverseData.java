@@ -40,22 +40,20 @@ public class UniverseData implements Result {
     private final long narrowOopBase;
     private final int narrowOopShift;
 
-    private final int klassOopSize;
-    private final boolean compressedKlassOopsEnabled;
+    private final boolean compressedKlassPtrsEnabled;
     private final long narrowKlassBase;
     private final int narrowKlassShift;
 
     public UniverseData(int addressSize, int objectAlignment, int oopSize,
-                        boolean compressedOopsEnabled, long narrowOopBase, int narrowOopShift, int klassOopSize,
-                        boolean compressedKlassOopsEnabled, long narrowKlassBase, int narrowKlassShift) {
+                        boolean compressedOopsEnabled, long narrowOopBase, int narrowOopShift,
+                        boolean compressedKlassPtrsEnabled, long narrowKlassBase, int narrowKlassShift) {
         this.addressSize = addressSize;
         this.objectAlignment = objectAlignment;
         this.oopSize = oopSize;
         this.compressedOopsEnabled = compressedOopsEnabled;
         this.narrowOopBase = narrowOopBase;
         this.narrowOopShift = narrowOopShift;
-        this.klassOopSize = klassOopSize;
-        this.compressedKlassOopsEnabled = compressedKlassOopsEnabled;
+        this.compressedKlassPtrsEnabled = compressedKlassPtrsEnabled;
         this.narrowKlassBase = narrowKlassBase;
         this.narrowKlassShift = narrowKlassShift;
     }
@@ -84,12 +82,8 @@ public class UniverseData implements Result {
         return narrowOopShift;
     }
 
-    public int getKlassOopSize() {
-        return klassOopSize;
-    }
-
-    public boolean isCompressedKlassOopsEnabled() {
-        return compressedKlassOopsEnabled;
+    public boolean isCompressedKlassPtrsEnabled() {
+        return compressedKlassPtrsEnabled;
     }
 
     public long getNarrowKlassBase() {

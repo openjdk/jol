@@ -248,20 +248,32 @@ public class ClassLayout {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
-        String MSG_GAP = "(alignment/padding gap)";
-        String MSG_NEXT_GAP = "(loss due to the next object alignment)";
-
         int maxTypeLen = "TYPE".length();
         for (FieldLayout f : fields()) {
             maxTypeLen = Math.max(f.typeClass().length(), maxTypeLen);
         }
         maxTypeLen += 2;
 
-        int maxDescrLen = Math.max(MSG_GAP.length(), MSG_NEXT_GAP.length());
+        String MSG_OBJ_HEADER = "(object header)";
+        String MSG_MARK_WORD = "(object header: mark)";
+        String MSG_CLASS_WORD = "(object header: class)";
+        String MSG_ARR_LEN = "(array length)";
+        String MSG_FIELD_GAP = "(alignment/padding gap)";
+        String MSG_OBJ_GAP = "(object alignment gap)";
+
+        int maxDescrLen = "DESCRIPTION".length();
+        maxDescrLen = Math.max(maxDescrLen, MSG_OBJ_HEADER.length());
+        maxDescrLen = Math.max(maxDescrLen, MSG_MARK_WORD.length());
+        maxDescrLen = Math.max(maxDescrLen, MSG_CLASS_WORD.length());
+        maxDescrLen = Math.max(maxDescrLen, MSG_FIELD_GAP.length());
+        maxDescrLen = Math.max(maxDescrLen, MSG_OBJ_GAP.length());
         for (FieldLayout f : fields()) {
             maxDescrLen = Math.max(f.shortFieldName().length(), maxDescrLen);
         }
         maxDescrLen += 2;
+
+        String format  = "%3d %3d %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n";
+        String formatS = "%3s %3s %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n";
 
         if (instance != null) {
             try {
@@ -275,38 +287,56 @@ public class ClassLayout {
         }
 
         pw.println(classData.name() + " object internals:");
-        pw.printf(" %6s %5s %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n", "OFFSET", "SIZE", "TYPE", "DESCRIPTION", "VALUE");
+        pw.printf(formatS, "OFF", "SZ", "TYPE", "DESCRIPTION", "VALUE");
+
         if (instance != null) {
             VirtualMachine vm = VM.current();
 
-            for (long off = 0; off < headerSize(); off += 4) {
-                int word = vm.getInt(instance, off);
-                pw.printf(" %6d %5d %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n", off, 4, "", "(object header)",
-                                toHex((word >> 0)  & 0xFF) + " " +
-                                toHex((word >> 8)  & 0xFF) + " " +
-                                toHex((word >> 16) & 0xFF) + " " +
-                                toHex((word >> 24) & 0xFF) + " " +
-                                "(" +
-                                toBinary((word >> 0)  & 0xFF) + " " +
-                                toBinary((word >> 8)  & 0xFF) + " " +
-                                toBinary((word >> 16) & 0xFF) + " " +
-                                toBinary((word >> 24) & 0xFF) + ") " +
-                                "(" + word + ")"
-                );
+            if (vm.addressSize() == 4) {
+                // 32-bit VM
+                int mark  = vm.getInt(instance, 0);
+                pw.printf(format, 0, 4, "", MSG_MARK_WORD, toHex(mark) + " " + parseMarkWord(mark));
+                int klass = vm.getInt(instance, 4);
+                pw.printf(format, 4, 4, "", MSG_CLASS_WORD, toHex(klass));
+                if (classData.isArray()) {
+                    int len = vm.getInt(instance, 8);
+                    pw.printf(format, 8, 4, "", "(array length)", len);
+                }
+            } else if (vm.addressSize() == 8) {
+                // 64-bit VM
+                long mark = vm.getLong(instance, 0);
+                pw.printf(format, 0, 8, "", MSG_MARK_WORD, toHex(mark) + " " + parseMarkWord(mark));
+                if (vm.classPointerSize() == 8) {
+                    long klass = vm.getLong(instance, 8);
+                    pw.printf(format, 8, 8, "klass", MSG_CLASS_WORD, toHex(klass));
+                } else {
+                    int klass = vm.getInt(instance, 8);
+                    pw.printf(format, 8, 4, "", MSG_CLASS_WORD, toHex(klass));
+                }
+                if (classData.isArray()) {
+                    int off = 8 + vm.classPointerSize();
+                    int len = vm.getInt(instance, off);
+                    pw.printf(format, off, 4, "", MSG_ARR_LEN, len);
+                }
+            } else {
+                for (long off = 0; off < headerSize(); off += 4) {
+                    int word = vm.getInt(instance, off);
+                    pw.printf(format, off, 4, "", MSG_OBJ_HEADER, toHex(word));
+                }
             }
         } else {
-            pw.printf(" %6d %5d %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n", 0, headerSize(), "", "(object header)", "N/A");
+            pw.printf(format, 0, headerSize(), "", MSG_OBJ_HEADER, "N/A");
         }
 
         long nextFree = headerSize();
 
         for (FieldLayout f : fields()) {
             if (f.offset() > nextFree) {
-                pw.printf(" %6d %5d %" + maxTypeLen + "s %-" + maxDescrLen + "s%n", nextFree, (f.offset() - nextFree), "", MSG_GAP);
+                pw.printf(format, nextFree, (f.offset() - nextFree), "", MSG_FIELD_GAP, "");
             }
 
             Field fi = f.data().refField();
-            pw.printf(" %6d %5d %" + maxTypeLen + "s %-" + maxDescrLen + "s %s%n",
+            pw.printf(format,
                     f.offset(),
                     f.size(),
                     f.typeClass(),
@@ -318,9 +348,8 @@ public class ClassLayout {
         }
 
         long sizeOf = (instance != null) ? VM.current().sizeOf(instance) : instanceSize();
-
         if (sizeOf != nextFree) {
-            pw.printf(" %6d %5s %" + maxTypeLen + "s %s%n", nextFree, lossesExternal, "", MSG_NEXT_GAP);
+            pw.printf(format, nextFree, lossesExternal, "", MSG_OBJ_GAP, "");
         }
 
         pw.printf("Instance size: %d bytes%n", sizeOf);
@@ -331,24 +360,99 @@ public class ClassLayout {
         return sw.toString();
     }
 
-    // very ineffective, so what?
-    private static String toBinary(int x) {
-        String s = Integer.toBinaryString(x);
-        int deficit = 8 - s.length();
-        for (int c = 0; c < deficit; c++) {
-            s = "0" + s;
+    static final String[] ZERO_RUNS;
+
+    static {
+        ZERO_RUNS = new String[16];
+        String s = "";
+        for (int c = 0; c < ZERO_RUNS.length; c++) {
+            ZERO_RUNS[c] = s;
+            s += "0";
         }
-        return s;
     }
 
-    // very ineffective, so what?
     private static String toHex(int x) {
         String s = Integer.toHexString(x);
-        int deficit = 2 - s.length();
-        for (int c = 0; c < deficit; c++) {
-            s = "0" + s;
+        int deficit = 8 - s.length();
+        return "0x" + ZERO_RUNS[deficit] + s;
+    }
+
+    private static String toHex(long x) {
+        String s = Long.toHexString(x);
+        int deficit = 16 - s.length();
+        return "0x" + ZERO_RUNS[deficit] + s;
+    }
+
+    private static String parseMarkWord(int mark) {
+        // 32 bits:
+        //    hash:25 ------------>| age:4    biased_lock:1 lock:2 (normal object)
+        //    JavaThread*:23 epoch:2 age:4    biased_lock:1 lock:2 (biased object)
+        int bits = mark & 0b11;
+        switch (bits) {
+            case 0b11:
+                return "(marked: " + toHex(mark) + ")";
+            case 0b00:
+                return "(thin lock: " + toHex(mark) + ")";
+            case 0b10:
+                return "(fat lock: " + toHex(mark) + ")";
+            case 0b01: // other
+                String s = "; age: " + ((mark >> 3) & 0xF);
+                int tribits = mark & 0b111;
+                switch (tribits) {
+                    case 0b001:
+                        int hash = mark >>> 7;
+                        if (hash != 0) {
+                            return "(hash: " + toHex(hash) + s + ")";
+                        } else {
+                            return "(non-biasable" + s + ")";
+                        }
+                    case 0b101:
+                        int thread = mark >>> 9;
+                        if (thread == 0) {
+                            return "(biasable" + s + ")";
+                        } else {
+                            return "(biased: " + toHex(thread) + "; epoch: " + ((mark >> 7) & 0x2) + s + ")";
+                        }
+                }
+            default:
+                return "(parse error)";
         }
-        return s;
+    }
+
+    private static String parseMarkWord(long mark) {
+        //  64 bits:
+        //  unused:25 hash:31 -->| unused_gap:1   age:4    biased_lock:1 lock:2 (normal object)
+        //  JavaThread*:54 epoch:2 unused_gap:1   age:4    biased_lock:1 lock:2 (biased object)
+        long bits = mark & 0b11;
+        switch ((int) bits) {
+            case 0b11:
+                return "(marked: " + toHex(mark) + ")";
+            case 0b00:
+                return "(thin lock: " + toHex(mark) + ")";
+            case 0b10:
+                return "(fat lock: " + toHex(mark) + ")";
+            case 0b01:
+                String s = "; age: " + ((mark >> 3) & 0xF);
+                int tribits = (int) (mark & 0b111);
+                switch (tribits) {
+                    case 0b001:
+                        int hash = (int)(mark >>> 8);
+                        if (hash != 0) {
+                            return "(hash: " + toHex(hash) + s + ")";
+                        } else {
+                            return "(non-biasable" + s + ")";
+                        }
+                    case 0b101:
+                        long thread = mark >>> 10;
+                        if (thread == 0) {
+                            return "(biasable" + s + ")";
+                        } else {
+                            return "(biased: " + toHex(thread) + "; epoch: " + ((mark >> 8) & 0x2) + s + ")";
+                        }
+                }
+            default:
+                return "(parse error)";
+        }
     }
 
     @Override

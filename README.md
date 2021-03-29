@@ -67,19 +67,18 @@ This dives into Object layout: field layout within the object, header informatio
     Instantiated the sample instance via default constructor.
 
     java.util.HashMap object internals:
-    OFFSET  SIZE                       TYPE DESCRIPTION                               VALUE
-         0     4                            (object header)                           01 00 00 00 (1)
-         4     4                            (object header)                           00 00 00 00 (0)
-         8     4                            (object header)                           b8 b2 01 00 (111288)
-        12     4              java.util.Set AbstractMap.keySet                        null
-        16     4       java.util.Collection AbstractMap.values                        null
-        20     4                        int HashMap.size                              0
-        24     4                        int HashMap.modCount                          0
-        28     4                        int HashMap.threshold                         0
-        32     4                      float HashMap.loadFactor                        0.75
-        36     4   java.util.HashMap.Node[] HashMap.table                             null
-        40     4              java.util.Set HashMap.entrySet                          null
-        44     4                            (loss due to the next object alignment)
+    OFF  SZ                       TYPE DESCRIPTION               VALUE
+      0   8                            (object header: mark)     0x0000000000000005 (biasable; age: 0)
+      8   4                            (object header: class)    0x00019828
+     12   4              java.util.Set AbstractMap.keySet        null
+     16   4       java.util.Collection AbstractMap.values        null
+     20   4                        int HashMap.size              0
+     24   4                        int HashMap.modCount          0
+     28   4                        int HashMap.threshold         0
+     32   4                      float HashMap.loadFactor        0.75
+     36   4   java.util.HashMap.Node[] HashMap.table             null
+     40   4              java.util.Set HashMap.entrySet          null
+     44   4                            (object alignment gap)
     Instance size: 48 bytes
     Space losses: 0 bytes internal + 4 bytes external = 4 bytes total
 

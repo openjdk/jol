@@ -95,6 +95,18 @@ public interface VirtualMachine {
     int arrayHeaderSize();
 
     /**
+     * Returns native address size.
+     * @return address size in bytes
+     */
+    int addressSize();
+
+    /**
+     * Returns class pointer size.
+     * @return class pointer size, in bytes
+     */
+    int classPointerSize();
+
+    /**
      * Reads a boolean off the object at given offset.
      * @param obj instance
      * @param offset offset
