@@ -33,38 +33,61 @@ package org.openjdk.jol.samples;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.vm.VM;
 
+import java.util.concurrent.TimeUnit;
+
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_06_Gaps {
+public class JOLSample_12_BiasedLocking {
 
     /*
-     * This example shows another HotSpot layout quirk.
+     * This is a dive into the mark word.
      *
-     * HotSpot rounds up the instance field block up to reference size.
-     * That unfortunately yields the artificial gaps at the end of the class.
+     * Among other things, mark words store locking information.
+     * We can clearly see how the mark word contents change when
+     * we acquire the lock, and subsequently release it.
      *
-     * See also:
-     *    https://bugs.openjdk.java.net/browse/JDK-8024912
+     * In this example, we demonstrate biased locking. Every Java
+     * object is potentially a target for synchronization. Most of
+     * the time, the object is ever locked by a single thread. In
+     * this case, we can "bias" the object to that single thread,
+     * and make the synchronization on it very cheap.
+     *
+     * To demonstrate this, we print the object internals before/during/after
+     * lock acquisition. You can notice that mark word changes from
+     * "biasable" to "biased". The mark word is left the same after
+     * unlock: the object is now biased towards the thread.
+     *
+     * Prior to JDK 9, biased locking is only enabled after 5 seconds
+     * after the VM startup. Therefore, the test is best run with
+     * -XX:BiasedLockingStartupDelay=0 on JDK 8 and lower. After JDK 15,
+     * biased locking is disabled by default, and this tests needs
+     * -XX:+UseBiasedLocking.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
-        out.println(ClassLayout.parseClass(C.class).toPrintable());
+
+        final A a = new A();
+
+        ClassLayout layout = ClassLayout.parseInstance(a);
+
+        out.println("**** Fresh object");
+        out.println(layout.toPrintable());
+
+        synchronized (a) {
+            out.println("**** With the lock");
+            out.println(layout.toPrintable());
+        }
+
+        out.println("**** After the lock");
+        out.println(layout.toPrintable());
     }
 
     public static class A {
-        boolean a;
-    }
-
-    public static class B extends A {
-        boolean b;
-    }
-
-    public static class C extends B {
-        boolean c;
+        // no fields
     }
 
 }

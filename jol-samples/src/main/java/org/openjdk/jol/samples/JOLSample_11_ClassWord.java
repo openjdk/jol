@@ -45,12 +45,11 @@ public class JOLSample_11_ClassWord {
      *
      * In HotSpot, object header consists of two parts: mark word,
      * and class word. We can clearly see the class word by analysing
-     * two syntactically equivalent instances of two distinct classes.
-     * See the difference in headers, that difference is the reference
-     * to class.
+     * two empty instances of two distinct classes. See the difference
+     * in class word, that difference is the reference to class.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
         out.println(ClassLayout.parseInstance(new A()).toPrintable());
         out.println(ClassLayout.parseInstance(new B()).toPrintable());

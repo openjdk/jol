@@ -37,6 +37,18 @@ public interface DataModel {
      *
      * @return object header size in bytes.
      */
+    int markHeaderSize();
+
+    int classHeaderSize();
+
+    int markHeaderOffset();
+
+    int classHeaderOffset();
+
+    int arrayLengthSize();
+
+    int arrayLengthOffset();
+
     int headerSize();
 
     /**

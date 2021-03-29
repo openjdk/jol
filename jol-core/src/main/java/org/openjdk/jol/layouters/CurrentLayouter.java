@@ -24,6 +24,8 @@
  */
 package org.openjdk.jol.layouters;
 
+import org.openjdk.jol.datamodel.ModelVM;
+import org.openjdk.jol.datamodel.DataModel;
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.info.FieldData;
@@ -43,6 +45,8 @@ import java.util.TreeSet;
  */
 public class CurrentLayouter implements Layouter {
 
+    static final DataModel CURRENT = new ModelVM();
+
     @Override
     public ClassLayout layout(ClassData data) {
         VirtualMachine vm = VM.current();
@@ -56,7 +60,7 @@ public class CurrentLayouter implements Layouter {
 
             SortedSet<FieldLayout> result = new TreeSet<>();
             result.add(new FieldLayout(FieldData.create(data.arrayClass(), "<elements>", data.arrayComponentType()), base, scale * data.arrayLength()));
-            return ClassLayout.create(data, result, vm.arrayHeaderSize(), instanceSize, false);
+            return ClassLayout.create(data, result, CURRENT, instanceSize, false);
         }
 
         Collection<FieldData> fields = data.fields();
@@ -75,7 +79,7 @@ public class CurrentLayouter implements Layouter {
             // TODO: This calculation is incorrect if there is a trailing @Contended field, or the instance is @Contended
         }
         instanceSize = MathUtil.align(instanceSize, vm.objectAlignment());
-        return ClassLayout.create(data, result, vm.objectHeaderSize(), instanceSize, true);
+        return ClassLayout.create(data, result, CURRENT, instanceSize, true);
     }
 
     @Override

@@ -61,7 +61,7 @@ public class JOLSample_16_AL_LL {
      * from either root, and also avoids double-counting.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
 
         ArrayList<Integer> al = new ArrayList<>();

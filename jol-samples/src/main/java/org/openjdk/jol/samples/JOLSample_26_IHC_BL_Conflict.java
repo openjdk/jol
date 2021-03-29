@@ -55,6 +55,8 @@ public class JOLSample_26_IHC_BL_Conflict {
      * and subsequent locks only displace it temporarily. After the second lock
      * is released, identity hash code data gets back. No biased locking is
      * possible for that object anymore.
+     *
+     * On JDK 15+, this test should enable -XX:+UseBiasedLocking.
      */
 
     public static void main(String[] args) throws Exception {

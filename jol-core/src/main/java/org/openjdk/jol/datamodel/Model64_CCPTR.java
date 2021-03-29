@@ -24,32 +24,64 @@
  */
 package org.openjdk.jol.datamodel;
 
+import java.util.Objects;
+
 /**
- * x86 data model, 64 bits, compressed references enabled.
+ * 64 bits, no compressed references, but have compressed class pointers.
  *
  * @author Aleksey Shipilev
  */
-public class X86_64_COOPS_DataModel implements DataModel {
+public class Model64_CCPTR implements DataModel {
 
     private final int align;
 
-    public X86_64_COOPS_DataModel() {
+    public Model64_CCPTR() {
         this(8);
     }
 
-    public X86_64_COOPS_DataModel(int align) {
+    public Model64_CCPTR(int align) {
         this.align = align;
     }
 
+
     @Override
-    public int headerSize() {
-        // 8 byte mark + 4 byte class
+    public int markHeaderSize() {
+        return 8;
+    }
+
+    @Override
+    public int classHeaderSize() {
+        return 4;
+    }
+
+    @Override
+    public int markHeaderOffset() {
+        return 0;
+    }
+
+    @Override
+    public int classHeaderOffset() {
+        return 8;
+    }
+
+    @Override
+    public int arrayLengthSize() {
+        return 4;
+    }
+
+    @Override
+    public int arrayLengthOffset() {
         return 12;
     }
 
     @Override
+    public int headerSize() {
+        return classHeaderOffset() + classHeaderSize();
+    }
+
+    @Override
     public int arrayHeaderSize() {
-        return headerSize() + 4;
+        return arrayLengthOffset() + arrayLengthSize();
     }
 
     @Override
@@ -62,7 +94,7 @@ public class X86_64_COOPS_DataModel implements DataModel {
         if (klass.equals("float"))   return 4;
         if (klass.equals("long"))    return 8;
         if (klass.equals("double"))  return 8;
-        return 4;
+        return 8;
     }
 
     @Override
@@ -72,7 +104,19 @@ public class X86_64_COOPS_DataModel implements DataModel {
 
     @Override
     public String toString() {
-        return "X64 model (compressed oops), " + align + "-byte aligned";
+        return "64-bit model, compressed class pointers, " + align + "-byte aligned";
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Model64_CCPTR that = (Model64_CCPTR) o;
+        return align == that.align;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(align);
+    }
 }

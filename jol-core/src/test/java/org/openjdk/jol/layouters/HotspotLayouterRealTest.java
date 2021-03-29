@@ -2,7 +2,7 @@ package org.openjdk.jol.layouters;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jol.datamodel.CurrentDataModel;
+import org.openjdk.jol.datamodel.ModelVM;
 import org.openjdk.jol.datamodel.DataModel;
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.ClassLayout;
@@ -12,7 +12,7 @@ import java.util.*;
 
 public class HotspotLayouterRealTest {
 
-    private static final DataModel[] MODELS = { new CurrentDataModel() };
+    private static final DataModel[] MODELS = { new ModelVM() };
     private static final int ITERATIONS = 20000;
 
     private int getVersion() {

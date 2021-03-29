@@ -52,6 +52,9 @@ public class JOLSample_22_Compaction {
      * the sparse layout. It happens because many temporary objects are
      * allocated while populating the list. The subsequent GCs compact
      * the list into the one or few dense blocks.
+     *
+     * Run this test with -Xmx1g -XX:+UseParallelGC -XX:ParallelGCThreads=1
+     * for best results.
      */
 
     public static volatile Object sink;
@@ -63,6 +66,7 @@ public class JOLSample_22_Compaction {
         for (int c = 0; c < 1000000; c++) {
             sink = new Object();
         }
+
         System.gc();
 
         List<String> list = new ArrayList<>();

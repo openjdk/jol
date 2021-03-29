@@ -51,7 +51,7 @@ public class JOLSample_02_Alignment {
      * object header.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
         out.println(ClassLayout.parseClass(A.class).toPrintable());
     }

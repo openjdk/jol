@@ -33,66 +33,41 @@ package org.openjdk.jol.samples;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.vm.VM;
 
-import java.io.PrintWriter;
-
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_19_Promotion {
+public class JOLSample_06_HierarchyGaps {
 
     /*
-     * The example of object promotion.
+     * This example shows another HotSpot layout quirk.
      *
-     * Once the object survives the garbage collections, it is getting
-     * promoted to another generation. In this example, we can track
-     * the addresses of the objects, as it changes over time.
+     * Prior to JDK 15, HotSpot rounds up the instance field block
+     * up to reference size. That unfortunately yields the artificial
+     * gaps at the end of the class.
      *
-     * VM also needs to record the "age" (that is, the number of GC
-     * cycles the object had survived) of the object somewhere, and
-     * it is stored in mark word as well. See how particular mark word
-     * bits change with each promotion.
+     * In JDK 15 and later, the hierarchy gaps are no longer present.
      *
-     * Run with test with smaller heap (about 1 GB) for best results.
+     * See also:
+     *    https://bugs.openjdk.java.net/browse/JDK-8237767
      */
-
-    static volatile Object sink;
 
     public static void main(String[] args) {
         out.println(VM.current().details());
+        out.println(ClassLayout.parseClass(C.class).toPrintable());
+    }
 
-        PrintWriter pw = new PrintWriter(System.out, true);
+    public static class A {
+        boolean a;
+    }
 
-        Object o = new Object();
+    public static class B extends A {
+        boolean b;
+    }
 
-        ClassLayout layout = ClassLayout.parseInstance(o);
-
-        long lastAddr = VM.current().addressOf(o);
-        pw.printf("*** Fresh object is at %x%n", lastAddr);
-        out.println(layout.toPrintable());
-
-        int moves = 0;
-        for (int i = 0; i < 100000; i++) {
-            long cur = VM.current().addressOf(o);
-            if (cur != lastAddr) {
-                moves++;
-                pw.printf("*** Move %2d, object is at %x%n", moves, cur);
-                out.println(layout.toPrintable());
-                lastAddr = cur;
-            }
-
-            // make garbage
-            for (int c = 0; c < 10000; c++) {
-                sink = new Object();
-            }
-        }
-
-        long finalAddr = VM.current().addressOf(o);
-        pw.printf("*** Final object is at %x%n", finalAddr);
-        out.println(layout.toPrintable());
-
-        pw.close();
+    public static class C extends B {
+        boolean c;
     }
 
 }

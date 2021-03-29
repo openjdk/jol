@@ -30,9 +30,10 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.datamodel.X86_32_DataModel;
-import org.openjdk.jol.datamodel.X86_64_COOPS_DataModel;
-import org.openjdk.jol.datamodel.X86_64_DataModel;
+import org.openjdk.jol.datamodel.Model32;
+import org.openjdk.jol.datamodel.Model64_CCPTR;
+import org.openjdk.jol.datamodel.Model64_COOPS_CCPTR;
+import org.openjdk.jol.datamodel.Model64;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.layouters.CurrentLayouter;
 import org.openjdk.jol.layouters.HotSpotLayouter;
@@ -45,29 +46,47 @@ public class JOLSample_10_DataModels {
 
     /*
      * This example shows the differences between the data models.
-     *
      * First layout is the actual VM layout, the remaining three
-     * are simulations. You can see the reference sizes are different,
-     * depending on VM bitness or mode. The header sizes are also
-     * a bit different, see subsequent examples to understand why.
+     * are simulations.
+     *
+     * You can see the reference sizes are different, depending on VM model:
+     *  - with 32-bit model, reference size is 4 bytes
+     *  - with 64-bit model, reference size is 8 bytes;
+     *      unless compressed references are enabled
+     *      (enabled by default when heap size is small)
+     *
+     * The mark word sizes depend on JVM bitness:
+     *  - with 32-bit model, mark word size is 4 bytes
+     *  - with 64-bit model, mark word size is 8 bytes
+     *
+     * The class word sizes depend on JVM model:
+     *  - with 32-bit model, class word is 4 bytes
+     *  - with 64-bit model, class word is 8 bytes;
+     *     unless compressed class pointers are enabled
+     *     (enabled by default when compressed references are enabled)
+     *     (since JDK 16, can be enabled even without compressed references)
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         Layouter l;
 
         l = new CurrentLayouter();
         System.out.println("***** " + l);
         System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
 
-        l = new HotSpotLayouter(new X86_32_DataModel());
+        l = new HotSpotLayouter(new Model32());
         System.out.println("***** " + l);
         System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
 
-        l = new HotSpotLayouter(new X86_64_DataModel());
+        l = new HotSpotLayouter(new Model64());
         System.out.println("***** " + l);
         System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
 
-        l = new HotSpotLayouter(new X86_64_COOPS_DataModel());
+        l = new HotSpotLayouter(new Model64_COOPS_CCPTR());
+        System.out.println("***** " + l);
+        System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
+
+        l = new HotSpotLayouter(new Model64_CCPTR());
         System.out.println("***** " + l);
         System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
     }

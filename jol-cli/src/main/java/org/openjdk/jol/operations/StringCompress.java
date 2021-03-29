@@ -25,10 +25,7 @@
 package org.openjdk.jol.operations;
 
 import org.openjdk.jol.Operation;
-import org.openjdk.jol.datamodel.DataModel;
-import org.openjdk.jol.datamodel.X86_32_DataModel;
-import org.openjdk.jol.datamodel.X86_64_COOPS_DataModel;
-import org.openjdk.jol.datamodel.X86_64_DataModel;
+import org.openjdk.jol.datamodel.*;
 import org.openjdk.jol.heap.HeapDumpException;
 import org.openjdk.jol.heap.HeapDumpReader;
 import org.openjdk.jol.info.ClassData;
@@ -62,10 +59,12 @@ public class StringCompress implements Operation {
     static final String DO_MODE = System.getProperty("mode", "estimates");
 
     static final DataModel[] DATA_MODELS = new DataModel[]{
-            new X86_32_DataModel(),
-            new X86_64_DataModel(),
-            new X86_64_COOPS_DataModel(),
-            new X86_64_COOPS_DataModel(16)
+            new Model32(),
+            new Model64(),
+            new Model64_COOPS_CCPTR(),
+            new Model64_COOPS_CCPTR(16),
+            new Model64_CCPTR(),
+            new Model64_CCPTR(16),
     };
 
 

@@ -24,32 +24,63 @@
  */
 package org.openjdk.jol.datamodel;
 
+import java.util.Objects;
+
 /**
- * x86 data model, 64 bits.
+ * 64 bits model, no compressed references, no compressed class pointers.
  *
  * @author Aleksey Shipilev
  */
-public class X86_64_DataModel implements DataModel {
+public class Model64 implements DataModel {
 
     private final int align;
 
-    public X86_64_DataModel() {
+    public Model64() {
         this(8);
     }
 
-    public X86_64_DataModel(int align) {
+    public Model64(int align) {
         this.align = align;
     }
 
     @Override
-    public int headerSize() {
-        // 8 byte mark + 8 byte class
+    public int markHeaderSize() {
+        return 8;
+    }
+
+    @Override
+    public int classHeaderSize() {
+        return 8;
+    }
+
+    @Override
+    public int markHeaderOffset() {
+        return 0;
+    }
+
+    @Override
+    public int classHeaderOffset() {
+        return 8;
+    }
+
+    @Override
+    public int arrayLengthSize() {
+        return 4;
+    }
+
+    @Override
+    public int arrayLengthOffset() {
         return 16;
     }
 
     @Override
+    public int headerSize() {
+        return classHeaderOffset() + classHeaderSize();
+    }
+
+    @Override
     public int arrayHeaderSize() {
-        return headerSize() + 4;
+        return arrayLengthOffset() + arrayLengthSize();
     }
 
     @Override
@@ -72,7 +103,19 @@ public class X86_64_DataModel implements DataModel {
 
     @Override
     public String toString() {
-        return "X64 model, " + align + "-byte aligned";
+        return "64-bit model, " + align + "-byte aligned";
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Model64 model64 = (Model64) o;
+        return align == model64.align;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(align);
+    }
 }

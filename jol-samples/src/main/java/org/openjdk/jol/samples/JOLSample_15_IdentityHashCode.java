@@ -49,7 +49,7 @@ public class JOLSample_15_IdentityHashCode {
      * it was computed.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
 
         final A a = new A();

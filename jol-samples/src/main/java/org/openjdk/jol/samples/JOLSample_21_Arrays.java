@@ -45,24 +45,29 @@ public class JOLSample_21_Arrays {
     /*
      * This example shows the array layout quirks.
      *
+     * If you run with almost any GC, then you would notice
+     * that array elements are laid out in-order by index.
+     *
      * If you run it with parallel GC, you might notice that
      * fresh object elements are laid out after the array in
      * the forward order, but after GC then can be rearranged
      * in the reverse order. This is because GC records the
      * to-be-promoted objects on the stack.
      *
+     * This test is better run with -XX:ParallelGCThreads=1.
+     *
      * See also:
      *   https://bugs.openjdk.java.net/browse/JDK-8024394
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
 
         PrintWriter pw = new PrintWriter(System.out, true);
 
         Integer[] arr = new Integer[10];
         for (int i = 0; i < 10; i++) {
-            arr[i] = new Integer(i);
+            arr[i] = i + 256; // boxing outside of Integer cache
         }
 
         String last = null;

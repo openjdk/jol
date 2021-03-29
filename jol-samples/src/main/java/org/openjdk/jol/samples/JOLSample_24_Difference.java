@@ -59,7 +59,7 @@ public class JOLSample_24_Difference {
      * It is a good idea to keep the allocations at minimum between the snapshots.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
 
         Map<String, String> chm = new ConcurrentHashMap<>();

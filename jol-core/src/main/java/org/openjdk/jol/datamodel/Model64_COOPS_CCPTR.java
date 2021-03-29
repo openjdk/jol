@@ -24,32 +24,64 @@
  */
 package org.openjdk.jol.datamodel;
 
+import java.util.Objects;
+
 /**
- * x86 data model, 32 bits.
+ * 64 bits, compressed references, compressed class pointers.
  *
  * @author Aleksey Shipilev
  */
-public class X86_32_DataModel implements DataModel {
+public class Model64_COOPS_CCPTR implements DataModel {
 
     private final int align;
 
-    public X86_32_DataModel() {
+    public Model64_COOPS_CCPTR() {
         this(8);
     }
 
-    public X86_32_DataModel(int align) {
+    public Model64_COOPS_CCPTR(int align) {
         this.align = align;
     }
 
+
     @Override
-    public int headerSize() {
-        // 4 byte mark + 4 byte class
+    public int markHeaderSize() {
         return 8;
     }
 
     @Override
+    public int classHeaderSize() {
+        return 4;
+    }
+
+    @Override
+    public int markHeaderOffset() {
+        return 0;
+    }
+
+    @Override
+    public int classHeaderOffset() {
+        return 8;
+    }
+
+    @Override
+    public int arrayLengthSize() {
+        return 4;
+    }
+
+    @Override
+    public int arrayLengthOffset() {
+        return 12;
+    }
+
+    @Override
+    public int headerSize() {
+        return classHeaderOffset() + classHeaderSize();
+    }
+
+    @Override
     public int arrayHeaderSize() {
-        return headerSize() + 4;
+        return arrayLengthOffset() + arrayLengthSize();
     }
 
     @Override
@@ -72,6 +104,19 @@ public class X86_32_DataModel implements DataModel {
 
     @Override
     public String toString() {
-        return "X32 model, " + align + "-byte aligned";
+        return "64-bit model, compressed references, compressed class pointers, " + align + "-byte aligned";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Model64_COOPS_CCPTR that = (Model64_COOPS_CCPTR) o;
+        return align == that.align;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(align);
     }
 }

@@ -26,20 +26,53 @@ package org.openjdk.jol.datamodel;
 
 import org.openjdk.jol.vm.VM;
 
+import java.util.Objects;
+
 /**
  * Current data model as detected by JVM.
  *
  * @author Aleksey Shipilev
  */
-public class CurrentDataModel implements DataModel {
+public class ModelVM implements DataModel {
+
+    @Override
+    public int markHeaderSize() {
+        return VM.current().addressSize();
+    }
+
+    @Override
+    public int classHeaderSize() {
+        return VM.current().classPointerSize();
+    }
+
+    @Override
+    public int markHeaderOffset() {
+        return 0;
+    }
+
+    @Override
+    public int classHeaderOffset() {
+        return markHeaderSize();
+    }
+
+    @Override
+    public int arrayLengthSize() {
+        return 4;
+    }
+
+    @Override
+    public int arrayLengthOffset() {
+        return classHeaderOffset() + classHeaderSize();
+    }
+
     @Override
     public int headerSize() {
-        return VM.current().objectHeaderSize();
+        return classHeaderOffset() + classHeaderSize();
     }
 
     @Override
     public int arrayHeaderSize() {
-        return VM.current().arrayHeaderSize();
+        return arrayLengthOffset() + arrayLengthOffset();
     }
 
     @Override
@@ -50,5 +83,22 @@ public class CurrentDataModel implements DataModel {
     @Override
     public int objectAlignment() {
         return VM.current().objectAlignment();
+    }
+
+    @Override
+    public String toString() {
+        return "Current VM";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
     }
 }

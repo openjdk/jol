@@ -50,7 +50,7 @@ public class JOLSample_04_Inheritance {
      * VM to lay out the superclass fields first.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
         out.println(ClassLayout.parseClass(C.class).toPrintable());
     }

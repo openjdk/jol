@@ -52,7 +52,7 @@ public class JOLSample_18_Layouts {
      * it further "degrades" to the tree.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
 
         PrintWriter pw = new PrintWriter(System.out, true);
@@ -107,7 +107,7 @@ public class JOLSample_18_Layouts {
 
         @Override
         public int compareTo(Dummy o) {
-            return (id < o.id) ? -1 : ((id == o.id) ? 0 : 1);
+            return Integer.compare(id, o.id);
         }
     }
 

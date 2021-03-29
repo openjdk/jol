@@ -55,7 +55,7 @@ public class JOLSample_25_ArrayAlignment {
      *   https://bugs.openjdk.java.net/browse/JDK-8139457
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
         out.println(ClassLayout.parseInstance(new long[0]).toPrintable());
         for (int size = 0; size <= 8; size++) {

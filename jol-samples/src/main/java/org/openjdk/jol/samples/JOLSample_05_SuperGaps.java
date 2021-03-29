@@ -38,22 +38,23 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_05_InheritanceBarrier {
+public class JOLSample_05_SuperGaps {
 
     /*
      * This example shows the HotSpot field layout quirk.
      * (Works best with 64-bit VMs)
      *
-     * Even though we have the alignment gap before A.a field, HotSpot
-     * does not claim it, because it does not track the gaps in the
-     * already laid out superclasses. This yields the virtual
-     * "inheritance barrier" between super- and sub-class fields blocks.
+     * Prior to JDK 15, even though we have the alignment gap before
+     * A.a field, HotSpot does not claim it, because it does not track
+     * the gaps in the already laid out superclasses.
+     *
+     * In JDK 15 and later, the superclass gaps are no longer present.
      *
      * See also:
-     *    https://bugs.openjdk.java.net/browse/JDK-8024913
+     *    https://bugs.openjdk.java.net/browse/JDK-8237767
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
         out.println(ClassLayout.parseClass(C.class).toPrintable());
     }
