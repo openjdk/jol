@@ -30,10 +30,7 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.datamodel.Model32;
-import org.openjdk.jol.datamodel.Model64_CCPTR;
-import org.openjdk.jol.datamodel.Model64_COOPS_CCPTR;
-import org.openjdk.jol.datamodel.Model64;
+import org.openjdk.jol.datamodel.*;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.layouters.CurrentLayouter;
 import org.openjdk.jol.layouters.HotSpotLayouter;
@@ -67,28 +64,27 @@ public class JOLSample_10_DataModels {
      *     (since JDK 16, can be enabled even without compressed references)
      */
 
+    static final DataModel[] MODELS = new DataModel[]{
+            new Model32(),
+            new Model64(),
+            new Model64_COOPS_CCPS(),
+            new Model64_COOPS_CCPS(16),
+            new Model64_CCPS(),
+            new Model64_CCPS(16),
+    };
+
     public static void main(String[] args) {
-        Layouter l;
+        {
+            Layouter l = new CurrentLayouter();
+            System.out.println("***** " + l);
+            System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
+        }
 
-        l = new CurrentLayouter();
-        System.out.println("***** " + l);
-        System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
-
-        l = new HotSpotLayouter(new Model32());
-        System.out.println("***** " + l);
-        System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
-
-        l = new HotSpotLayouter(new Model64());
-        System.out.println("***** " + l);
-        System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
-
-        l = new HotSpotLayouter(new Model64_COOPS_CCPTR());
-        System.out.println("***** " + l);
-        System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
-
-        l = new HotSpotLayouter(new Model64_CCPTR());
-        System.out.println("***** " + l);
-        System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
+        for (DataModel model : MODELS) {
+            Layouter l = new HotSpotLayouter(model);
+            System.out.println("***** " + l);
+            System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
+        }
     }
 
     public static class A {
