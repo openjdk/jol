@@ -27,6 +27,7 @@ package org.openjdk.jol.operations;
 import org.openjdk.jol.datamodel.*;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.layouters.HotSpotLayouter;
+import org.openjdk.jol.layouters.Layouter;
 
 import static java.lang.System.out;
 
@@ -45,20 +46,36 @@ public class ObjectEstimates extends ClasspathedOperation {
         return "Simulate the class layout in different VM modes.";
     }
 
-    static final DataModel[] DATA_MODELS = new DataModel[]{
+    static final DataModel[] MODELS_JDK8 = new DataModel[]{
             new Model32(),
             new Model64(),
             new Model64_COOPS_CCPS(),
             new Model64_COOPS_CCPS(16),
+    };
+
+    static final DataModel[] MODELS_JDK15 = new DataModel[]{
             new Model64_CCPS(),
             new Model64_CCPS(16),
     };
 
     @Override
     protected void runWith(Class<?> klass) {
-        for (DataModel model : DATA_MODELS) {
-            out.println("***** " + model.toString());
-            out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(model)).toPrintable());
+        for (DataModel model : MODELS_JDK8) {
+            Layouter l = new HotSpotLayouter(model, 8);
+            out.println("***** " + l);
+            out.println(ClassLayout.parseClass(klass, l).toPrintable());
+        }
+
+        for (DataModel model : MODELS_JDK8) {
+            Layouter l = new HotSpotLayouter(model, 15);
+            out.println("***** " + l);
+            out.println(ClassLayout.parseClass(klass, l).toPrintable());
+        }
+
+        for (DataModel model : MODELS_JDK15) {
+            Layouter l = new HotSpotLayouter(model, 15);
+            out.println("***** " + l);
+            out.println(ClassLayout.parseClass(klass, l).toPrintable());
         }
     }
 

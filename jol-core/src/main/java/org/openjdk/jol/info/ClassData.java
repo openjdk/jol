@@ -251,18 +251,7 @@ public class ClassData {
         int count = 0;
 
         for (FieldData f : fields) {
-            String simpleName = f.typeClass();
-
-            if (
-                !simpleName.equals("boolean") &&
-                !simpleName.equals("byte") &&
-                !simpleName.equals("short") &&
-                !simpleName.equals("char") &&
-                !simpleName.equals("int") &&
-                !simpleName.equals("float") &&
-                !simpleName.equals("long") &&
-                !simpleName.equals("double")
-            ) {
+            if (!f.isPrimitive()) {
                 count++;
             }
         }

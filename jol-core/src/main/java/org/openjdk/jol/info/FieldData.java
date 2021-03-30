@@ -107,6 +107,22 @@ public class FieldData {
         return type;
     }
 
+    public boolean isPrimitive() {
+        switch (type) {
+            case "boolean":
+            case "byte":
+            case "short":
+            case "char":
+            case "int":
+            case "float":
+            case "long":
+            case "double":
+                return true;
+            default:
+                return false;
+        }
+    }
+
     /**
      * Answers the class for the field holder.
      *

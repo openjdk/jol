@@ -48,13 +48,20 @@ public class JOLSample_10_DataModels {
      * are simulations. You can see the reference sizes are different,
      * depending on VM bitness or mode. The header sizes are also
      * a bit different, see subsequent examples to understand why.
+     *
+     * JDK 15 brought a new layouter, which may pack fields more densely.
+     * JDK 15 also allows to have compressed class pointers without
+     * compressed oops.
      */
 
-    static final DataModel[] MODELS = new DataModel[]{
+    static final DataModel[] MODELS_JDK8 = new DataModel[]{
             new Model32(),
             new Model64(),
             new Model64_COOPS_CCPS(),
             new Model64_COOPS_CCPS(16),
+    };
+
+    static final DataModel[] MODELS_JDK15 = new DataModel[]{
             new Model64_CCPS(),
             new Model64_CCPS(16),
     };
@@ -66,8 +73,20 @@ public class JOLSample_10_DataModels {
             System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
         }
 
-        for (DataModel model : MODELS) {
-            Layouter l = new HotSpotLayouter(model);
+        for (DataModel model : MODELS_JDK8) {
+            Layouter l = new HotSpotLayouter(model, 8);
+            System.out.println("***** " + l);
+            System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
+        }
+
+        for (DataModel model : MODELS_JDK8) {
+            Layouter l = new HotSpotLayouter(model, 15);
+            System.out.println("***** " + l);
+            System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
+        }
+
+        for (DataModel model : MODELS_JDK15) {
+            Layouter l = new HotSpotLayouter(model, 15);
             System.out.println("***** " + l);
             System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
         }
@@ -75,7 +94,7 @@ public class JOLSample_10_DataModels {
 
     public static class A {
         Object a;
-        Object b;
+        int b;
     }
 
 }
