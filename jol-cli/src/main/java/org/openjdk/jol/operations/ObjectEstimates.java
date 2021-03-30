@@ -28,8 +28,6 @@ import org.openjdk.jol.datamodel.*;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.layouters.HotSpotLayouter;
 
-import javax.xml.crypto.Data;
-
 import static java.lang.System.out;
 
 /**

@@ -24,8 +24,6 @@
  */
 package org.openjdk.jol.datamodel;
 
-import java.util.Objects;
-
 /**
  * 64 bits, compressed references, compressed class pointers.
  *
@@ -102,6 +100,6 @@ public class Model64_COOPS_CCPTR implements DataModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(align);
+        return align;
     }
 }
