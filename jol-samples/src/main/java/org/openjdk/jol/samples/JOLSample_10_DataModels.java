@@ -53,10 +53,10 @@ public class JOLSample_10_DataModels {
     static final DataModel[] MODELS = new DataModel[]{
             new Model32(),
             new Model64(),
-            new Model64_COOPS_CCPTR(),
-            new Model64_COOPS_CCPTR(16),
-            new Model64_CCPTR(),
-            new Model64_CCPTR(16),
+            new Model64_COOPS_CCPS(),
+            new Model64_COOPS_CCPS(16),
+            new Model64_CCPS(),
+            new Model64_CCPS(16),
     };
 
     public static void main(String[] args) {

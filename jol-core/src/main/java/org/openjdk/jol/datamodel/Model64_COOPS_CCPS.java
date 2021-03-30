@@ -29,15 +29,15 @@ package org.openjdk.jol.datamodel;
  *
  * @author Aleksey Shipilev
  */
-public class Model64_COOPS_CCPTR implements DataModel {
+public class Model64_COOPS_CCPS implements DataModel {
 
     private final int align;
 
-    public Model64_COOPS_CCPTR() {
+    public Model64_COOPS_CCPS() {
         this(8);
     }
 
-    public Model64_COOPS_CCPTR(int align) {
+    public Model64_COOPS_CCPS(int align) {
         this.align = align;
     }
 
@@ -94,7 +94,7 @@ public class Model64_COOPS_CCPTR implements DataModel {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Model64_COOPS_CCPTR that = (Model64_COOPS_CCPTR) o;
+        Model64_COOPS_CCPS that = (Model64_COOPS_CCPS) o;
         return align == that.align;
     }
 
