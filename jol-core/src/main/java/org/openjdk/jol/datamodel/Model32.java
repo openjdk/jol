@@ -24,32 +24,48 @@
  */
 package org.openjdk.jol.datamodel;
 
+import java.util.Objects;
+
 /**
- * x86 data model, 64 bits, compressed references enabled.
+ * 32 bits model.
  *
  * @author Aleksey Shipilev
  */
-public class X86_64_COOPS_DataModel implements DataModel {
+public class Model32 implements DataModel {
 
     private final int align;
 
-    public X86_64_COOPS_DataModel() {
+    public Model32() {
         this(8);
     }
 
-    public X86_64_COOPS_DataModel(int align) {
+    public Model32(int align) {
         this.align = align;
     }
 
     @Override
+    public int markHeaderSize() {
+        return 4;
+    }
+
+    @Override
+    public int classHeaderSize() {
+        return 4;
+    }
+
+    @Override
+    public int arrayLengthHeaderSize() {
+        return 4;
+    }
+
+    @Override
     public int headerSize() {
-        // 8 byte mark + 4 byte class
-        return 12;
+        return markHeaderSize() + classHeaderSize();
     }
 
     @Override
     public int arrayHeaderSize() {
-        return headerSize() + 4;
+        return headerSize() + arrayLengthHeaderSize();
     }
 
     @Override
@@ -72,7 +88,19 @@ public class X86_64_COOPS_DataModel implements DataModel {
 
     @Override
     public String toString() {
-        return "X64 model (compressed oops), " + align + "-byte aligned";
+        return "32-bit model, " + align + "-byte aligned";
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Model32 model32 = (Model32) o;
+        return align == model32.align;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(align);
+    }
 }

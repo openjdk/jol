@@ -24,6 +24,7 @@
  */
 package org.openjdk.jol.info;
 
+import org.openjdk.jol.datamodel.DataModel;
 import org.openjdk.jol.layouters.CurrentLayouter;
 import org.openjdk.jol.layouters.Layouter;
 import org.openjdk.jol.util.ClassUtils;
@@ -34,6 +35,7 @@ import org.openjdk.jol.vm.VirtualMachine;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.util.Objects;
 import java.util.SortedSet;
 
 /**
@@ -102,16 +104,16 @@ public class ClassLayout {
 
     private final ClassData classData;
     private final SortedSet<FieldLayout> fields;
-    private final int headerSize;
+    private final DataModel model;
     private final long size;
     private final int lossesInternal;
     private final int lossesExternal;
     private final int lossesTotal;
 
-    private ClassLayout(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, long instanceSize, int lossesInternal, int lossesExternal, int lossesTotal) {
+    private ClassLayout(ClassData classData, SortedSet<FieldLayout> fields, DataModel model, long instanceSize, int lossesInternal, int lossesExternal, int lossesTotal) {
         this.classData = classData;
         this.fields = fields;
-        this.headerSize = headerSize;
+        this.model = model;
         this.size = instanceSize;
         this.lossesInternal = lossesInternal;
         this.lossesExternal = lossesExternal;
@@ -123,17 +125,17 @@ public class ClassLayout {
      *
      * @param classData    class data
      * @param fields       field layouts
-     * @param headerSize   header size
+     * @param model        data model to use
      * @param instanceSize instance size
      * @param check        whether to check important invariants
      * @return a new instance of the ClassLayout
      */
-    public static ClassLayout create(ClassData classData, SortedSet<FieldLayout> fields, int headerSize, long instanceSize, boolean check) {
+    public static ClassLayout create(ClassData classData, SortedSet<FieldLayout> fields, DataModel model, long instanceSize, boolean check) {
         if (check) {
             checkInvariants(fields, instanceSize);
         }
         // calculate loses
-        long next = headerSize;
+        long next = model.headerSize();
         long internal = 0;
         for (FieldLayout fl : fields) {
             if (fl.offset() > next) {
@@ -143,7 +145,7 @@ public class ClassLayout {
         }
         long external = (instanceSize != next) ? (instanceSize - next) : 0;
         long total = internal + external;
-        return new ClassLayout(classData, fields, headerSize, instanceSize, (int) internal, (int) external, (int) total);
+        return new ClassLayout(classData, fields, model, instanceSize, (int) internal, (int) external, (int) total);
     }
 
     private static void checkInvariants(SortedSet<FieldLayout> fields, long instanceSize) {
@@ -186,7 +188,7 @@ public class ClassLayout {
      * @return header size
      */
     public int headerSize() {
-        return headerSize;
+        return model.headerSize();
     }
 
     /**
@@ -289,43 +291,43 @@ public class ClassLayout {
         pw.println(classData.name() + " object internals:");
         pw.printf(formatS, "OFF", "SZ", "TYPE", "DESCRIPTION", "VALUE");
 
+        String markStr = "N/A";
+        String classStr = "N/A";
+        String arrLenStr = "N/A";
+
+        int markSize = model.markHeaderSize();
+        int classSize = model.classHeaderSize();
+        int arrSize = model.arrayLengthHeaderSize();
+
+        int markOffset = 0;
+        int classOffset = markOffset + markSize;
+        int arrOffset = classOffset + classSize;
+
         if (instance != null) {
             VirtualMachine vm = VM.current();
-
-            if (vm.addressSize() == 4) {
-                // 32-bit VM
-                int mark  = vm.getInt(instance, 0);
-                pw.printf(format, 0, 4, "", MSG_MARK_WORD, toHex(mark) + " " + parseMarkWord(mark));
-                int klass = vm.getInt(instance, 4);
-                pw.printf(format, 4, 4, "", MSG_CLASS_WORD, toHex(klass));
-                if (classData.isArray()) {
-                    int len = vm.getInt(instance, 8);
-                    pw.printf(format, 8, 4, "", "(array length)", len);
-                }
-            } else if (vm.addressSize() == 8) {
-                // 64-bit VM
-                long mark = vm.getLong(instance, 0);
-                pw.printf(format, 0, 8, "", MSG_MARK_WORD, toHex(mark) + " " + parseMarkWord(mark));
-                if (vm.classPointerSize() == 8) {
-                    long klass = vm.getLong(instance, 8);
-                    pw.printf(format, 8, 8, "klass", MSG_CLASS_WORD, toHex(klass));
-                } else {
-                    int klass = vm.getInt(instance, 8);
-                    pw.printf(format, 8, 4, "", MSG_CLASS_WORD, toHex(klass));
-                }
-                if (classData.isArray()) {
-                    int off = 8 + vm.classPointerSize();
-                    int len = vm.getInt(instance, off);
-                    pw.printf(format, off, 4, "", MSG_ARR_LEN, len);
-                }
-            } else {
-                for (long off = 0; off < headerSize(); off += 4) {
-                    int word = vm.getInt(instance, off);
-                    pw.printf(format, off, 4, "", MSG_OBJ_HEADER, toHex(word));
-                }
+            if (markSize == 8) {
+                long mark = vm.getLong(instance, markOffset);
+                markStr = toHex(mark) + " " + parseMarkWord(mark);
+            } else if (markSize == 4) {
+                int mark = vm.getInt(instance, markOffset);
+                markStr = toHex(mark) + " " + parseMarkWord(mark);
             }
-        } else {
-            pw.printf(format, 0, headerSize(), "", MSG_OBJ_HEADER, "N/A");
+
+            if (classSize == 8) {
+                classStr = toHex(vm.getLong(instance, classOffset));
+            } else if (classSize == 4) {
+                classStr = toHex(vm.getInt(instance, classOffset));
+            }
+
+            if (classData.isArray()) {
+                arrLenStr = Integer.toString(vm.getInt(instance, arrOffset));
+            }
+        }
+
+        pw.printf(format, markOffset, markSize, "", MSG_MARK_WORD, markStr);
+        pw.printf(format, classOffset, classSize, "", MSG_CLASS_WORD, classStr);
+        if (classData.isArray()) {
+            pw.printf(format, arrOffset, arrSize, "", MSG_ARR_LEN, arrLenStr);
         }
 
         long nextFree = headerSize();
@@ -459,20 +461,13 @@ public class ClassLayout {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         ClassLayout that = (ClassLayout) o;
-
-        if (headerSize != that.headerSize) return false;
-        if (size != that.size) return false;
-        return fields.equals(that.fields);
-
+        return fields.equals(that.fields) &&
+                model.equals(that.model);
     }
 
     @Override
     public int hashCode() {
-        int result = fields.hashCode();
-        result = 31 * result + headerSize;
-        result = 31 * result + (int) (size ^ (size >>> 32));
-        return result;
+        return Objects.hash(fields, model);
     }
 }

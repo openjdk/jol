@@ -33,6 +33,24 @@ package org.openjdk.jol.datamodel;
 public interface DataModel {
 
     /**
+     * Return the mark header size.
+     * @return mark header size in bytes.
+     */
+    int markHeaderSize();
+
+    /**
+     * Return the class header size.
+     * @return class header size in bytes.
+     */
+    int classHeaderSize();
+
+    /**
+     * Return the array length header size.
+     * @return array length header size in bytes.
+     */
+    int arrayLengthHeaderSize();
+
+    /**
      * Return the object header size.
      *
      * @return object header size in bytes.

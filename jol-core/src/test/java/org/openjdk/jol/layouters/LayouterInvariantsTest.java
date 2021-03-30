@@ -3,7 +3,7 @@ package org.openjdk.jol.layouters;
 import org.junit.BeforeClass;
 import org.junit.Assert;
 import org.junit.Test;
-import org.openjdk.jol.datamodel.CurrentDataModel;
+import org.openjdk.jol.datamodel.ModelVM;
 import org.openjdk.jol.datamodel.*;
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.ClassLayout;
@@ -14,10 +14,11 @@ import java.util.Random;
 public class LayouterInvariantsTest {
 
     private static final DataModel[] MODELS = {
-        new CurrentDataModel(),
-        new X86_32_DataModel(),
-        new X86_64_COOPS_DataModel(),
-        new X86_64_DataModel()
+            new ModelVM(),
+            new Model32(),
+            new Model64(),
+            new Model64_CCPS(),
+            new Model64_COOPS_CCPS(),
     };
 
     private static final int ITERATIONS = 10000;

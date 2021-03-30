@@ -24,31 +24,83 @@
  */
 package org.openjdk.jol.datamodel;
 
-import org.openjdk.jol.vm.VM;
+import java.util.Objects;
 
 /**
- * Current data model as detected by JVM.
+ * 64 bits model, no compressed references, no compressed class pointers.
  *
  * @author Aleksey Shipilev
  */
-public class CurrentDataModel implements DataModel {
+public class Model64 implements DataModel {
+
+    private final int align;
+
+    public Model64() {
+        this(8);
+    }
+
+    public Model64(int align) {
+        this.align = align;
+    }
+
+    @Override
+    public int markHeaderSize() {
+        return 8;
+    }
+
+    @Override
+    public int classHeaderSize() {
+        return 8;
+    }
+
+    @Override
+    public int arrayLengthHeaderSize() {
+        return 4;
+    }
+
     @Override
     public int headerSize() {
-        return VM.current().objectHeaderSize();
+        return markHeaderSize() + classHeaderSize();
     }
 
     @Override
     public int arrayHeaderSize() {
-        return VM.current().arrayHeaderSize();
+        return headerSize() + arrayLengthHeaderSize();
     }
 
     @Override
     public int sizeOf(String klass) {
-        return (int) VM.current().sizeOfField(klass);
+        if (klass.equals("byte"))    return 1;
+        if (klass.equals("boolean")) return 1;
+        if (klass.equals("short"))   return 2;
+        if (klass.equals("char"))    return 2;
+        if (klass.equals("int"))     return 4;
+        if (klass.equals("float"))   return 4;
+        if (klass.equals("long"))    return 8;
+        if (klass.equals("double"))  return 8;
+        return 8;
     }
 
     @Override
     public int objectAlignment() {
-        return VM.current().objectAlignment();
+        return align;
+    }
+
+    @Override
+    public String toString() {
+        return "64-bit model, " + align + "-byte aligned";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Model64 model64 = (Model64) o;
+        return align == model64.align;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(align);
     }
 }

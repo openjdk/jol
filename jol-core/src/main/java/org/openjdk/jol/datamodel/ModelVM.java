@@ -24,54 +24,64 @@
  */
 package org.openjdk.jol.datamodel;
 
+import org.openjdk.jol.vm.VM;
+
 /**
- * x86 data model, 32 bits.
+ * Current data model as detected by JVM.
  *
  * @author Aleksey Shipilev
  */
-public class X86_32_DataModel implements DataModel {
+public class ModelVM implements DataModel {
 
-    private final int align;
-
-    public X86_32_DataModel() {
-        this(8);
-    }
-
-    public X86_32_DataModel(int align) {
-        this.align = align;
+    @Override
+    public int markHeaderSize() {
+        return VM.current().addressSize();
     }
 
     @Override
-    public int headerSize() {
-        // 4 byte mark + 4 byte class
-        return 8;
+    public int classHeaderSize() {
+        return VM.current().classPointerSize();
     }
 
     @Override
-    public int arrayHeaderSize() {
-        return headerSize() + 4;
-    }
-
-    @Override
-    public int sizeOf(String klass) {
-        if (klass.equals("byte"))    return 1;
-        if (klass.equals("boolean")) return 1;
-        if (klass.equals("short"))   return 2;
-        if (klass.equals("char"))    return 2;
-        if (klass.equals("int"))     return 4;
-        if (klass.equals("float"))   return 4;
-        if (klass.equals("long"))    return 8;
-        if (klass.equals("double"))  return 8;
+    public int arrayLengthHeaderSize() {
         return 4;
     }
 
     @Override
+    public int headerSize() {
+        return markHeaderSize() + classHeaderSize();
+    }
+
+    @Override
+    public int arrayHeaderSize() {
+        return headerSize() + arrayLengthHeaderSize();
+    }
+
+    @Override
+    public int sizeOf(String klass) {
+        return (int) VM.current().sizeOfField(klass);
+    }
+
+    @Override
     public int objectAlignment() {
-        return align;
+        return VM.current().objectAlignment();
     }
 
     @Override
     public String toString() {
-        return "X32 model, " + align + "-byte aligned";
+        return "Current VM";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
     }
 }

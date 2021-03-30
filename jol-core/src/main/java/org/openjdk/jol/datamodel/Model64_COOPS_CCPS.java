@@ -25,31 +25,46 @@
 package org.openjdk.jol.datamodel;
 
 /**
- * x86 data model, 64 bits.
+ * 64 bits, compressed references, compressed class pointers.
  *
  * @author Aleksey Shipilev
  */
-public class X86_64_DataModel implements DataModel {
+public class Model64_COOPS_CCPS implements DataModel {
 
     private final int align;
 
-    public X86_64_DataModel() {
+    public Model64_COOPS_CCPS() {
         this(8);
     }
 
-    public X86_64_DataModel(int align) {
+    public Model64_COOPS_CCPS(int align) {
         this.align = align;
+    }
+
+
+    @Override
+    public int markHeaderSize() {
+        return 8;
+    }
+
+    @Override
+    public int classHeaderSize() {
+        return 4;
+    }
+
+    @Override
+    public int arrayLengthHeaderSize() {
+        return 4;
     }
 
     @Override
     public int headerSize() {
-        // 8 byte mark + 8 byte class
-        return 16;
+        return markHeaderSize() + classHeaderSize();
     }
 
     @Override
     public int arrayHeaderSize() {
-        return headerSize() + 4;
+        return headerSize() + arrayLengthHeaderSize();
     }
 
     @Override
@@ -62,7 +77,7 @@ public class X86_64_DataModel implements DataModel {
         if (klass.equals("float"))   return 4;
         if (klass.equals("long"))    return 8;
         if (klass.equals("double"))  return 8;
-        return 8;
+        return 4;
     }
 
     @Override
@@ -72,7 +87,19 @@ public class X86_64_DataModel implements DataModel {
 
     @Override
     public String toString() {
-        return "X64 model, " + align + "-byte aligned";
+        return "64-bit model, compressed references, compressed class pointers, " + align + "-byte aligned";
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Model64_COOPS_CCPS that = (Model64_COOPS_CCPS) o;
+        return align == that.align;
+    }
+
+    @Override
+    public int hashCode() {
+        return align;
+    }
 }

@@ -30,9 +30,7 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.datamodel.X86_32_DataModel;
-import org.openjdk.jol.datamodel.X86_64_COOPS_DataModel;
-import org.openjdk.jol.datamodel.X86_64_DataModel;
+import org.openjdk.jol.datamodel.*;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.layouters.CurrentLayouter;
 import org.openjdk.jol.layouters.HotSpotLayouter;
@@ -52,24 +50,27 @@ public class JOLSample_10_DataModels {
      * a bit different, see subsequent examples to understand why.
      */
 
-    public static void main(String[] args) throws Exception {
-        Layouter l;
+    static final DataModel[] MODELS = new DataModel[]{
+            new Model32(),
+            new Model64(),
+            new Model64_COOPS_CCPS(),
+            new Model64_COOPS_CCPS(16),
+            new Model64_CCPS(),
+            new Model64_CCPS(16),
+    };
 
-        l = new CurrentLayouter();
-        System.out.println("***** " + l);
-        System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
+    public static void main(String[] args) {
+        {
+            Layouter l = new CurrentLayouter();
+            System.out.println("***** " + l);
+            System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
+        }
 
-        l = new HotSpotLayouter(new X86_32_DataModel());
-        System.out.println("***** " + l);
-        System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
-
-        l = new HotSpotLayouter(new X86_64_DataModel());
-        System.out.println("***** " + l);
-        System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
-
-        l = new HotSpotLayouter(new X86_64_COOPS_DataModel());
-        System.out.println("***** " + l);
-        System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
+        for (DataModel model : MODELS) {
+            Layouter l = new HotSpotLayouter(model);
+            System.out.println("***** " + l);
+            System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
+        }
     }
 
     public static class A {
