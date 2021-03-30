@@ -295,43 +295,33 @@ public class ClassLayout {
         String classStr = "N/A";
         String arrLenStr = "N/A";
 
-        int markOffset = model.markHeaderOffset();
-        int classOffset = model.classHeaderOffset();
-        int arrOffset = model.arrayLengthOffset();
-
         int markSize = model.markHeaderSize();
         int classSize = model.classHeaderSize();
-        int arrSize = model.arrayLengthSize();
+        int arrSize = model.arrayLengthHeaderSize();
 
-        VirtualMachine vm = VM.current();
-        if (vm.addressSize() == 4) {
-            // 32-bit VM
-            if (instance != null) {
-                int mark = vm.getInt(instance, markOffset);
-                int klass = vm.getInt(instance, classOffset);
-                markStr = toHex(mark) + " " + parseMarkWord(mark);
-                classStr = toHex(klass);
-            }
-        } else if (vm.addressSize() == 8) {
-            // 64-bit VM
-            if (instance != null) {
+        int markOffset = 0;
+        int classOffset = markOffset + markSize;
+        int arrOffset = classOffset + classSize;
+
+        if (instance != null) {
+            VirtualMachine vm = VM.current();
+            if (markSize == 8) {
                 long mark = vm.getLong(instance, markOffset);
                 markStr = toHex(mark) + " " + parseMarkWord(mark);
-
-                if (classSize == 4) {
-                    int klass = vm.getInt(instance, classOffset);
-                    classStr = toHex(klass);
-                } else {
-                    long klass = vm.getLong(instance, classOffset);
-                    classStr = toHex(klass);
-                }
-                if (classData.isArray()) {
-                    int len = vm.getInt(instance, arrOffset);
-                    arrLenStr = Integer.toString(len);
-                }
+            } else if (markSize == 4) {
+                int mark = vm.getInt(instance, markOffset);
+                markStr = toHex(mark) + " " + parseMarkWord(mark);
             }
-        } else {
-            pw.printf(format, 0, headerSize(), "", MSG_OBJ_HEADER, "N/A");
+
+            if (classSize == 8) {
+                classStr = toHex(vm.getLong(instance, classOffset));
+            } else if (classSize == 4) {
+                classStr = toHex(vm.getInt(instance, classOffset));
+            }
+
+            if (classData.isArray()) {
+                arrLenStr = Integer.toString(vm.getInt(instance, arrOffset));
+            }
         }
 
         pw.printf(format, markOffset, markSize, "", MSG_MARK_WORD, markStr);

@@ -26,8 +26,6 @@ package org.openjdk.jol.datamodel;
 
 import org.openjdk.jol.vm.VM;
 
-import java.util.Objects;
-
 /**
  * Current data model as detected by JVM.
  *
@@ -46,33 +44,18 @@ public class ModelVM implements DataModel {
     }
 
     @Override
-    public int markHeaderOffset() {
-        return 0;
-    }
-
-    @Override
-    public int classHeaderOffset() {
-        return markHeaderSize();
-    }
-
-    @Override
-    public int arrayLengthSize() {
+    public int arrayLengthHeaderSize() {
         return 4;
     }
 
     @Override
-    public int arrayLengthOffset() {
-        return classHeaderOffset() + classHeaderSize();
-    }
-
-    @Override
     public int headerSize() {
-        return classHeaderOffset() + classHeaderSize();
+        return markHeaderSize() + classHeaderSize();
     }
 
     @Override
     public int arrayHeaderSize() {
-        return arrayLengthOffset() + arrayLengthOffset();
+        return headerSize() + arrayLengthHeaderSize();
     }
 
     @Override

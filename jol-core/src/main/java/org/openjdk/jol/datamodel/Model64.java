@@ -54,33 +54,18 @@ public class Model64 implements DataModel {
     }
 
     @Override
-    public int markHeaderOffset() {
-        return 0;
-    }
-
-    @Override
-    public int classHeaderOffset() {
-        return 8;
-    }
-
-    @Override
-    public int arrayLengthSize() {
+    public int arrayLengthHeaderSize() {
         return 4;
     }
 
     @Override
-    public int arrayLengthOffset() {
-        return 16;
-    }
-
-    @Override
     public int headerSize() {
-        return classHeaderOffset() + classHeaderSize();
+        return markHeaderSize() + classHeaderSize();
     }
 
     @Override
     public int arrayHeaderSize() {
-        return arrayLengthOffset() + arrayLengthSize();
+        return headerSize() + arrayLengthHeaderSize();
     }
 
     @Override

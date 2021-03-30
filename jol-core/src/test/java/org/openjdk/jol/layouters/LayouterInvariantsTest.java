@@ -17,8 +17,8 @@ public class LayouterInvariantsTest {
             new ModelVM(),
             new Model32(),
             new Model64(),
-            new Model64_CCPTR(),
-            new Model64_COOPS_CCPTR(),
+            new Model64_CCPS(),
+            new Model64_COOPS_CCPS(),
     };
 
     private static final int ITERATIONS = 10000;

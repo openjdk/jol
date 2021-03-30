@@ -54,33 +54,18 @@ public class Model32 implements DataModel {
     }
 
     @Override
-    public int markHeaderOffset() {
-        return 0;
-    }
-
-    @Override
-    public int classHeaderOffset() {
+    public int arrayLengthHeaderSize() {
         return 4;
-    }
-
-    @Override
-    public int arrayLengthSize() {
-        return 4;
-    }
-
-    @Override
-    public int arrayLengthOffset() {
-        return 8;
     }
 
     @Override
     public int headerSize() {
-        return classHeaderOffset() + classHeaderSize();
+        return markHeaderSize() + classHeaderSize();
     }
 
     @Override
     public int arrayHeaderSize() {
-        return arrayLengthOffset() + arrayLengthSize();
+        return headerSize() + arrayLengthHeaderSize();
     }
 
     @Override
