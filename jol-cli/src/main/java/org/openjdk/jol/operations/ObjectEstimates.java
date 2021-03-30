@@ -46,14 +46,14 @@ public class ObjectEstimates extends ClasspathedOperation {
         return "Simulate the class layout in different VM modes.";
     }
 
-    static final DataModel[] MODELS_JDK8 = new DataModel[]{
+    private static final DataModel[] MODELS_JDK8 = new DataModel[]{
             new Model32(),
             new Model64(),
             new Model64_COOPS_CCPS(),
             new Model64_COOPS_CCPS(16),
     };
 
-    static final DataModel[] MODELS_JDK15 = new DataModel[]{
+    private static final DataModel[] MODELS_JDK15 = new DataModel[]{
             new Model64_CCPS(),
             new Model64_CCPS(16),
     };
