@@ -30,45 +30,59 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.info.ClassLayout;
+import org.openjdk.jol.info.GraphLayout;
 import org.openjdk.jol.vm.VM;
+
+import java.io.PrintWriter;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_05_InheritanceBarrier {
+public class JOLSample_24_Arrays {
 
     /*
-     * This example shows the HotSpot field layout quirk.
-     * (Works best with 64-bit VMs)
+     * This example shows the array layout quirks.
      *
-     * Even though we have the alignment gap before A.a field, HotSpot
-     * does not claim it, because it does not track the gaps in the
-     * already laid out superclasses. This yields the virtual
-     * "inheritance barrier" between super- and sub-class fields blocks.
+     * If you run with almost any GC, then you would notice
+     * that array elements are laid out in-order by index.
+     *
+     * If you run it with parallel GC, you might notice that
+     * fresh object elements are laid out after the array in
+     * the forward order, but after GC then can be rearranged
+     * in the reverse order. This is because GC records the
+     * to-be-promoted objects on the stack.
+     *
+     * This test is better run with -XX:ParallelGCThreads=1.
      *
      * See also:
-     *    https://bugs.openjdk.java.net/browse/JDK-8024913
+     *   https://bugs.openjdk.java.net/browse/JDK-8024394
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
-        out.println(ClassLayout.parseClass(C.class).toPrintable());
-    }
 
-    public static class A {
-        long a;
-    }
+        PrintWriter pw = new PrintWriter(System.out, true);
 
-    public static class B extends A {
-        long b;
-    }
+        Integer[] arr = new Integer[10];
+        for (int i = 0; i < 10; i++) {
+            arr[i] = i + 256; // boxing outside of Integer cache
+        }
 
-    public static class C extends B {
-        long c;
-        int d;
+        String last = null;
+        for (int c = 0; c < 100; c++) {
+            String current = GraphLayout.parseInstance((Object) arr).toPrintable();
+
+            if (last == null || !last.equalsIgnoreCase(current)) {
+                pw.println(current);
+                last = current;
+            }
+
+            System.gc();
+        }
+
+        pw.close();
     }
 
 }

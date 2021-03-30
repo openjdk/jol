@@ -41,7 +41,7 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_17_Allocation {
+public class JOLSample_20_Allocation {
 
     /*
      * The example of allocation addresses.
@@ -50,11 +50,15 @@ public class JOLSample_17_Allocation {
      * grow linearly in HotSpot. This is because the allocation in
      * parallel collectors is linear. We can also see it rewinds back
      * to the same offsets -- that's the start of some GC generation.
-     * The address of the generation is changing, while GC adjusts
-     * for the allocation rate.
+     *
+     * For Parallel-like GCs, while GC adjusts for the allocation rate.
+     * For G1-like GCs, the allocation address changes by region size,
+     * as collector switches to another region for allocation.
+     *
+     * Run with test with smaller heap (about 1 GB) for best results.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
 
         PrintWriter pw = new PrintWriter(out, true);
@@ -64,7 +68,7 @@ public class JOLSample_17_Allocation {
             long current = VM.current().addressOf(new Object());
 
             long distance = Math.abs(current - last);
-            if (distance > 16 * 1024) {
+            if (distance > 4096) {
                 pw.printf("Jumping from %x to %x (distance = %d bytes, %dK, %dM)%n",
                         last,
                         current,

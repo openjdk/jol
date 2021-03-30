@@ -48,7 +48,7 @@ public class JOLSample_01_Basic {
      *   c) how the external alignment beefs up the object size
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
         out.println(ClassLayout.parseClass(A.class).toPrintable());
     }

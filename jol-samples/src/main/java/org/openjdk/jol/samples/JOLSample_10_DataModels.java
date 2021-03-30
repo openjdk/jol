@@ -43,15 +43,29 @@ public class JOLSample_10_DataModels {
 
     /*
      * This example shows the differences between the data models.
-     *
-     * First layout is the actual VM layout, the remaining three
-     * are simulations. You can see the reference sizes are different,
-     * depending on VM bitness or mode. The header sizes are also
-     * a bit different, see subsequent examples to understand why.
+     * First layout is the actual VM layout, everything else are
+     * simulations.
      *
      * JDK 15 brought a new layouter, which may pack fields more densely.
      * JDK 15 also allows to have compressed class pointers without
      * compressed oops.
+     *
+     * You can see the reference sizes are different, depending on VM model:
+     *  - with 32-bit model, reference size is 4 bytes
+     *  - with 64-bit model, reference size is 8 bytes;
+     *      unless compressed references are enabled
+     *      (enabled by default when heap size is small)
+     *
+     * The mark word sizes depend on JVM bitness:
+     *  - with 32-bit model, mark word size is 4 bytes
+     *  - with 64-bit model, mark word size is 8 bytes
+     *
+     * The class word sizes depend on JVM model:
+     *  - with 32-bit model, class word is 4 bytes
+     *  - with 64-bit model, class word is 8 bytes;
+     *     unless compressed class pointers are enabled
+     *     (enabled by default when compressed references are enabled)
+     *     (since JDK 15, can be enabled even without compressed references)
      */
 
     static final DataModel[] MODELS_JDK8 = new DataModel[]{

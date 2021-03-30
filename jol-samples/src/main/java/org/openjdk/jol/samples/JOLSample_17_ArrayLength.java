@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Oracle America, Inc.
+ * Copyright (c) 2021, Red Hat, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,29 +38,23 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_11_ClassWord {
+public class JOLSample_17_ArrayLength {
 
     /*
-     * This is the example to have insight into object headers.
+     * The example for array length.
      *
-     * In HotSpot, object header consists of two parts: mark word,
-     * and class word. We can clearly see the class word by analysing
-     * two empty instances of two distinct classes. See the difference
-     * in class word, that difference is the reference to class.
+     * Array length is not the part of array type, so VMs need another
+     * slot in header to store the array length. This can be demonstrated
+     * by this example.
      */
 
     public static void main(String[] args) {
         out.println(VM.current().details());
-        out.println(ClassLayout.parseInstance(new A()).toPrintable());
-        out.println(ClassLayout.parseInstance(new B()).toPrintable());
-    }
 
-    public static class A {
-        // no fields
-    }
-
-    public static class B {
-        // no fields
+        for (int c = 0; c < 8; c++) {
+            out.println("**** int[" + c + "]");
+            out.println(ClassLayout.parseInstance(new int[c]).toPrintable());
+        }
     }
 
 }

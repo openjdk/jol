@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Red Hat, Inc.
+ * Copyright (c) 2014, Oracle America, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,68 +33,66 @@ package org.openjdk.jol.samples;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.vm.VM;
 
-import java.util.concurrent.TimeUnit;
+import java.io.PrintWriter;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_26_IHC_BL_Conflict {
+public class JOLSample_22_Promotion {
 
     /*
-     * This is the example of biased locking conflicting with identity hash
-     * code. Identity hash code takes precedence.
+     * The example of object promotion.
      *
-     * In order to demonstrate this, we first need to sleep for >5 seconds
-     * to pass the grace period of biased locking. Then, we do the same
-     * trick as the example before. You may notice that the mark word
-     * had not changed after the first lock was released, retaining the bias.
+     * Once the object survives the garbage collections, it is getting
+     * promoted to another generation. In this example, we can track
+     * the addresses of the objects, as it changes over time.
      *
-     * The identity hash code computation overwrites the biased locking information,
-     * and subsequent locks only displace it temporarily. After the second lock
-     * is released, identity hash code data gets back. No biased locking is
-     * possible for that object anymore.
+     * VM also needs to record the "age" (that is, the number of GC
+     * cycles the object had survived) of the object somewhere, and
+     * it is stored in mark word as well. See how particular mark word
+     * bits change with each promotion.
+     *
+     * Run with test with smaller heap (about 1 GB) for best results.
      */
 
-    public static void main(String[] args) throws Exception {
+    static volatile Object sink;
+
+    public static void main(String[] args) {
         out.println(VM.current().details());
 
-        TimeUnit.SECONDS.sleep(6);
+        PrintWriter pw = new PrintWriter(System.out, true);
 
-        final A a = new A();
+        Object o = new Object();
 
-        ClassLayout layout = ClassLayout.parseInstance(a);
+        ClassLayout layout = ClassLayout.parseInstance(o);
 
-        out.println("**** Fresh object");
+        long lastAddr = VM.current().addressOf(o);
+        pw.printf("*** Fresh object is at %x%n", lastAddr);
         out.println(layout.toPrintable());
 
-        synchronized (a) {
-            out.println("**** With the lock");
-            out.println(layout.toPrintable());
+        int moves = 0;
+        for (int i = 0; i < 100000; i++) {
+            long cur = VM.current().addressOf(o);
+            if (cur != lastAddr) {
+                moves++;
+                pw.printf("*** Move %2d, object is at %x%n", moves, cur);
+                out.println(layout.toPrintable());
+                lastAddr = cur;
+            }
+
+            // make garbage
+            for (int c = 0; c < 10000; c++) {
+                sink = new Object();
+            }
         }
 
-        out.println("**** After the lock");
+        long finalAddr = VM.current().addressOf(o);
+        pw.printf("*** Final object is at %x%n", finalAddr);
         out.println(layout.toPrintable());
 
-        int hashCode = a.hashCode();
-        out.println("hashCode: " + Integer.toHexString(hashCode));
-        out.println();
-
-        out.println("**** After the hashcode");
-        out.println(layout.toPrintable());
-
-        synchronized (a) {
-            out.println("**** With the second lock");
-            out.println(layout.toPrintable());
-        }
-
-        out.println("**** After the second lock");
-        out.println(layout.toPrintable());
-    }
-
-    public static class A {
-        // no fields
+        pw.close();
     }
 
 }

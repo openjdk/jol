@@ -30,51 +30,85 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.info.ClassLayout;
+import org.openjdk.jol.info.GraphLayout;
 import org.openjdk.jol.vm.VM;
+
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_12_ThinLocking {
+public class JOLSample_21_Layouts {
 
     /*
-     * This is another dive into the mark word.
+     * This is the example of more verbose reachability graph.
      *
-     * Among other things, mark words store locking information.
-     * We can clearly see how the mark word contents change when
-     * we acquire the lock, and release it subsequently.
-     *
-     * This one is the example of thin (displaced) lock. The data
-     * in mark word when lock is acquired is the reference to the
-     * displaced object header, allocated on stack. Once we leave
-     * the lock, the displaced header is discarded, and mark word
-     * is reverted to the default value.
+     * In this example, we see that under collisions, HashMap
+     * degrades to the linked list. With JDK 8, we can also see
+     * it further "degrades" to the tree.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
 
-        final A a = new A();
+        PrintWriter pw = new PrintWriter(System.out, true);
 
-        ClassLayout layout = ClassLayout.parseInstance(a);
+        Map<Dummy, Void> map = new HashMap<>();
 
-        out.println("**** Fresh object");
-        out.println(layout.toPrintable());
+        map.put(new Dummy(1), null);
+        map.put(new Dummy(2), null);
 
-        synchronized (a) {
-            out.println("**** With the lock");
-            out.println(layout.toPrintable());
+        System.gc();
+        pw.println(GraphLayout.parseInstance(map).toPrintable());
+
+        map.put(new Dummy(2), null);
+        map.put(new Dummy(2), null);
+        map.put(new Dummy(2), null);
+        map.put(new Dummy(2), null);
+
+        System.gc();
+        pw.println(GraphLayout.parseInstance(map).toPrintable());
+
+        for (int c = 0; c < 12; c++) {
+            map.put(new Dummy(2), null);
         }
 
-        out.println("**** After the lock");
-        out.println(layout.toPrintable());
+        System.gc();
+        pw.println(GraphLayout.parseInstance(map).toPrintable());
+
+        pw.close();
     }
 
-    public static class A {
-        // no fields
+    /**
+     * Dummy class which controls the hashcode and is decently Comparable.
+     */
+    public static class Dummy implements Comparable<Dummy> {
+        static int ID;
+        final int id = ID++;
+        final int hc;
+
+        public Dummy(int hc) {
+            this.hc = hc;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return (this == o);
+        }
+
+        @Override
+        public int hashCode() {
+            return hc;
+        }
+
+        @Override
+        public int compareTo(Dummy o) {
+            return Integer.compare(id, o.id);
+        }
     }
 
 }

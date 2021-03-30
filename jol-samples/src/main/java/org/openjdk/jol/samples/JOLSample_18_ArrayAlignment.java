@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Oracle America, Inc.
+ * Copyright (c) 2015, Oracle America, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,33 +38,29 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_06_Gaps {
+public class JOLSample_18_ArrayAlignment {
 
     /*
-     * This example shows another HotSpot layout quirk.
+     * This sample showcases that the alignment requirements are also
+     * affecting arrays. This test introspects the byte[] arrays of different
+     * small sizes. It may be seen that many arrays are actually consuming the
+     * same space, since they are also required to be externally aligned.
      *
-     * HotSpot rounds up the instance field block up to reference size.
-     * That unfortunately yields the artificial gaps at the end of the class.
+     * The internal alignment can be demonstrated in some specific VM modes, e.g.
+     * on long[] arrays with 32-bit modes. There, the zero-th element of long[]
+     * array should be aligned by 8.
      *
-     * See also:
-     *    https://bugs.openjdk.java.net/browse/JDK-8024912
+     * Or, even on byte[] arrays in 64-bit mode with compressed references disabled,
+     * on some VMs:
+     *   https://bugs.openjdk.java.net/browse/JDK-8139457
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
-        out.println(ClassLayout.parseClass(C.class).toPrintable());
-    }
-
-    public static class A {
-        boolean a;
-    }
-
-    public static class B extends A {
-        boolean b;
-    }
-
-    public static class C extends B {
-        boolean c;
+        out.println(ClassLayout.parseInstance(new long[0]).toPrintable());
+        for (int size = 0; size <= 8; size++) {
+            out.println(ClassLayout.parseInstance(new byte[size]).toPrintable());
+        }
     }
 
 }

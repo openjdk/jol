@@ -41,7 +41,7 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_20_Roots {
+public class JOLSample_23_Roots {
 
     /*
      * The example how VM traverses the root sets.
@@ -56,6 +56,8 @@ public class JOLSample_20_Roots {
      * This will have the effect of having the different parts of ring
      * in the root set, which will, in the end, change the ring layout
      * in memory.
+     *
+     * Run with test with smaller heap (about 1 GB) for best results.
      */
 
     static volatile Object sink;
@@ -78,7 +80,7 @@ public class JOLSample_20_Roots {
     public static class L5 extends AL {}
     public static class L6 extends AL {}
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
 
         PrintWriter pw = new PrintWriter(System.out, true);
