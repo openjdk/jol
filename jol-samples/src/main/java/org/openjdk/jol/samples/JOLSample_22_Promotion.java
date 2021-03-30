@@ -30,7 +30,7 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.info.GraphLayout;
+import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.vm.VM;
 
 import java.io.PrintWriter;
@@ -40,47 +40,57 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_21_Arrays {
+public class JOLSample_22_Promotion {
 
     /*
-     * This example shows the array layout quirks.
+     * The example of object promotion.
      *
-     * If you run with almost any GC, then you would notice
-     * that array elements are laid out in-order by index.
+     * Once the object survives the garbage collections, it is getting
+     * promoted to another generation. In this example, we can track
+     * the addresses of the objects, as it changes over time.
      *
-     * If you run it with parallel GC, you might notice that
-     * fresh object elements are laid out after the array in
-     * the forward order, but after GC then can be rearranged
-     * in the reverse order. This is because GC records the
-     * to-be-promoted objects on the stack.
+     * VM also needs to record the "age" (that is, the number of GC
+     * cycles the object had survived) of the object somewhere, and
+     * it is stored in mark word as well. See how particular mark word
+     * bits change with each promotion.
      *
-     * This test is better run with -XX:ParallelGCThreads=1.
-     *
-     * See also:
-     *   https://bugs.openjdk.java.net/browse/JDK-8024394
+     * Run with test with smaller heap (about 1 GB) for best results.
      */
+
+    static volatile Object sink;
 
     public static void main(String[] args) {
         out.println(VM.current().details());
 
         PrintWriter pw = new PrintWriter(System.out, true);
 
-        Integer[] arr = new Integer[10];
-        for (int i = 0; i < 10; i++) {
-            arr[i] = i + 256; // boxing outside of Integer cache
-        }
+        Object o = new Object();
 
-        String last = null;
-        for (int c = 0; c < 100; c++) {
-            String current = GraphLayout.parseInstance((Object) arr).toPrintable();
+        ClassLayout layout = ClassLayout.parseInstance(o);
 
-            if (last == null || !last.equalsIgnoreCase(current)) {
-                pw.println(current);
-                last = current;
+        long lastAddr = VM.current().addressOf(o);
+        pw.printf("*** Fresh object is at %x%n", lastAddr);
+        out.println(layout.toPrintable());
+
+        int moves = 0;
+        for (int i = 0; i < 100000; i++) {
+            long cur = VM.current().addressOf(o);
+            if (cur != lastAddr) {
+                moves++;
+                pw.printf("*** Move %2d, object is at %x%n", moves, cur);
+                out.println(layout.toPrintable());
+                lastAddr = cur;
             }
 
-            System.gc();
+            // make garbage
+            for (int c = 0; c < 10000; c++) {
+                sink = new Object();
+            }
         }
+
+        long finalAddr = VM.current().addressOf(o);
+        pw.printf("*** Final object is at %x%n", finalAddr);
+        out.println(layout.toPrintable());
 
         pw.close();
     }

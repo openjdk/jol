@@ -33,27 +33,21 @@ package org.openjdk.jol.samples;
 import org.openjdk.jol.info.GraphLayout;
 import org.openjdk.jol.vm.VM;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_24_Colocation {
+public class JOLSample_26_Defragmentation {
 
     /*
-     * This is the example how VM colocates the objects allocated
-     * by different threads.
+     * This is the example how VM defragments the heap.
      *
-     * In this example, the ConcurrentHashMap is being populated
-     * by several threads. We can see that after a few GCs it is
-     * densely packed, regardless of the fact it was allocated by
-     * multiple threads.
+     * In this example, we have the array of objects, which
+     * is densely allocated, and survives multiple GCs as
+     * the dense structure. Then, we randomly purge half of
+     * the elements. Now the memory layout is sparse. Subsequent
+     * GCs take care of that.
      *
      * This example generates PNG images in your current directory.
      *
@@ -67,52 +61,45 @@ public class JOLSample_24_Colocation {
         out.println(VM.current().details());
 
         // allocate some objects to beef up generations
-        for (int c = 0; c < 1000000; c++) {
+        for (int t = 0; t < 1000000; t++) {
             sink = new Object();
         }
         System.gc();
 
-        final int COUNT = 1000;
+        final int COUNT = 10000;
 
-        ConcurrentHashMap<Object, Object> chm = new ConcurrentHashMap<>();
+        Object[] array = new Object[COUNT];
+        for (int c = 0; c < COUNT; c++) {
+            array[c] = new Object();
+        }
 
-        addElements(COUNT, chm);
+        Object obj = array;
 
-        GraphLayout.parseInstance(chm).toImage("chm-1-new.png");
+        GraphLayout.parseInstance(obj).toImage("array-1-new.png");
 
         for (int c = 2; c <= 5; c++) {
-            GraphLayout.parseInstance(chm).toImage("chm-" + c + "-gc.png");
-            System.gc();
-        }
-
-        addElements(COUNT, chm);
-
-        for (int c = 6; c <= 10; c++) {
-            GraphLayout.parseInstance(chm).toImage("chm-" + c + "-more-gc.png");
-            System.gc();
-        }
-
-    }
-
-    private static void addElements(final int count, final Map<Object, Object> chm) throws InterruptedException {
-        ExecutorService pool = Executors.newCachedThreadPool();
-
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                for (int c = 0; c < count; c++) {
-                    Object o = new Object();
-                    chm.put(o, o);
-                }
+            for (int t = 0; t < 1000000; t++) {
+                sink = new Object();
             }
-        };
-
-        for (int t = 0; t < Runtime.getRuntime().availableProcessors() * 2; t++) {
-            pool.submit(task);
+            System.gc();
+            GraphLayout.parseInstance(obj).toImage("array-" + c + "-before.png");
         }
 
-        pool.shutdown();
-        pool.awaitTermination(1, TimeUnit.DAYS);
+        for (int c = 0; c < COUNT; c++) {
+            if (Math.random() < 0.5) {
+                array[c] = null;
+            }
+        }
+
+        GraphLayout.parseInstance(obj).toImage("array-6-after.png");
+
+        for (int c = 7; c <= 10; c++) {
+            for (int t = 0; t < 1000000; t++) {
+                sink = new Object();
+            }
+            System.gc();
+            GraphLayout.parseInstance(obj).toImage("array-" + c + "-after-gc.png");
+        }
     }
 
 }

@@ -41,7 +41,7 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_20_Roots {
+public class JOLSample_23_Roots {
 
     /*
      * The example how VM traverses the root sets.

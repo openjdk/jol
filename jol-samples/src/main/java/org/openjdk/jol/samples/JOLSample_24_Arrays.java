@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Oracle America, Inc.
+ * Copyright (c) 2014, Oracle America, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,37 +30,59 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.info.ClassLayout;
+import org.openjdk.jol.info.GraphLayout;
 import org.openjdk.jol.vm.VM;
+
+import java.io.PrintWriter;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_25_ArrayAlignment {
+public class JOLSample_24_Arrays {
 
     /*
-     * This sample showcases that the alignment requirements are also
-     * affecting arrays. This test introspects the byte[] arrays of different
-     * small sizes. It may be seen that many arrays are actually consuming the
-     * same space, since they are also required to be externally aligned.
+     * This example shows the array layout quirks.
      *
-     * The internal alignment can be demonstrated in some specific VM modes, e.g.
-     * on long[] arrays with 32-bit modes. There, the zero-th element of long[]
-     * array should be aligned by 8.
+     * If you run with almost any GC, then you would notice
+     * that array elements are laid out in-order by index.
      *
-     * Or, even on byte[] arrays in 64-bit mode with compressed references disabled,
-     * on some VMs:
-     *   https://bugs.openjdk.java.net/browse/JDK-8139457
+     * If you run it with parallel GC, you might notice that
+     * fresh object elements are laid out after the array in
+     * the forward order, but after GC then can be rearranged
+     * in the reverse order. This is because GC records the
+     * to-be-promoted objects on the stack.
+     *
+     * This test is better run with -XX:ParallelGCThreads=1.
+     *
+     * See also:
+     *   https://bugs.openjdk.java.net/browse/JDK-8024394
      */
 
     public static void main(String[] args) {
         out.println(VM.current().details());
-        out.println(ClassLayout.parseInstance(new long[0]).toPrintable());
-        for (int size = 0; size <= 8; size++) {
-            out.println(ClassLayout.parseInstance(new byte[size]).toPrintable());
+
+        PrintWriter pw = new PrintWriter(System.out, true);
+
+        Integer[] arr = new Integer[10];
+        for (int i = 0; i < 10; i++) {
+            arr[i] = i + 256; // boxing outside of Integer cache
         }
+
+        String last = null;
+        for (int c = 0; c < 100; c++) {
+            String current = GraphLayout.parseInstance((Object) arr).toPrintable();
+
+            if (last == null || !last.equalsIgnoreCase(current)) {
+                pw.println(current);
+                last = current;
+            }
+
+            System.gc();
+        }
+
+        pw.close();
     }
 
 }

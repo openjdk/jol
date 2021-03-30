@@ -30,57 +30,50 @@
  */
 package org.openjdk.jol.samples;
 
-
-
+import org.openjdk.jol.info.GraphLayout;
 import org.openjdk.jol.vm.VM;
 
-import java.io.PrintWriter;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_17_Allocation {
+public class JOLSample_28_Difference {
 
     /*
-     * The example of allocation addresses.
+     * This is the example how would one use the GraphLayout differences to
+     * figure out the object graph changes.
      *
-     * This example shows the addresses of newly allocated objects
-     * grow linearly in HotSpot. This is because the allocation in
-     * parallel collectors is linear. We can also see it rewinds back
-     * to the same offsets -- that's the start of some GC generation.
+     * Here, we have the ConcurrentHashMap, and three measurements:
+     *   1) The initial CHM that has no backing storage;
+     *   2) After adding the first KV pair, when both KV pair is allocated,
+     *      and the backing storage is allocated;
+     *   3) After adding the second KV pair.
      *
-     * For Parallel-like GCs, while GC adjusts for the allocation rate.
-     * For G1-like GCs, the allocation address changes by region size,
-     * as collector switches to another region for allocation.
-     *
-     * Run with test with smaller heap (about 1 GB) for best results.
+     * An API for subtracting the GraphLayouts helps to show the difference
+     * between the snapshots. Note that differences are based on object
+     * addresses, so if GC moves under our feet, the difference is unreliable.
+     * It is a good idea to keep the allocations at minimum between the snapshots.
      */
 
     public static void main(String[] args) {
         out.println(VM.current().details());
 
-        PrintWriter pw = new PrintWriter(out, true);
+        Map<String, String> chm = new ConcurrentHashMap<>();
 
-        long last = VM.current().addressOf(new Object());
-        for (int l = 0; l < 1000 * 1000 * 1000; l++) {
-            long current = VM.current().addressOf(new Object());
+        GraphLayout gl1 = GraphLayout.parseInstance(chm);
 
-            long distance = Math.abs(current - last);
-            if (distance > 4096) {
-                pw.printf("Jumping from %x to %x (distance = %d bytes, %dK, %dM)%n",
-                        last,
-                        current,
-                        distance,
-                        distance / 1024,
-                        distance / 1024 / 1024);
-            }
+        chm.put("Foo", "Bar");
+        GraphLayout gl2 = GraphLayout.parseInstance(chm);
 
-            last = current;
-        }
+        chm.put("Foo2", "Bar2");
+        GraphLayout gl3 = GraphLayout.parseInstance(chm);
 
-        pw.close();
+        System.out.println(gl2.subtract(gl1).toPrintable());
+        System.out.println(gl3.subtract(gl2).toPrintable());
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Oracle America, Inc.
+ * Copyright (c) 2021, Red Hat, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,50 +30,31 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.info.GraphLayout;
+import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.vm.VM;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_24_Difference {
+public class JOLSample_17_ArrayLength {
 
     /*
-     * This is the example how would one use the GraphLayout differences to
-     * figure out the object graph changes.
+     * The example for array length.
      *
-     * Here, we have the ConcurrentHashMap, and three measurements:
-     *   1) The initial CHM that has no backing storage;
-     *   2) After adding the first KV pair, when both KV pair is allocated,
-     *      and the backing storage is allocated;
-     *   3) After adding the second KV pair.
-     *
-     * An API for subtracting the GraphLayouts helps to show the difference
-     * between the snapshots. Note that differences are based on object
-     * addresses, so if GC moves under our feet, the difference is unreliable.
-     * It is a good idea to keep the allocations at minimum between the snapshots.
+     * Array length is not the part of array type, so VMs need another
+     * slot in header to store the array length. This can be demonstrated
+     * by this example.
      */
 
     public static void main(String[] args) {
         out.println(VM.current().details());
 
-        Map<String, String> chm = new ConcurrentHashMap<>();
-
-        GraphLayout gl1 = GraphLayout.parseInstance(chm);
-
-        chm.put("Foo", "Bar");
-        GraphLayout gl2 = GraphLayout.parseInstance(chm);
-
-        chm.put("Foo2", "Bar2");
-        GraphLayout gl3 = GraphLayout.parseInstance(chm);
-
-        System.out.println(gl2.subtract(gl1).toPrintable());
-        System.out.println(gl3.subtract(gl2).toPrintable());
+        for (int c = 0; c < 8; c++) {
+            out.println("**** int[" + c + "]");
+            out.println(ClassLayout.parseInstance(new int[c]).toPrintable());
+        }
     }
 
 }

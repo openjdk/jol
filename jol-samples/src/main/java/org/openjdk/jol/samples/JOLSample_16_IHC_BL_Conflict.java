@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Oracle America, Inc.
+ * Copyright (c) 2020, Red Hat, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,76 +30,73 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.info.GraphLayout;
+import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.vm.VM;
+
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_23_Defragmentation {
+public class JOLSample_16_IHC_BL_Conflict {
 
     /*
-     * This is the example how VM defragments the heap.
+     * This is the example of biased locking conflicting with identity hash
+     * code. Identity hash code takes precedence.
      *
-     * In this example, we have the array of objects, which
-     * is densely allocated, and survives multiple GCs as
-     * the dense structure. Then, we randomly purge half of
-     * the elements. Now the memory layout is sparse. Subsequent
-     * GCs take care of that.
+     * In order to demonstrate this, we first need to sleep for >5 seconds
+     * to pass the grace period of biased locking. Then, we do the same
+     * trick as the example before. You may notice that the mark word
+     * had not changed after the first lock was released, retaining the bias.
      *
-     * This example generates PNG images in your current directory.
+     * The identity hash code computation overwrites the biased locking information,
+     * and subsequent locks only displace it temporarily. After the second lock
+     * is released, identity hash code data gets back. No biased locking is
+     * possible for that object anymore.
      *
-     * Run this test with -Xmx1g -XX:+UseParallelGC -XX:ParallelGCThreads=1
-     * for best results.
+     * On JDK 15+, this test should enable -XX:+UseBiasedLocking.
      */
-
-    public static volatile Object sink;
 
     public static void main(String[] args) throws Exception {
         out.println(VM.current().details());
 
-        // allocate some objects to beef up generations
-        for (int t = 0; t < 1000000; t++) {
-            sink = new Object();
-        }
-        System.gc();
+        TimeUnit.SECONDS.sleep(6);
 
-        final int COUNT = 10000;
+        final A a = new A();
 
-        Object[] array = new Object[COUNT];
-        for (int c = 0; c < COUNT; c++) {
-            array[c] = new Object();
-        }
+        ClassLayout layout = ClassLayout.parseInstance(a);
 
-        Object obj = array;
+        out.println("**** Fresh object");
+        out.println(layout.toPrintable());
 
-        GraphLayout.parseInstance(obj).toImage("array-1-new.png");
-
-        for (int c = 2; c <= 5; c++) {
-            for (int t = 0; t < 1000000; t++) {
-                sink = new Object();
-            }
-            System.gc();
-            GraphLayout.parseInstance(obj).toImage("array-" + c + "-before.png");
+        synchronized (a) {
+            out.println("**** With the lock");
+            out.println(layout.toPrintable());
         }
 
-        for (int c = 0; c < COUNT; c++) {
-            if (Math.random() < 0.5) {
-                array[c] = null;
-            }
+        out.println("**** After the lock");
+        out.println(layout.toPrintable());
+
+        int hashCode = a.hashCode();
+        out.println("hashCode: " + Integer.toHexString(hashCode));
+        out.println();
+
+        out.println("**** After the hashcode");
+        out.println(layout.toPrintable());
+
+        synchronized (a) {
+            out.println("**** With the second lock");
+            out.println(layout.toPrintable());
         }
 
-        GraphLayout.parseInstance(obj).toImage("array-6-after.png");
+        out.println("**** After the second lock");
+        out.println(layout.toPrintable());
+    }
 
-        for (int c = 7; c <= 10; c++) {
-            for (int t = 0; t < 1000000; t++) {
-                sink = new Object();
-            }
-            System.gc();
-            GraphLayout.parseInstance(obj).toImage("array-" + c + "-after-gc.png");
-        }
+    public static class A {
+        // no fields
     }
 
 }

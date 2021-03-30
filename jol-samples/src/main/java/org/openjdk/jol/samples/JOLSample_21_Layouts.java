@@ -33,52 +33,82 @@ package org.openjdk.jol.samples;
 import org.openjdk.jol.info.GraphLayout;
 import org.openjdk.jol.vm.VM;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_22_Compaction {
+public class JOLSample_21_Layouts {
 
     /*
-     * This is the example how VM compacts the objects.
+     * This is the example of more verbose reachability graph.
      *
-     * This example generates PNG images in your current directory.
-     *
-     * You can see the freshly allocated and populated list has quite
-     * the sparse layout. It happens because many temporary objects are
-     * allocated while populating the list. The subsequent GCs compact
-     * the list into the one or few dense blocks.
-     *
-     * Run this test with -Xmx1g -XX:+UseParallelGC -XX:ParallelGCThreads=1
-     * for best results.
+     * In this example, we see that under collisions, HashMap
+     * degrades to the linked list. With JDK 8, we can also see
+     * it further "degrades" to the tree.
      */
 
-    public static volatile Object sink;
-
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
 
-        // allocate some objects to beef up generations
-        for (int c = 0; c < 1000000; c++) {
-            sink = new Object();
+        PrintWriter pw = new PrintWriter(System.out, true);
+
+        Map<Dummy, Void> map = new HashMap<>();
+
+        map.put(new Dummy(1), null);
+        map.put(new Dummy(2), null);
+
+        System.gc();
+        pw.println(GraphLayout.parseInstance(map).toPrintable());
+
+        map.put(new Dummy(2), null);
+        map.put(new Dummy(2), null);
+        map.put(new Dummy(2), null);
+        map.put(new Dummy(2), null);
+
+        System.gc();
+        pw.println(GraphLayout.parseInstance(map).toPrintable());
+
+        for (int c = 0; c < 12; c++) {
+            map.put(new Dummy(2), null);
         }
 
         System.gc();
+        pw.println(GraphLayout.parseInstance(map).toPrintable());
 
-        List<String> list = new ArrayList<>();
-        for (int c = 0; c < 1000; c++) {
-            list.add("Key" + c);
-        }
-
-        for (int c = 1; c <= 10; c++) {
-            GraphLayout.parseInstance(list).toImage("list-" + c + ".png");
-            System.gc();
-        }
+        pw.close();
     }
 
+    /**
+     * Dummy class which controls the hashcode and is decently Comparable.
+     */
+    public static class Dummy implements Comparable<Dummy> {
+        static int ID;
+        final int id = ID++;
+        final int hc;
+
+        public Dummy(int hc) {
+            this.hc = hc;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return (this == o);
+        }
+
+        @Override
+        public int hashCode() {
+            return hc;
+        }
+
+        @Override
+        public int compareTo(Dummy o) {
+            return Integer.compare(id, o.id);
+        }
+    }
 
 }

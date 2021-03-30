@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Oracle America, Inc.
+ * Copyright (c) 2015, Oracle America, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,56 +30,37 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.info.GraphLayout;
+import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.vm.VM;
-
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_16_AL_LL {
+public class JOLSample_18_ArrayAlignment {
 
     /*
-     * The example of traversing the reachability graphs.
+     * This sample showcases that the alignment requirements are also
+     * affecting arrays. This test introspects the byte[] arrays of different
+     * small sizes. It may be seen that many arrays are actually consuming the
+     * same space, since they are also required to be externally aligned.
      *
-     * In addition to introspecting the object internals, we can also
-     * see the object externals, that is, the objects referenced from the
-     * object in question. There are multiple ways to illustrate this,
-     * the summary table seems to work well.
+     * The internal alignment can be demonstrated in some specific VM modes, e.g.
+     * on long[] arrays with 32-bit modes. There, the zero-th element of long[]
+     * array should be aligned by 8.
      *
-     * In this example, you can clearly see the difference between
-     * the shadow heap (i.e. space taken by the reachable objects)
-     * for ArrayList and LinkedList.
-     *
-     * When several roots are handed over to JOL, it tracks the objects reachable
-     * from either root, and also avoids double-counting.
+     * Or, even on byte[] arrays in 64-bit mode with compressed references disabled,
+     * on some VMs:
+     *   https://bugs.openjdk.java.net/browse/JDK-8139457
      */
 
     public static void main(String[] args) {
         out.println(VM.current().details());
-
-        ArrayList<Integer> al = new ArrayList<>();
-        LinkedList<Integer> ll = new LinkedList<>();
-
-        for (int i = 0; i < 1000; i++) {
-            Integer io = i; // box once
-            al.add(io);
-            ll.add(io);
+        out.println(ClassLayout.parseInstance(new long[0]).toPrintable());
+        for (int size = 0; size <= 8; size++) {
+            out.println(ClassLayout.parseInstance(new byte[size]).toPrintable());
         }
-
-        al.trimToSize();
-
-        PrintWriter pw = new PrintWriter(out);
-        pw.println(GraphLayout.parseInstance(al).toFootprint());
-        pw.println(GraphLayout.parseInstance(ll).toFootprint());
-        pw.println(GraphLayout.parseInstance(al, ll).toFootprint());
-        pw.close();
     }
 
 }
