@@ -30,7 +30,6 @@
  */
 package org.openjdk.jol.samples;
 
-import jdk.internal.vm.annotation.Contended;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.vm.VM;
 
@@ -74,19 +73,19 @@ public class JOLSample_09_Contended {
         int e;
 
         @sun.misc.Contended("first")
-        @Contended("first")
+        @jdk.internal.vm.annotation.Contended("first")
         int f;
 
         @sun.misc.Contended("first")
-        @Contended("first")
+        @jdk.internal.vm.annotation.Contended("first")
         int g;
 
         @sun.misc.Contended("last")
-        @Contended("last")
+        @jdk.internal.vm.annotation.Contended("last")
         int i;
 
         @sun.misc.Contended("last")
-        @Contended("last")
+        @jdk.internal.vm.annotation.Contended("last")
         int k;
     }
 
