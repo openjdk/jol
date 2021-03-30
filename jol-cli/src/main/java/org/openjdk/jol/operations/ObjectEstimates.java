@@ -24,11 +24,11 @@
  */
 package org.openjdk.jol.operations;
 
-import org.openjdk.jol.datamodel.X86_32_DataModel;
-import org.openjdk.jol.datamodel.X86_64_COOPS_DataModel;
-import org.openjdk.jol.datamodel.X86_64_DataModel;
+import org.openjdk.jol.datamodel.*;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.layouters.HotSpotLayouter;
+
+import javax.xml.crypto.Data;
 
 import static java.lang.System.out;
 
@@ -47,19 +47,21 @@ public class ObjectEstimates extends ClasspathedOperation {
         return "Simulate the class layout in different VM modes.";
     }
 
+    static final DataModel[] DATA_MODELS = new DataModel[]{
+            new Model32(),
+            new Model64(),
+            new Model64_COOPS_CCPTR(),
+            new Model64_COOPS_CCPTR(16),
+            new Model64_CCPTR(),
+            new Model64_CCPTR(16),
+    };
+
     @Override
-    protected void runWith(Class<?> klass) throws Exception {
-        out.println("***** 32-bit VM: **********************************************************");
-        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_32_DataModel())).toPrintable());
-
-        out.println("***** 64-bit VM: **********************************************************");
-        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_DataModel())).toPrintable());
-
-        out.println("***** 64-bit VM, compressed references enabled: ***************************");
-        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel())).toPrintable());
-
-        out.println("***** 64-bit VM, compressed references enabled, 16-byte align: ************");
-        out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(new X86_64_COOPS_DataModel(16))).toPrintable());
+    protected void runWith(Class<?> klass) {
+        for (DataModel model : DATA_MODELS) {
+            out.println("***** " + model.toString());
+            out.println(ClassLayout.parseClass(klass, new HotSpotLayouter(model)).toPrintable());
+        }
     }
 
 }

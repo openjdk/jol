@@ -28,22 +28,16 @@ import org.openjdk.jol.Operation;
 import org.openjdk.jol.datamodel.*;
 import org.openjdk.jol.heap.HeapDumpReader;
 import org.openjdk.jol.info.ClassData;
-import org.openjdk.jol.info.ClassLayout;
-import org.openjdk.jol.layouters.CurrentLayouter;
 import org.openjdk.jol.layouters.HotSpotLayouter;
 import org.openjdk.jol.layouters.Layouter;
-import org.openjdk.jol.layouters.RawLayouter;
 import org.openjdk.jol.util.Multiset;
 
 import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static java.lang.System.in;
 import static java.lang.System.out;
 
 /**
@@ -76,7 +70,7 @@ public class HeapDumpStats implements Operation {
         final Multiset<String> counts = new Multiset<>();
         final Multiset<String> sizes = new Multiset<>();
 
-        Layouter layouter = new HotSpotLayouter(new CurrentDataModel());
+        Layouter layouter = new HotSpotLayouter(new ModelVM());
         for (ClassData cd : data.keys()) {
             long size = layouter.layout(cd).instanceSize();
             counts.add(cd.name(), data.count(cd));

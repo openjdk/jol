@@ -24,31 +24,83 @@
  */
 package org.openjdk.jol.datamodel;
 
-import org.openjdk.jol.vm.VM;
+import java.util.Objects;
 
 /**
- * Current data model as detected by JVM.
+ * 32 bits model.
  *
  * @author Aleksey Shipilev
  */
-public class CurrentDataModel implements DataModel {
+public class Model32 implements DataModel {
+
+    private final int align;
+
+    public Model32() {
+        this(8);
+    }
+
+    public Model32(int align) {
+        this.align = align;
+    }
+
+    @Override
+    public int markHeaderSize() {
+        return 4;
+    }
+
+    @Override
+    public int classHeaderSize() {
+        return 4;
+    }
+
+    @Override
+    public int arrayLengthHeaderSize() {
+        return 4;
+    }
+
     @Override
     public int headerSize() {
-        return VM.current().objectHeaderSize();
+        return markHeaderSize() + classHeaderSize();
     }
 
     @Override
     public int arrayHeaderSize() {
-        return VM.current().arrayHeaderSize();
+        return headerSize() + arrayLengthHeaderSize();
     }
 
     @Override
     public int sizeOf(String klass) {
-        return (int) VM.current().sizeOfField(klass);
+        if (klass.equals("byte"))    return 1;
+        if (klass.equals("boolean")) return 1;
+        if (klass.equals("short"))   return 2;
+        if (klass.equals("char"))    return 2;
+        if (klass.equals("int"))     return 4;
+        if (klass.equals("float"))   return 4;
+        if (klass.equals("long"))    return 8;
+        if (klass.equals("double"))  return 8;
+        return 4;
     }
 
     @Override
     public int objectAlignment() {
-        return VM.current().objectAlignment();
+        return align;
+    }
+
+    @Override
+    public String toString() {
+        return "32-bit model, " + align + "-byte aligned";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Model32 model32 = (Model32) o;
+        return align == model32.align;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(align);
     }
 }
