@@ -49,11 +49,10 @@ public class JOLSample_08_Class {
      * of the fields into the Class, to store some of the meta-information there.
      *
      * See:
-     *  http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/tip/src/share/vm/classfile/javaClasses.hpp
-     *  http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/tip/src/share/vm/classfile/javaClasses.cpp
+     *  https://github.com/openjdk/jdk/blob/fd45694c58452635db572cb55e5a1b2cb7bc34b2/src/hotspot/share/classfile/javaClasses.hpp#L219-L226
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
         out.println(ClassLayout.parseClass(Class.class).toPrintable());
     }

@@ -30,51 +30,53 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.info.GraphLayout;
+import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.vm.VM;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_22_Compaction {
+public class JOLSample_13_ThinLocking {
 
     /*
-     * This is the example how VM compacts the objects.
+     * This is another dive into the mark word.
      *
-     * This example generates PNG images in your current directory.
+     * This one is the example of thin (displaced) lock. The data
+     * in mark word when lock is acquired is the reference to the
+     * displaced object header, allocated on stack. Once we leave
+     * the lock, the displaced header is discarded, and mark word
+     * is reverted to the default value.
      *
-     * You can see the freshly allocated and populated list has quite
-     * the sparse layout. It happens because many temporary objects are
-     * allocated while populating the list. The subsequent GCs compact
-     * the list into the one or few dense blocks.
+     * This example relies on biased locking not biasing the object
+     * at the first lock acquisition. Since JDKs up to 8 have biased
+     * locking startup delay, this example works out of the box there.
+     * On modern JDKs, starting with 9, this example should be run
+     * with with -XX:-UseBiasedLocking.
      */
 
-    public static volatile Object sink;
-
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
 
-        // allocate some objects to beef up generations
-        for (int c = 0; c < 1000000; c++) {
-            sink = new Object();
-        }
-        System.gc();
+        final A a = new A();
 
-        List<String> list = new ArrayList<>();
-        for (int c = 0; c < 1000; c++) {
-            list.add("Key" + c);
+        ClassLayout layout = ClassLayout.parseInstance(a);
+
+        out.println("**** Fresh object");
+        out.println(layout.toPrintable());
+
+        synchronized (a) {
+            out.println("**** With the lock");
+            out.println(layout.toPrintable());
         }
 
-        for (int c = 1; c <= 10; c++) {
-            GraphLayout.parseInstance(list).toImage("list-" + c + ".png");
-            System.gc();
-        }
+        out.println("**** After the lock");
+        out.println(layout.toPrintable());
     }
 
+    public static class A {
+        // no fields
+    }
 
 }

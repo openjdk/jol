@@ -38,29 +38,36 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_11_ClassWord {
+public class JOLSample_06_HierarchyGaps {
 
     /*
-     * This is the example to have insight into object headers.
+     * This example shows another HotSpot layout quirk.
      *
-     * In HotSpot, object header consists of two parts: mark word,
-     * and class word. We can clearly see the class word by analysing
-     * two empty instances of two distinct classes. See the difference
-     * in class word, that difference is the reference to class.
+     * Prior to JDK 15, HotSpot rounds up the instance field block
+     * up to reference size. That unfortunately yields the artificial
+     * gaps at the end of the class.
+     *
+     * In JDK 15 and later, the hierarchy gaps are no longer present.
+     *
+     * See also:
+     *    https://bugs.openjdk.java.net/browse/JDK-8237767
      */
 
     public static void main(String[] args) {
         out.println(VM.current().details());
-        out.println(ClassLayout.parseInstance(new A()).toPrintable());
-        out.println(ClassLayout.parseInstance(new B()).toPrintable());
+        out.println(ClassLayout.parseClass(C.class).toPrintable());
     }
 
     public static class A {
-        // no fields
+        boolean a;
     }
 
-    public static class B {
-        // no fields
+    public static class B extends A {
+        boolean b;
+    }
+
+    public static class C extends B {
+        boolean c;
     }
 
 }

@@ -54,7 +54,7 @@ public class JOLSample_03_Packing {
      * declared order. Nothing in the JVM spec requires otherwise.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
         out.println(ClassLayout.parseClass(A.class).toPrintable());
     }

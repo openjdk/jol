@@ -30,62 +30,55 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.info.ClassLayout;
+import org.openjdk.jol.info.GraphLayout;
 import org.openjdk.jol.vm.VM;
 
-import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_19_Promotion {
+public class JOLSample_25_Compaction {
 
     /*
-     * The example of object promotion.
+     * This is the example how VM compacts the objects.
      *
-     * Once the object survives the garbage collections, it is getting
-     * promoted to another generation. In this example, we can track
-     * the addresses of the objects, as it changes over time.
+     * This example generates PNG images in your current directory.
      *
-     * VM also needs to record the "age" (that is, the number of GC
-     * cycles the object had survived) of the object somewhere, and
-     * it is stored in mark word as well. See how particular mark word
-     * bits change with each promotion.
+     * You can see the freshly allocated and populated list has quite
+     * the sparse layout. It happens because many temporary objects are
+     * allocated while populating the list. The subsequent GCs compact
+     * the list into the one or few dense blocks.
+     *
+     * Run this test with -Xmx1g -XX:+UseParallelGC -XX:ParallelGCThreads=1
+     * for best results.
      */
 
-    static volatile Object sink;
+    public static volatile Object sink;
 
     public static void main(String[] args) throws Exception {
         out.println(VM.current().details());
 
-        PrintWriter pw = new PrintWriter(System.out, true);
-
-        Object o = new Object();
-
-        ClassLayout layout = ClassLayout.parseInstance(o);
-
-        long lastAddr = VM.current().addressOf(o);
-        pw.printf("Fresh object is at %x%n", lastAddr);
-
-        int moves = 0;
-        for (int i = 0; i < 100000; i++) {
-            long cur = VM.current().addressOf(o);
-            if (cur != lastAddr) {
-                moves++;
-                pw.printf("*** Move %2d, object is at %x%n", moves, cur);
-                out.println(layout.toPrintable());
-                lastAddr = cur;
-            }
-
-            // make garbage
-            for (int c = 0; c < 10000; c++) {
-                sink = new Object();
-            }
+        // allocate some objects to beef up generations
+        for (int c = 0; c < 1000000; c++) {
+            sink = new Object();
         }
 
-        pw.close();
+        System.gc();
+
+        List<String> list = new ArrayList<>();
+        for (int c = 0; c < 1000; c++) {
+            list.add("Key" + c);
+        }
+
+        for (int c = 1; c <= 10; c++) {
+            GraphLayout.parseInstance(list).toImage("list-" + c + ".png");
+            System.gc();
+        }
     }
+
 
 }

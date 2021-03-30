@@ -54,9 +54,12 @@ public class JOLSample_14_FatLocking {
      * has the default mark word, the object before the lock was already
      * acquired by the auxiliary thread, and when the lock was finally
      * acquired by main thread, it had been inflated. The inflation stays
-     * there after the lock is released. You can also see the lock is
-     * "deflated" after the GC (the lock cleanup proceeds in safepoints,
-     * actually).
+     * there after the lock is released.
+     *
+     * You can also see the lock is "deflated" after the GC on some JDKs.
+     * Prior to JDK 15, the lock cleanup proceeds in safepoints, so any
+     * GC would enter that code. Since JDK 15, monitors are deflated
+     * asynchronously, once unused monitor population is large enough.
      */
 
     public static void main(String[] args) throws Exception {

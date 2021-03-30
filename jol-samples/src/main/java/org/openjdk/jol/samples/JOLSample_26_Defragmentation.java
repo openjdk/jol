@@ -38,7 +38,7 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_23_Defragmentation {
+public class JOLSample_26_Defragmentation {
 
     /*
      * This is the example how VM defragments the heap.
@@ -50,6 +50,9 @@ public class JOLSample_23_Defragmentation {
      * GCs take care of that.
      *
      * This example generates PNG images in your current directory.
+     *
+     * Run this test with -Xmx1g -XX:+UseParallelGC -XX:ParallelGCThreads=1
+     * for best results.
      */
 
     public static volatile Object sink;
@@ -58,7 +61,7 @@ public class JOLSample_23_Defragmentation {
         out.println(VM.current().details());
 
         // allocate some objects to beef up generations
-        for (int c = 0; c < 1000000; c++) {
+        for (int t = 0; t < 1000000; t++) {
             sink = new Object();
         }
         System.gc();
@@ -75,6 +78,9 @@ public class JOLSample_23_Defragmentation {
         GraphLayout.parseInstance(obj).toImage("array-1-new.png");
 
         for (int c = 2; c <= 5; c++) {
+            for (int t = 0; t < 1000000; t++) {
+                sink = new Object();
+            }
             System.gc();
             GraphLayout.parseInstance(obj).toImage("array-" + c + "-before.png");
         }
@@ -88,6 +94,9 @@ public class JOLSample_23_Defragmentation {
         GraphLayout.parseInstance(obj).toImage("array-6-after.png");
 
         for (int c = 7; c <= 10; c++) {
+            for (int t = 0; t < 1000000; t++) {
+                sink = new Object();
+            }
             System.gc();
             GraphLayout.parseInstance(obj).toImage("array-" + c + "-after-gc.png");
         }

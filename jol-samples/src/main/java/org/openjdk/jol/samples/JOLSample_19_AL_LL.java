@@ -34,81 +34,52 @@ import org.openjdk.jol.info.GraphLayout;
 import org.openjdk.jol.vm.VM;
 
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_18_Layouts {
+public class JOLSample_19_AL_LL {
 
     /*
-     * This is the example of more verbose reachability graph.
+     * The example of traversing the reachability graphs.
      *
-     * In this example, we see that under collisions, HashMap
-     * degrades to the linked list. With JDK 8, we can also see
-     * it further "degrades" to the tree.
+     * In addition to introspecting the object internals, we can also
+     * see the object externals, that is, the objects referenced from the
+     * object in question. There are multiple ways to illustrate this,
+     * the summary table seems to work well.
+     *
+     * In this example, you can clearly see the difference between
+     * the shadow heap (i.e. space taken by the reachable objects)
+     * for ArrayList and LinkedList.
+     *
+     * When several roots are handed over to JOL, it tracks the objects reachable
+     * from either root, and also avoids double-counting.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
 
-        PrintWriter pw = new PrintWriter(System.out, true);
+        ArrayList<Integer> al = new ArrayList<>();
+        LinkedList<Integer> ll = new LinkedList<>();
 
-        Map<Dummy, Void> map = new HashMap<>();
-
-        map.put(new Dummy(1), null);
-        map.put(new Dummy(2), null);
-
-        System.gc();
-        pw.println(GraphLayout.parseInstance(map).toPrintable());
-
-        map.put(new Dummy(2), null);
-        map.put(new Dummy(2), null);
-        map.put(new Dummy(2), null);
-        map.put(new Dummy(2), null);
-
-        System.gc();
-        pw.println(GraphLayout.parseInstance(map).toPrintable());
-
-        for (int c = 0; c < 12; c++) {
-            map.put(new Dummy(2), null);
+        for (int i = 0; i < 1000; i++) {
+            Integer io = i; // box once
+            al.add(io);
+            ll.add(io);
         }
 
-        System.gc();
-        pw.println(GraphLayout.parseInstance(map).toPrintable());
+        al.trimToSize();
 
+        PrintWriter pw = new PrintWriter(out);
+        pw.println(GraphLayout.parseInstance(al).toFootprint());
+        pw.println(GraphLayout.parseInstance(ll).toFootprint());
+        pw.println(GraphLayout.parseInstance(al, ll).toFootprint());
         pw.close();
-    }
-
-    /**
-     * Dummy class which controls the hashcode and is decently Comparable.
-     */
-    public static class Dummy implements Comparable<Dummy> {
-        static int ID;
-        final int id = ID++;
-        final int hc;
-
-        public Dummy(int hc) {
-            this.hc = hc;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return (this == o);
-        }
-
-        @Override
-        public int hashCode() {
-            return hc;
-        }
-
-        @Override
-        public int compareTo(Dummy o) {
-            return (id < o.id) ? -1 : ((id == o.id) ? 0 : 1);
-        }
     }
 
 }

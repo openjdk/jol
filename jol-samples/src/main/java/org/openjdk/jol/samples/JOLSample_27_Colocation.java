@@ -44,7 +44,7 @@ import static java.lang.System.out;
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_24_Colocation {
+public class JOLSample_27_Colocation {
 
     /*
      * This is the example how VM colocates the objects allocated
@@ -56,6 +56,9 @@ public class JOLSample_24_Colocation {
      * multiple threads.
      *
      * This example generates PNG images in your current directory.
+     *
+     * Run this test with -Xmx1g -XX:+UseParallelGC -XX:ParallelGCThreads=1
+     * for best results.
      */
 
     public static volatile Object sink;

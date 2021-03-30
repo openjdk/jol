@@ -30,54 +30,64 @@
  */
 package org.openjdk.jol.samples;
 
-import org.openjdk.jol.info.GraphLayout;
+import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.vm.VM;
 
-import java.io.PrintWriter;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class JOLSample_21_Arrays {
+public class JOLSample_12_BiasedLocking {
 
     /*
-     * This example shows the array layout quirks.
+     * This is a dive into the mark word.
      *
-     * If you run it with parallel GC, you might notice that
-     * fresh object elements are laid out after the array in
-     * the forward order, but after GC then can be rearranged
-     * in the reverse order. This is because GC records the
-     * to-be-promoted objects on the stack.
+     * Among other things, mark words store locking information.
+     * We can clearly see how the mark word contents change when
+     * we acquire the lock, and subsequently release it.
      *
-     * See also:
-     *   https://bugs.openjdk.java.net/browse/JDK-8024394
+     * In this example, we demonstrate biased locking. Every Java
+     * object is potentially a target for synchronization. Most of
+     * the time, the object is ever locked by a single thread. In
+     * this case, we can "bias" the object to that single thread,
+     * and make the synchronization on it very cheap.
+     *
+     * To demonstrate this, we print the object internals before/during/after
+     * lock acquisition. You can notice that mark word changes from
+     * "biasable" to "biased". The mark word is left the same after
+     * unlock: the object is now biased towards the thread.
+     *
+     * Prior to JDK 9, biased locking is only enabled after 5 seconds
+     * after the VM startup. Therefore, the test is best run with
+     * -XX:BiasedLockingStartupDelay=0 on JDK 8 and lower. After JDK 15,
+     * biased locking is disabled by default, and this tests needs
+     * -XX:+UseBiasedLocking.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
 
-        PrintWriter pw = new PrintWriter(System.out, true);
+        final A a = new A();
 
-        Integer[] arr = new Integer[10];
-        for (int i = 0; i < 10; i++) {
-            arr[i] = new Integer(i);
+        ClassLayout layout = ClassLayout.parseInstance(a);
+
+        out.println("**** Fresh object");
+        out.println(layout.toPrintable());
+
+        synchronized (a) {
+            out.println("**** With the lock");
+            out.println(layout.toPrintable());
         }
 
-        String last = null;
-        for (int c = 0; c < 100; c++) {
-            String current = GraphLayout.parseInstance((Object) arr).toPrintable();
+        out.println("**** After the lock");
+        out.println(layout.toPrintable());
+    }
 
-            if (last == null || !last.equalsIgnoreCase(current)) {
-                pw.println(current);
-                last = current;
-            }
-
-            System.gc();
-        }
-
-        pw.close();
+    public static class A {
+        // no fields
     }
 
 }

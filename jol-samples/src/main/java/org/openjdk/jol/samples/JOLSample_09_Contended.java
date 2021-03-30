@@ -42,35 +42,50 @@ public class JOLSample_09_Contended {
 
     /*
      * This is an example of special annotations that can affect the field layout.
-     * (This example requires JDK 8 to run, -XX:-RestrictContended should also be used)
      *
      * In order to dodge false sharing, users can put the @Contended annotation
      * on the selected fields/classes. The conservative effect of this annotation
      * is laying out the fields at sparse offsets, effectively providing the
      * artificial padding.
+     *
+     * This example requires at least JDK 8 (for sun.misc.Contended), or JDK 9
+     * (for jdk.internal.vm.annotation.Contended). Any JDK also requires
+     * -XX:-RestrictContended to access @Contended from unprivileged code.
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
         out.println(ClassLayout.parseClass(B.class).toPrintable());
     }
 
     public static class A {
-                             int a;
-                             int b;
-        @sun.misc.Contended  int c;
-                             int d;
+        int a;
+        int b;
+
+        @sun.misc.Contended
+        @jdk.internal.vm.annotation.Contended
+        int c;
+
+        int d;
     }
 
     public static class B extends A {
         int e;
+
         @sun.misc.Contended("first")
+        @jdk.internal.vm.annotation.Contended("first")
         int f;
+
         @sun.misc.Contended("first")
+        @jdk.internal.vm.annotation.Contended("first")
         int g;
+
         @sun.misc.Contended("last")
+        @jdk.internal.vm.annotation.Contended("last")
         int i;
+
         @sun.misc.Contended("last")
+        @jdk.internal.vm.annotation.Contended("last")
         int k;
     }
 

@@ -43,16 +43,21 @@ public class JOLSample_07_Exceptions {
     /*
      * This example shows some of the fields are treated specially in VM.
      *
-     * See the suspicious gap in Throwable class. If you look in the Java
-     * source, you will see the Throwable.backtrace field, which is not
-     * listed in the dump. This is because this field handles the VM internal
-     * info which should not be accessible to users under no conditions.
+     * In JDK 8 and lower, you would see suspicious gap in Throwable class.
+     * If you look in the Java source, you will see the Throwable.backtrace
+     * field, which is not listed in the dump. This is because this field
+     * handles the VM internal info which should not be accessible to users
+     * under no conditions.
+     *
+     * In JDK 9 and later, the field is visible again and guaranteed to
+     * contain Java-readable contents.
      *
      * See also:
-     *    http://bugs.openjdk.java.net/browse/JDK-4496456
+     *    https://bugs.openjdk.java.net/browse/JDK-4496456
+     *    https://bugs.openjdk.java.net/browse/JDK-8033735
      */
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         out.println(VM.current().details());
         out.println(ClassLayout.parseClass(Throwable.class).toPrintable());
     }
