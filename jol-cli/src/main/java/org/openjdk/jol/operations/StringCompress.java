@@ -61,10 +61,10 @@ public class StringCompress implements Operation {
     static final DataModel[] DATA_MODELS = new DataModel[]{
             new Model32(),
             new Model64(),
-            new Model64_COOPS_CCPTR(),
-            new Model64_COOPS_CCPTR(16),
-            new Model64_CCPTR(),
-            new Model64_CCPTR(16),
+            new Model64_COOPS_CCPS(),
+            new Model64_COOPS_CCPS(16),
+            new Model64_CCPS(),
+            new Model64_CCPS(16),
     };
 
 
