@@ -70,7 +70,7 @@ public class HeapDumpStats implements Operation {
         final Multiset<String> counts = new Multiset<>();
         final Multiset<String> sizes = new Multiset<>();
 
-        Layouter layouter = new HotSpotLayouter(new ModelVM());
+        Layouter layouter = new HotSpotLayouter(new ModelVM(), 8);
         for (ClassData cd : data.keys()) {
             long size = layouter.layout(cd).instanceSize();
             counts.add(cd.name(), data.count(cd));

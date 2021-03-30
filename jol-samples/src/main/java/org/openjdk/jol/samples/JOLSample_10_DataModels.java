@@ -43,8 +43,12 @@ public class JOLSample_10_DataModels {
 
     /*
      * This example shows the differences between the data models.
-     * First layout is the actual VM layout, the remaining three
-     * are simulations.
+     * First layout is the actual VM layout, everything else are
+     * simulations.
+     *
+     * JDK 15 brought a new layouter, which may pack fields more densely.
+     * JDK 15 also allows to have compressed class pointers without
+     * compressed oops.
      *
      * You can see the reference sizes are different, depending on VM model:
      *  - with 32-bit model, reference size is 4 bytes
@@ -61,14 +65,17 @@ public class JOLSample_10_DataModels {
      *  - with 64-bit model, class word is 8 bytes;
      *     unless compressed class pointers are enabled
      *     (enabled by default when compressed references are enabled)
-     *     (since JDK 16, can be enabled even without compressed references)
+     *     (since JDK 15, can be enabled even without compressed references)
      */
 
-    static final DataModel[] MODELS = new DataModel[]{
+    private static final DataModel[] MODELS_JDK8 = new DataModel[]{
             new Model32(),
             new Model64(),
             new Model64_COOPS_CCPS(),
             new Model64_COOPS_CCPS(16),
+    };
+
+    private static final DataModel[] MODELS_JDK15 = new DataModel[]{
             new Model64_CCPS(),
             new Model64_CCPS(16),
     };
@@ -80,8 +87,20 @@ public class JOLSample_10_DataModels {
             System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
         }
 
-        for (DataModel model : MODELS) {
-            Layouter l = new HotSpotLayouter(model);
+        for (DataModel model : MODELS_JDK8) {
+            Layouter l = new HotSpotLayouter(model, 8);
+            System.out.println("***** " + l);
+            System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
+        }
+
+        for (DataModel model : MODELS_JDK8) {
+            Layouter l = new HotSpotLayouter(model, 15);
+            System.out.println("***** " + l);
+            System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
+        }
+
+        for (DataModel model : MODELS_JDK15) {
+            Layouter l = new HotSpotLayouter(model, 15);
             System.out.println("***** " + l);
             System.out.println(ClassLayout.parseClass(A.class, l).toPrintable());
         }
@@ -89,7 +108,7 @@ public class JOLSample_10_DataModels {
 
     public static class A {
         Object a;
-        Object b;
+        int b;
     }
 
 }

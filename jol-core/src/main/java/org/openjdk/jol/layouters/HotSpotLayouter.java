@@ -66,15 +66,15 @@ public class HotSpotLayouter implements Layouter {
     static final int CONTENDED_PADDING_WIDTH = Integer.getInteger("contendedPaddingWidth", 128);
 
     private final DataModel model;
+    private final int jdkVersion;
 
-    public HotSpotLayouter(DataModel model) {
+    public HotSpotLayouter(DataModel model, int jdkVersion) {
         this.model = model;
+        this.jdkVersion = jdkVersion;
     }
 
     @Override
     public ClassLayout layout(ClassData cd) {
-        SortedSet<FieldLayout> result = new TreeSet<>();
-
         if (cd.isArray()) {
             // special case for arrays
             int base = model.arrayHeaderSize();
@@ -84,9 +84,70 @@ public class HotSpotLayouter implements Layouter {
             instanceSize = MathUtil.align(instanceSize, model.objectAlignment());
             base = MathUtil.align(base, Math.max(4, scale));
 
+            SortedSet<FieldLayout> result = new TreeSet<>();
             result.add(new FieldLayout(FieldData.create(cd.arrayClass(), "<elements>", cd.arrayComponentType()), base, scale * cd.arrayLength()));
             return ClassLayout.create(cd, result, model, instanceSize, false);
         }
+
+        if (jdkVersion >= 15) {
+            return newLayouter(cd);
+        } else {
+            return oldLayouter(cd);
+        }
+    }
+
+    private ClassLayout newLayouter(ClassData cd) {
+        SortedSet<FieldLayout> result = new TreeSet<>();
+
+        List<String> hierarchy = cd.classHierarchy();
+
+        BitSet claimed = new BitSet();
+        claimed.set(0, model.headerSize());
+
+        for (String k : hierarchy) {
+            Collection<FieldData> fields = cd.fieldsFor(k);
+
+            SortedSet<FieldLayout> current = new TreeSet<>();
+            for (int size : new int[]{8, 4, 2, 1}) {
+                for (FieldData f : fields) {
+                    if (!f.isPrimitive()) continue;
+                    int fSize = model.sizeOf(f.typeClass());
+                    if (fSize != size) continue;
+
+                    for (int t = 0; t < Integer.MAX_VALUE; t++) {
+                        if (claimed.get(t * size, (t + 1) * size).isEmpty()) {
+                            claimed.set(t * size, (t + 1) * size);
+                            current.add(new FieldLayout(f, t * size, size));
+                            break;
+                        }
+                    }
+                }
+            }
+            for (int size : new int[]{8, 4, 2, 1}) {
+                for (FieldData f : fields) {
+                    if (f.isPrimitive()) continue;
+                    int fSize = model.sizeOf(f.typeClass());
+                    if (fSize != size) continue;
+
+                    for (int t = 0; t < Integer.MAX_VALUE; t++) {
+                        if (claimed.get(t * size, (t + 1) * size).isEmpty()) {
+                            claimed.set(t * size, (t + 1) * size);
+                            current.add(new FieldLayout(f, t * size, size));
+                            break;
+                        }
+                    }
+                }
+            }
+            result.addAll(current);
+        }
+
+        int instanceSize = MathUtil.align(claimed.length(), model.objectAlignment());
+
+        return ClassLayout.create(cd, result, model, instanceSize, true);
+    }
+
+    private ClassLayout oldLayouter(ClassData cd) {
+        SortedSet<FieldLayout> result = new TreeSet<>();
 
         List<ClassData> classDataClassHierarchy = new ArrayList<>();
         ClassData cld = cd;
@@ -354,6 +415,6 @@ public class HotSpotLayouter implements Layouter {
 
     @Override
     public String toString() {
-        return "VM Layout Simulation (" + model + ")";
+        return "Hotspot Layout Simulation (JDK " + jdkVersion + ", " + model + ")";
     }
 }

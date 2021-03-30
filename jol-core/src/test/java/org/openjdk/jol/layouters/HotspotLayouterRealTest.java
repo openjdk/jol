@@ -25,17 +25,15 @@ public class HotspotLayouterRealTest {
 
     @Test
     public void testSingleClass() throws Exception {
-        if (getVersion() >= 15) return;
-        tryWith(1, 5);
+        tryWith(1, 5, getVersion());
     }
 
     @Test
     public void testTwoClasses() throws Exception {
-        if (getVersion() >= 15) return;
-        tryWith(2, 5);
+        tryWith(2, 5, getVersion());
     }
 
-    public void tryWith(int hierarchyDepth, int fieldsPerClass) throws Exception {
+    public void tryWith(int hierarchyDepth, int fieldsPerClass, int jdkVersion) throws Exception {
         Random seeder = new Random();
         for (int c = 0; c < ITERATIONS; c++) {
             int seed = seeder.nextInt();
@@ -44,7 +42,7 @@ public class HotspotLayouterRealTest {
             try {
                 ClassLayout actual = ClassLayout.parseClass(cl);
 
-                Map<Layouter, ClassLayout> candidates = candidateLayouts(cl);
+                Map<Layouter, ClassLayout> candidates = candidateLayouts(cl, jdkVersion);
 
                 if (!candidates.containsValue(actual)) {
                     System.out.println(actual.toPrintable());
@@ -60,11 +58,11 @@ public class HotspotLayouterRealTest {
         }
     }
 
-    private Map<Layouter, ClassLayout> candidateLayouts(Class<?> cl) {
+    private Map<Layouter, ClassLayout> candidateLayouts(Class<?> cl, int jdkVersion) {
         ClassData cd = ClassData.parseClass(cl);
         Map<Layouter, ClassLayout> layouts = new HashMap<>();
         for (DataModel model : MODELS) {
-            HotSpotLayouter layouter = new HotSpotLayouter(model);
+            HotSpotLayouter layouter = new HotSpotLayouter(model, jdkVersion);
             layouts.put(layouter, layouter.layout(cd));
         }
         return layouts;
