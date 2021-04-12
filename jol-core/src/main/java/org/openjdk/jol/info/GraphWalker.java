@@ -30,7 +30,9 @@ import org.openjdk.jol.util.SimpleStack;
 import org.openjdk.jol.vm.VM;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,10 +42,16 @@ import java.util.Map;
  */
 public class GraphWalker extends AbstractGraphWalker {
 
+    private final List<GraphVisitor> visitors;
     private final Map<Class<?>, Long> sizeCache;
 
     public GraphWalker() {
+        visitors = new ArrayList<>();
         sizeCache = new HashMap<>();
+    }
+
+    public void addVisitor(GraphVisitor visitor) {
+        visitors.add(visitor);
     }
 
     public GraphLayout walk(Object... roots) {
@@ -84,6 +92,7 @@ public class GraphWalker extends AbstractGraphWalker {
                     if (e != null && visited.add(e)) {
                         GraphPathRecord gpr = new ArrayGraphPathRecord(cGpr, i, cGpr.depth() + 1, e);
                         data.addRecord(gpr);
+                        visitObject(gpr);
                         s.push(gpr);
                     }
                 }
@@ -100,6 +109,7 @@ public class GraphWalker extends AbstractGraphWalker {
                     if (e != null && visited.add(e)) {
                         GraphPathRecord gpr = new FieldGraphPathRecord(cGpr, f.getName(), cGpr.depth() + 1, e);
                         data.addRecord(gpr);
+                        visitObject(gpr);
                         s.push(gpr);
                     }
                 }
@@ -107,6 +117,12 @@ public class GraphWalker extends AbstractGraphWalker {
         }
 
         return data;
+    }
+
+    private void visitObject(GraphPathRecord record) {
+        for (GraphVisitor v : visitors) {
+            v.visit(record);
+        }
     }
 
 }
