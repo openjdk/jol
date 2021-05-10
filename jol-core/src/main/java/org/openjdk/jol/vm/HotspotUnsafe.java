@@ -40,12 +40,18 @@ import java.util.Random;
 
 class HotspotUnsafe implements VirtualMachine {
 
-    // The reason why this option exists is public Unsafe.objectFieldOffset
-    // refusing to tell the field offset in Records (and probably other future
-    // new Java object flavors). See JDK-8247444. Internal Unsafe still allows it,
-    // but it requires several very dirty moves to access. Since it pokes (*writes*)
-    // into object internals, it is dangerous to use, and while the code tries to be
-    // as defensive as possible, it might still cause issues.
+    /*
+        The reason why this option exists is public Unsafe.objectFieldOffset
+        refusing to tell the field offset in Records, Hidden Classes and probably
+        other future new Java object flavors:
+            * https://bugs.openjdk.java.net/browse/JDK-8247444
+            * https://github.com/openjdk/jdk/blob/de784312c340b4a4f4c4d11854bfbe9e9e826ea3/src/jdk.unsupported/share/classes/sun/misc/Unsafe.java#L644-L649
+
+        Internal Unsafe still allows field offset access, but it requires several
+        very dirty moves to access. Since the magic field offset code pokes (*writes*)
+        into object internals, it is dangerous to use, and while the code tries to be
+        as defensive as possible, it might still cause issues.
+    */
     private static final String MAGIC_FIELD_OFFSET_OPTION = "jol.magicFieldOffset";
 
     private static final boolean MAGIC_FIELD_OFFSET =
@@ -460,7 +466,7 @@ class HotspotUnsafe implements VirtualMachine {
     private long magicFieldOffset(Field field, RuntimeException original) {
         if (!mfoInitialized) {
             // YOLO Engineering, part (N+1):
-            // Guess where the magic field is in AccessibleObject.
+            // Guess where the magic boolean field is in AccessibleObject.
             long magicOffset = -1;
             try {
                 Method acFalse = HotspotUnsafe.class.getDeclaredMethod("magicFieldOffset",
@@ -473,7 +479,7 @@ class HotspotUnsafe implements VirtualMachine {
                 Method acTest = HotspotUnsafe.class.getDeclaredMethod("magicFieldOffset",
                         Field.class, RuntimeException.class);
 
-                // Try to find the latest plausible offset.
+                // Try to find the last plausible offset.
                 long sizeOf = sizeOf(acFalse);
                 for (long off = 0; off < sizeOf; off++) {
                     boolean vFalse = U.getBoolean(acFalse, off);
@@ -514,17 +520,18 @@ class HotspotUnsafe implements VirtualMachine {
                     Method canAccess = Method.class.getMethod("canAccess", Object.class);
                     if (!(boolean)canAccess.invoke(mfo, mfoUnsafe)) {
                         // Not accessible. Nothing we can do, except this last-ditch...
-                        // DIRTY HACK: Allow calling the method, despite module boundary protection
-                        // by overriding the access control check.
+                        // DIRTY HACK: Side-step module protections by overriding the access
+                        // control check. This allows calling internal Unsafe methods that is
+                        // normally disallowed.
 
                         // Save the old int-aligned slot for the fallback
                         long slotOffset = (magicOffset >> 2) << 2;
                         int old = U.getInt(mfo, slotOffset);
 
-                        // Here be dragons
+                        // NAKED MEMORY STORE. Here be dragons.
                         U.putBoolean(mfo, magicOffset, true);
 
-                        // Check that we succeeded
+                        // Check that we succeeded?
                         if (!(boolean)canAccess.invoke(mfo, mfoUnsafe)) {
                             // Failed! Put the old value back in.
                             U.putInt(mfo, slotOffset, old);
