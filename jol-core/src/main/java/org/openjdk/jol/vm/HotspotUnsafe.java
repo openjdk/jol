@@ -469,6 +469,10 @@ class HotspotUnsafe implements VirtualMachine {
             // Guess where the magic boolean field is in AccessibleObject.
             long magicOffset = -1;
             try {
+                // Candidates for testing: one with setAccessible "true", another with "false".
+                // The experiment would try to figure out what object field offset differ.
+                // Note that setAccessible should always work here, since we are reflecting
+                // to ourselves.
                 Method acFalse = HotspotUnsafe.class.getDeclaredMethod("magicFieldOffset",
                         Field.class, RuntimeException.class);
                 Method acTrue = HotspotUnsafe.class.getDeclaredMethod("magicFieldOffset",
@@ -476,6 +480,7 @@ class HotspotUnsafe implements VirtualMachine {
                 acFalse.setAccessible(false);
                 acTrue.setAccessible(true);
 
+                // Victim candidate to juggle the setAccessible back and forth for more testing.
                 Method acTest = HotspotUnsafe.class.getDeclaredMethod("magicFieldOffset",
                         Field.class, RuntimeException.class);
 
@@ -485,7 +490,7 @@ class HotspotUnsafe implements VirtualMachine {
                     boolean vFalse = U.getBoolean(acFalse, off);
                     boolean vTrue  = U.getBoolean(acTrue, off);
                     if (!vFalse && vTrue) {
-                        // Potential candidate. Verify:
+                        // Potential candidate offset. Verify:
                         Random r = new Random();
                         boolean good = true;
                         for (int t = 0; t < 1000; t++) {
@@ -497,7 +502,7 @@ class HotspotUnsafe implements VirtualMachine {
                             }
                         }
                         if (good) {
-                            // CODE RED. The confidence is HIGH.
+                            // The confidence is HIGH. Remember it.
                             magicOffset = off;
                         }
                     }
