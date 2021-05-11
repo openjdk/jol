@@ -26,22 +26,36 @@ package org.openjdk.jol.vm;
 
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.layouters.CurrentLayouter;
-import org.openjdk.jol.util.IOUtils;
 import org.openjdk.jol.util.MathUtil;
 import org.openjdk.jol.vm.sa.UniverseData;
 import sun.misc.Unsafe;
 
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.instrument.Instrumentation;
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Random;
 
 class HotspotUnsafe implements VirtualMachine {
+
+    /*
+        The reason why this option exists is public Unsafe.objectFieldOffset
+        refusing to tell the field offset in Records, Hidden Classes and probably
+        other future new Java object flavors:
+            * https://bugs.openjdk.java.net/browse/JDK-8247444
+            * https://github.com/openjdk/jdk/blob/de784312c340b4a4f4c4d11854bfbe9e9e826ea3/src/jdk.unsupported/share/classes/sun/misc/Unsafe.java#L644-L649
+
+        Internal Unsafe still allows field offset access, but it requires several
+        very dirty moves to access. Since the magic field offset code pokes (*writes*)
+        into object internals, it is dangerous to use, and while the code tries to be
+        as defensive as possible, it might still cause issues.
+    */
+    private static final String MAGIC_FIELD_OFFSET_OPTION = "jol.magicFieldOffset";
+
+    private static final boolean MAGIC_FIELD_OFFSET =
+            Boolean.parseBoolean(System.getProperty(MAGIC_FIELD_OFFSET_OPTION, "false"));
 
     private final Unsafe U;
     private final Instrumentation instrumentation;
@@ -65,8 +79,9 @@ class HotspotUnsafe implements VirtualMachine {
 
     private final Sizes sizes;
 
-    private volatile boolean trampolineOffsetInitialized;
-    private Method trampolineOffset;
+    private volatile boolean mfoInitialized;
+    private Object mfoUnsafe;
+    private Method mfoMethod;
 
     private final ThreadLocal<Object[]> BUFFERS = new ThreadLocal<Object[]>() {
         @Override
@@ -152,37 +167,6 @@ class HotspotUnsafe implements VirtualMachine {
         narrowKlassBase = 0;
 
         sizes = new Sizes(this);
-    }
-
-    private Method getTrampolineOffset() {
-        if (trampolineOffsetInitialized) {
-            return trampolineOffset;
-        }
-
-        Method to;
-
-        String name = "/java/lang/JOLUnsafeTrampoline.class";
-        try (InputStream is = getClass().getResourceAsStream(name)) {
-            byte[] bytes = IOUtils.readAllBytes(is);
-
-            // Define the trampoline class with elevated privileges.
-            // Use the full-privileged Lookup object, and use defineClass from there.
-            // Lookup::defineClass is available only from 9+, so fail gracefully here.
-            Method mDefCl = MethodHandles.Lookup.class.getMethod("defineClass", byte[].class);
-            Field fImplLookup = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
-            fImplLookup.setAccessible(true);
-            MethodHandles.Lookup lookup = (MethodHandles.Lookup)fImplLookup.get(null);
-            Class<?> tramCl = (Class<?>) mDefCl.invoke(lookup, bytes);
-
-            // Call the trampoline
-            to = tramCl.getMethod("objectFieldOffset", Field.class);
-        } catch (Exception e) {
-            to = null;
-        }
-
-        trampolineOffset = to;
-        trampolineOffsetInitialized = true;
-        return to;
     }
 
     private long guessNarrowOopBase() {
@@ -470,20 +454,118 @@ class HotspotUnsafe implements VirtualMachine {
                 return U.objectFieldOffset(field);
             }
         } catch (UnsupportedOperationException uoe) {
-            // Access denied? Try again with trampoline.
-            Method to = getTrampolineOffset();
-            if (to == null) {
-                throw uoe;
+            if (MAGIC_FIELD_OFFSET) {
+                // Access denied? Try again with magic method.
+                return magicFieldOffset(field, uoe);
+            } else {
+                throw new RuntimeException("Cannot get the field offset, try with -D" + MAGIC_FIELD_OFFSET_OPTION + "=true", uoe);
+            }
+        }
+    }
+
+    private long magicFieldOffset(Field field, RuntimeException original) {
+        if (!mfoInitialized) {
+            // YOLO Engineering, part (N+1):
+            // Guess where the magic boolean field is in AccessibleObject.
+            long magicOffset = -1;
+            try {
+                // Candidates for testing: one with setAccessible "true", another with "false".
+                // The experiment would try to figure out what object field offset differ.
+                // Note that setAccessible should always work here, since we are reflecting
+                // to ourselves.
+                Method acFalse = HotspotUnsafe.class.getDeclaredMethod("magicFieldOffset",
+                        Field.class, RuntimeException.class);
+                Method acTrue = HotspotUnsafe.class.getDeclaredMethod("magicFieldOffset",
+                        Field.class, RuntimeException.class);
+                acFalse.setAccessible(false);
+                acTrue.setAccessible(true);
+
+                // Victim candidate to juggle the setAccessible back and forth for more testing.
+                Method acTest = HotspotUnsafe.class.getDeclaredMethod("magicFieldOffset",
+                        Field.class, RuntimeException.class);
+
+                // Try to find the last plausible offset.
+                long sizeOf = sizeOf(acFalse);
+                for (long off = sizeOf - 1; off >= 0; off--) {
+                    boolean vFalse = U.getBoolean(acFalse, off);
+                    boolean vTrue  = U.getBoolean(acTrue, off);
+                    if (!vFalse && vTrue) {
+                        // Potential candidate offset. Verify that every transition
+                        // reflects the change in observed value: ? -> T, T -> F, F -> T.
+                        boolean good = true;
+                        for (int t = 0; t < 3; t++) {
+                            boolean test = (t & 0x1) == 0;
+                            acTest.setAccessible(test);
+                            if (U.getBoolean(acTest, off) != test) {
+                                good = false;
+                                break;
+                            }
+                        }
+                        if (good) {
+                            // The confidence is HIGH. Remember it.
+                            magicOffset = off;
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // Do nothing.
             }
 
-            try {
-                return (long) to.invoke(null, field);
-            } catch (Exception e) {
-                RuntimeException ex = new IllegalStateException("Unable to get the offset for " + field);
-                ex.addSuppressed(uoe);
-                ex.addSuppressed(e);
-                throw ex;
+            if (magicOffset != -1) {
+                try {
+                    // Figure out the way to internal Unsafe
+                    Class<?> cl = Class.forName("jdk.internal.misc.Unsafe");
+                    Field fu = cl.getDeclaredField("theUnsafe");
+                    mfoUnsafe = U.getObject(U.staticFieldBase(fu), U.staticFieldOffset(fu));
+
+                    // Figure out the magic accessor
+                    Method mfo = mfoUnsafe.getClass().getMethod("objectFieldOffset", Field.class);
+
+                    // Check if magic accessor is accessible.
+                    Method canAccess = Method.class.getMethod("canAccess", Object.class);
+                    if (!(boolean)canAccess.invoke(mfo, mfoUnsafe)) {
+                        // Not accessible. Nothing we can do, except this last-ditch...
+                        // DIRTY HACK: Side-step module protections by overriding the access
+                        // control check. This allows calling internal Unsafe methods that is
+                        // normally disallowed.
+
+                        // Save the old int-aligned slot for the fallback
+                        long slotOffset = (magicOffset >> 2) << 2;
+                        int old = U.getInt(mfo, slotOffset);
+
+                        // NAKED MEMORY STORE. Here be dragons.
+                        U.putBoolean(mfo, magicOffset, true);
+
+                        // Check that we succeeded?
+                        if (!(boolean)canAccess.invoke(mfo, mfoUnsafe)) {
+                            // Failed! Put the old value back in.
+                            U.putInt(mfo, slotOffset, old);
+                            throw new IllegalStateException("Hard failure: magic offset calculation must be wrong");
+                        }
+                    }
+
+                    // All good? Install the method as resolved.
+                    mfoMethod = mfo;
+                } catch (Exception e) {
+                    // Do nothing.
+                }
             }
+
+            mfoInitialized = true;
+        }
+
+        if (mfoMethod == null || mfoUnsafe == null) {
+            throw original;
+        }
+
+        try {
+            return (long) mfoMethod.invoke(mfoUnsafe, field);
+        } catch (Exception e) {
+            RuntimeException ex = new IllegalStateException("Unable to get the offset for " + field);
+            ex.addSuppressed(original);
+            ex.addSuppressed(e);
+            throw ex;
         }
     }
 
