@@ -486,15 +486,15 @@ class HotspotUnsafe implements VirtualMachine {
 
                 // Try to find the last plausible offset.
                 long sizeOf = sizeOf(acFalse);
-                for (long off = 0; off < sizeOf; off++) {
+                for (long off = sizeOf - 1; off >= 0; off--) {
                     boolean vFalse = U.getBoolean(acFalse, off);
                     boolean vTrue  = U.getBoolean(acTrue, off);
                     if (!vFalse && vTrue) {
-                        // Potential candidate offset. Verify:
-                        Random r = new Random();
+                        // Potential candidate offset. Verify that every transition
+                        // reflects the change in observed value: ? -> T, T -> F, F -> T.
                         boolean good = true;
-                        for (int t = 0; t < 1000; t++) {
-                            boolean test = r.nextBoolean();
+                        for (int t = 0; t < 3; t++) {
+                            boolean test = (t & 0x1) == 0;
                             acTest.setAccessible(test);
                             if (U.getBoolean(acTest, off) != test) {
                                 good = false;
@@ -504,6 +504,7 @@ class HotspotUnsafe implements VirtualMachine {
                         if (good) {
                             // The confidence is HIGH. Remember it.
                             magicOffset = off;
+                            break;
                         }
                     }
                 }
