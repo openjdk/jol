@@ -38,7 +38,7 @@ final class FieldGraphPathRecord extends GraphPathRecord {
     }
 
     @Override
-    final String path() {
+    public final String path() {
         if (parent != null) {
             return parent.path() + "." + name;
         } else {

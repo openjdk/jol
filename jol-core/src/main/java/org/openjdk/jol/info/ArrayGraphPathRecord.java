@@ -39,7 +39,7 @@ final class ArrayGraphPathRecord extends GraphPathRecord {
     }
 
     @Override
-    final String path() {
+    public final String path() {
         if (parent != null) {
             return parent.path() + "[" + idx + "]";
         } else {
