@@ -24,16 +24,13 @@
  */
 package org.openjdk.jol.info;
 
-import org.openjdk.jol.util.SimpleIdentityHashSet;
 import org.openjdk.jol.util.ObjectUtils;
+import org.openjdk.jol.util.SimpleIdentityHashSet;
 import org.openjdk.jol.util.SimpleStack;
 import org.openjdk.jol.vm.VM;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Concrete class to walk object graphs.
@@ -42,16 +39,12 @@ import java.util.Map;
  */
 public class GraphWalker extends AbstractGraphWalker {
 
-    private final List<GraphVisitor> visitors;
-    private final Map<Class<?>, Long> sizeCache;
+    private final GraphVisitor[] visitors;
+    private final HashMap<Class<?>, Long> sizeCache;
 
-    public GraphWalker() {
-        visitors = new ArrayList<>();
+    public GraphWalker(GraphVisitor... visitor) {
+        this.visitors = visitor;
         sizeCache = new HashMap<>();
-    }
-
-    public void addVisitor(GraphVisitor visitor) {
-        visitors.add(visitor);
     }
 
     public GraphLayout walk(Object... roots) {
@@ -92,7 +85,9 @@ public class GraphWalker extends AbstractGraphWalker {
                     if (e != null && visited.add(e)) {
                         GraphPathRecord gpr = new ArrayGraphPathRecord(cGpr, i, cGpr.depth() + 1, e);
                         data.addRecord(gpr);
-                        visitObject(gpr);
+                        for (GraphVisitor v : visitors) {
+                            v.visit(gpr);
+                        }
                         s.push(gpr);
                     }
                 }
@@ -109,7 +104,9 @@ public class GraphWalker extends AbstractGraphWalker {
                     if (e != null && visited.add(e)) {
                         GraphPathRecord gpr = new FieldGraphPathRecord(cGpr, f.getName(), cGpr.depth() + 1, e);
                         data.addRecord(gpr);
-                        visitObject(gpr);
+                        for (GraphVisitor v : visitors) {
+                            v.visit(gpr);
+                        }
                         s.push(gpr);
                     }
                 }
@@ -117,12 +114,6 @@ public class GraphWalker extends AbstractGraphWalker {
         }
 
         return data;
-    }
-
-    private void visitObject(GraphPathRecord record) {
-        for (GraphVisitor v : visitors) {
-            v.visit(record);
-        }
     }
 
 }
