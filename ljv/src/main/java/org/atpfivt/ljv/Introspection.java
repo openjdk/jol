@@ -4,21 +4,21 @@ import java.lang.reflect.Field;
 
 public interface Introspection {
 
-    public String getObjClassName(Object obj, boolean useToStringAsClassName);
+    String getObjClassName(Object obj, boolean useToStringAsClassName);
 
-    public Field[] getObjFields(Object obj);
+    Field[] getObjFields(Object obj);
 
-    public int countObjectPrimitiveFields(Object obj);
+    int countObjectPrimitiveFields(Object obj);
 
-    public boolean hasPrimitiveFields(Object obj);
+    boolean hasPrimitiveFields(Object obj);
 
-    public boolean objectFieldIsPrimitive(Field field, Object obj);
+    boolean objectFieldIsPrimitive(Field field, Object obj);
 
-    public boolean canBeConvertedToString(Object obj);
+    boolean canBeConvertedToString(Object obj);
 
-    public boolean canTreatObjAsPrimitive(Object obj);
+    boolean canTreatObjAsPrimitive(Object obj);
 
-    public boolean catTreatObjAsArrayOfPrimitives(Object obj);
+    boolean catTreatObjAsArrayOfPrimitives(Object obj);
 
-    public boolean canTreatClassAsPrimitive(Class<?> cz);
+    boolean canTreatClassAsPrimitive(Class<?> cz);
 }
