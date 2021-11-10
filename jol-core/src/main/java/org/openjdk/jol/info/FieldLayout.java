@@ -24,6 +24,10 @@
  */
 package org.openjdk.jol.info;
 
+import org.openjdk.jol.util.ObjectUtils;
+
+import java.lang.reflect.Field;
+
 /**
  * Holds the field info with the layout.
  *
@@ -106,7 +110,30 @@ public class FieldLayout implements Comparable<FieldLayout> {
         }
     }
 
-    public FieldData data() {
+    /**
+     * Returns the value of the field for a given instance.
+     *
+     * @param instance  object from which the represented field's value is to be extracted
+     *
+     * @return the value of the represented field
+     */
+    public Object value(Object instance) {
+        if (instance == null) {
+            return null;
+        }
+        return ObjectUtils.value(instance, f.refField());
+    }
+
+    /**
+     * Get original Field.
+     *
+     * @return Field which is represented by the FieldLayout
+     */
+    public Field refField() {
+        return f.refField();
+    }
+
+    FieldData data() {
         return f;
     }
 
