@@ -1,11 +1,16 @@
 package org.atpfivt.ljv;
 
 import org.approvaltests.Approvals;
+import org.atpfivt.ljv.jol.ClassLayout;
+import org.atpfivt.ljv.jol.FieldLayout;
 import org.junit.jupiter.api.Test;
-import org.reflections.ReflectionUtils;
+import org.openjdk.jol.info.FieldData;
+import org.openjdk.jol.util.ObjectUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LJVTest {
 
@@ -139,8 +144,14 @@ public class LJVTest {
         map.put("two", 2);
         map.put("three", 3);
         map.put("four", 4);
+        map.put("F", 4);
+        map.put("G", 4);
+        map.put("H", 4);
+        map.put("J", 4);
+
 
         String actualGraph = new LJV()
+                .setIgnoreNullValuedFields(true)
                 .setTreatAsPrimitive(Integer.class)
                 .setTreatAsPrimitive(String.class)
                 .addObjectAttributesProvider(this::redBlack)
@@ -149,20 +160,19 @@ public class LJVTest {
     }
 
     private String redBlack(Object o) {
-        Set<Field> colorFields = ReflectionUtils.getAllFields(o.getClass(),
-                f -> "color".equals(f.getName())
-                        && f.getType().equals(boolean.class));
+        Stream<Field> fieldStream = ClassLayout.parseClass(o.getClass()).fields().stream()
+                .map(FieldLayout::data)
+                .map(FieldData::refField)
+                .filter(f -> "color".equals(f.getName()) && f.getType().equals(boolean.class));
+
+        Set<Field> colorFields = fieldStream.collect(Collectors.toSet());
+
         if (colorFields.isEmpty()) {
             return "";
         } else {
             Field colorField = colorFields.iterator().next();
-            colorField.setAccessible(true);
-            try {
-                boolean b = colorField.getBoolean(o);
-                return b ? "color=black" : "color=red";
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException(e);
-            }
+            boolean b = (boolean)ObjectUtils.value(o, colorField);
+            return b ? "color=black" : "color=red";
         }
     }
 

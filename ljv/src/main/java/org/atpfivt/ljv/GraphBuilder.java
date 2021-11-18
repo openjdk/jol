@@ -1,5 +1,7 @@
 package org.atpfivt.ljv;
 
+import org.openjdk.jol.util.ObjectUtils;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 
@@ -61,16 +63,12 @@ final class GraphBuilder {
                 continue;
             }
 
-            try {
-                Object ref = field.get(obj);
+                Object ref = ObjectUtils.value(obj, field);
                 if (introspection.objectFieldIsPrimitive(field, obj)) {
                     String name = field.getName();
                     String value = String.valueOf(ref);
                     visualization.visitObjectPrimitiveField(obj, name, value);
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
         }
         visualization.visitObjectEnd(obj);
 
@@ -80,16 +78,12 @@ final class GraphBuilder {
                 continue;
             }
 
-            try {
-                Object ref = field.get(obj);
-                String name = field.getName();
-                String fabs = ljv.getFieldAttributes(field, ref);
+            Object ref = ObjectUtils.value(obj, field);;
+            String name = field.getName();
+            String fabs = ljv.getFieldAttributes(field, ref);
 
-                processNode(ref);
-                visualization.visitObjectFieldRelationWithNonPrimitiveObject(obj, name, fabs, ref);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+            processNode(ref);
+            visualization.visitObjectFieldRelationWithNonPrimitiveObject(obj, name, fabs, ref);
         }
     }
 

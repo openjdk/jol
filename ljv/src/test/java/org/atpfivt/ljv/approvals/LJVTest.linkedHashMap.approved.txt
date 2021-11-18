@@ -7,95 +7,23 @@ digraph Java {
 				<td rowspan='6'>LinkedHashMap</td>
 			</tr>
 			<tr>
-				<td>threshold: 12</td>
-			</tr>
-			<tr>
-				<td>accessOrder: false</td>
+				<td>size: 4</td>
 			</tr>
 			<tr>
 				<td>modCount: 4</td>
 			</tr>
 			<tr>
-				<td>size: 4</td>
+				<td>threshold: 12</td>
 			</tr>
 			<tr>
 				<td>loadFactor: 0.75</td>
 			</tr>
+			<tr>
+				<td>accessOrder: false</td>
+			</tr>
 		</table>
 	>];
 	n2[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
-				<td rowspan='4'>Entry</td>
-			</tr>
-			<tr>
-				<td>hash: 110183</td>
-			</tr>
-			<tr>
-				<td>key: one</td>
-			</tr>
-			<tr>
-				<td>value: 1</td>
-			</tr>
-		</table>
-	>];
-	n3[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
-				<td rowspan='4'>Entry</td>
-			</tr>
-			<tr>
-				<td>hash: 115277</td>
-			</tr>
-			<tr>
-				<td>key: two</td>
-			</tr>
-			<tr>
-				<td>value: 2</td>
-			</tr>
-		</table>
-	>];
-	n3 -> n2[label="before",fontsize=12];
-	n4[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
-				<td rowspan='4'>Entry</td>
-			</tr>
-			<tr>
-				<td>hash: 110338829</td>
-			</tr>
-			<tr>
-				<td>key: three</td>
-			</tr>
-			<tr>
-				<td>value: 3</td>
-			</tr>
-		</table>
-	>];
-	n4 -> n3[label="before",fontsize=12];
-	n5[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
-				<td rowspan='4'>Entry</td>
-			</tr>
-			<tr>
-				<td>hash: 3149078</td>
-			</tr>
-			<tr>
-				<td>key: four</td>
-			</tr>
-			<tr>
-				<td>value: 4</td>
-			</tr>
-		</table>
-	>];
-	n5 -> n4[label="before",fontsize=12];
-	n4 -> n5[label="after",fontsize=12];
-	n3 -> n4[label="after",fontsize=12];
-	n3 -> n4[label="next",fontsize=12];
-	n2 -> n3[label="after",fontsize=12];
-	n1 -> n2[label="head",fontsize=12];
-	n6[label=<
 		<table border='0' cellborder='1' cellspacing='0' cellpadding='9'>
 			<tr>
 				<td port="f0"></td>
@@ -117,9 +45,81 @@ digraph Java {
 			</tr>
 		</table>
 	>];
-	n6:f6 -> n5[label="6",fontsize=12];
-	n6:f7 -> n2[label="7",fontsize=12];
-	n6:f13 -> n3[label="13",fontsize=12];
-	n1 -> n6[label="table",fontsize=12];
-	n1 -> n5[label="tail",fontsize=12];
+	n3[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Entry</td>
+			</tr>
+			<tr>
+				<td>hash: 3149078</td>
+			</tr>
+			<tr>
+				<td>key: four</td>
+			</tr>
+			<tr>
+				<td>value: 4</td>
+			</tr>
+		</table>
+	>];
+	n4[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Entry</td>
+			</tr>
+			<tr>
+				<td>hash: 110338829</td>
+			</tr>
+			<tr>
+				<td>key: three</td>
+			</tr>
+			<tr>
+				<td>value: 3</td>
+			</tr>
+		</table>
+	>];
+	n5[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Entry</td>
+			</tr>
+			<tr>
+				<td>hash: 115277</td>
+			</tr>
+			<tr>
+				<td>key: two</td>
+			</tr>
+			<tr>
+				<td>value: 2</td>
+			</tr>
+		</table>
+	>];
+	n5 -> n4[label="next",fontsize=12];
+	n6[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Entry</td>
+			</tr>
+			<tr>
+				<td>hash: 110183</td>
+			</tr>
+			<tr>
+				<td>key: one</td>
+			</tr>
+			<tr>
+				<td>value: 1</td>
+			</tr>
+		</table>
+	>];
+	n6 -> n5[label="after",fontsize=12];
+	n5 -> n6[label="before",fontsize=12];
+	n5 -> n4[label="after",fontsize=12];
+	n4 -> n5[label="before",fontsize=12];
+	n4 -> n3[label="after",fontsize=12];
+	n3 -> n4[label="before",fontsize=12];
+	n2:f6 -> n3[label="6",fontsize=12];
+	n2:f7 -> n6[label="7",fontsize=12];
+	n2:f13 -> n5[label="13",fontsize=12];
+	n1 -> n2[label="table",fontsize=12];
+	n1 -> n6[label="head",fontsize=12];
+	n1 -> n3[label="tail",fontsize=12];
 }

@@ -40,7 +40,6 @@ digraph Java {
 			</tr>
 		</table>
 	>];
-	n3 -> n2[label="parent",fontsize=12];
 	n4[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
@@ -56,6 +55,7 @@ digraph Java {
 	>,style=filled,fillcolor=yellow];
 	n4 -> n3[label="parent",fontsize=12];
 	n3 -> n4[label="left",fontsize=12];
+	n3 -> n2[label="parent",fontsize=12];
 	n2 -> n3[label="left",fontsize=12];
 	n5[label=<
 		<table border='0' cellborder='1' cellspacing='0'>

@@ -7,13 +7,13 @@ digraph Java {
 				<td rowspan='5'>HashMap</td>
 			</tr>
 			<tr>
-				<td>threshold: 12</td>
+				<td>size: 4</td>
 			</tr>
 			<tr>
 				<td>modCount: 4</td>
 			</tr>
 			<tr>
-				<td>size: 4</td>
+				<td>threshold: 12</td>
 			</tr>
 			<tr>
 				<td>loadFactor: 0.75</td>

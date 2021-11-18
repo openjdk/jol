@@ -1,13 +1,17 @@
 package org.atpfivt.ljv;
 
-import org.reflections.ReflectionUtils;
+import org.atpfivt.ljv.jol.ClassLayout;
+import org.atpfivt.ljv.jol.FieldLayout;
+import org.openjdk.jol.info.FieldData;
+import org.openjdk.jol.util.ObjectUtils;
 
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.lang.reflect.Field;
 import java.lang.reflect.Array;
 
+import java.util.SortedSet;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class IntrospectionWithReflectionAPI extends IntrospectionBase {
     public IntrospectionWithReflectionAPI(LJV ljv) {
@@ -18,14 +22,12 @@ public class IntrospectionWithReflectionAPI extends IntrospectionBase {
     public Field[] getObjFields(Object obj) {
         Class<?> cls = obj.getClass();
 
-        Field[] fs = ReflectionUtils.getAllFields(cls, getObjFieldsIgnoreNullValuedPredicate(obj))
-                                    .toArray(new Field[0]);
-        normalizeFieldsOrder(fs);
-        if (!ljv.isIgnorePrivateFields()) {
-            AccessibleObject.setAccessible(fs, true);
-        }
+        SortedSet<FieldLayout> fieldLayouts = ClassLayout.parseClass(cls).fields();
 
-        return fs;
+        Stream<Field> fieldStream = fieldLayouts.stream()
+                .map(FieldLayout::data).map(FieldData::refField).filter(getObjFieldsIgnoreNullValuedPredicate(obj));
+
+        return fieldStream.toArray(Field[]::new);
     }
 
     @Override
@@ -45,24 +47,16 @@ public class IntrospectionWithReflectionAPI extends IntrospectionBase {
         return countObjectPrimitiveFields(obj) > 0;
     }
 
-
     @Override
     public boolean objectFieldIsPrimitive(Field field, Object obj) {
         if (!ljv.canIgnoreField(field)) {
-            try {
-                //- The order of these statements matters.  If field is not
-                //- accessible, we want an IllegalAccessException to be raised
-                //- (and caught).  It is not correct to return true if
-                //- field.getType( ).isPrimitive( )
-                Object val = field.get(obj);
-                if (field.getType().isPrimitive() || canTreatObjAsPrimitive(val))
-                    //- Just calling ljv.canTreatAsPrimitive is not adequate --
-                    //- val will be wrapped as a Boolean or Character, etc. if we
-                    //- are dealing with a truly primitive type.
-                    return true;
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+            //- The order of these statements matters. It is not correct
+            //- to return true if field.getType( ).isPrimitive( )
+            Object val = ObjectUtils.value(obj, field);
+            //- Just calling ljv.canTreatAsPrimitive is not adequate --
+            //- val will be wrapped as a Boolean or Character, etc. if we
+            //- are dealing with a truly primitive type.
+            return field.getType().isPrimitive() || canTreatObjAsPrimitive(val);
         }
 
         return false;
@@ -99,39 +93,9 @@ public class IntrospectionWithReflectionAPI extends IntrospectionBase {
     private Predicate<Field> getObjFieldsIgnoreNullValuedPredicate(Object obj) {
         return (Field f) -> {
             if (ljv.isIgnoreNullValuedFields()) {
-                try {
-                    f.setAccessible(true);
-                    return f.get(obj) != null;
-                } catch (IllegalAccessException e) {
-                    return false;
-                }
+                return ObjectUtils.value(obj, f) != null;
             }
             return true;
         };
-    }
-
-    private static void normalizeFieldsOrder(Field[] fs) {
-        /*Ensure that 'left' field is always processed before 'right'.
-        The problem is that ReflectionUtils.getAllFields uses HashSet, not LinkedHashSet,
-        and loses information about fields order.
-
-        This is a hard-coded logic and should be removed in the future.
-         */
-        int i = 0, left = -1, right = -1;
-        for (Field f : fs) {
-            if ("left".equals(f.getName())) {
-                left = i;
-                break;
-            } else if ("right".equals(f.getName())) {
-                right = i;
-            }
-            i++;
-        }
-        if (right > -1 && left > right) {
-            //swap left & right
-            Field f = fs[left];
-            fs[left] = fs[right];
-            fs[right] = f;
-        }
     }
 }

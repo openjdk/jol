@@ -54,7 +54,7 @@ digraph Java {
 				<td rowspan='3'>String</td>
 			</tr>
 			<tr>
-				<td>hash: 2358797</td>
+				<td>hash: 0</td>
 			</tr>
 			<tr>
 				<td>coder: 0</td>

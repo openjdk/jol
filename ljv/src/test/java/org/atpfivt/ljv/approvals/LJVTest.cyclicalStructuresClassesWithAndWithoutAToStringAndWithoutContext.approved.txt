@@ -17,10 +17,10 @@ digraph Java {
 				<td rowspan='4'>AnotherNode</td>
 			</tr>
 			<tr>
-				<td>null</td>
+				<td>B</td>
 			</tr>
 			<tr>
-				<td>B</td>
+				<td>null</td>
 			</tr>
 			<tr>
 				<td>null</td>

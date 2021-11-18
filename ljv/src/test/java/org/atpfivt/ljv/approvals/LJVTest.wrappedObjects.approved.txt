@@ -11,6 +11,40 @@ digraph Java {
 	n2[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
+				<td rowspan='2'>Integer</td>
+			</tr>
+			<tr>
+				<td>value: 42</td>
+			</tr>
+		</table>
+	>];
+	n1 -> n2[label="i1",fontsize=12];
+	n1 -> n2[label="i2",fontsize=12];
+	n3[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>Integer</td>
+			</tr>
+			<tr>
+				<td>value: 2020</td>
+			</tr>
+		</table>
+	>];
+	n1 -> n3[label="i3",fontsize=12];
+	n4[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>Integer</td>
+			</tr>
+			<tr>
+				<td>value: 2020</td>
+			</tr>
+		</table>
+	>];
+	n1 -> n4[label="i4",fontsize=12];
+	n5[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
 				<td rowspan='3'>String</td>
 			</tr>
 			<tr>
@@ -21,7 +55,7 @@ digraph Java {
 			</tr>
 		</table>
 	>];
-	n3[label=<
+	n6[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
 				<td>72</td>
@@ -37,10 +71,9 @@ digraph Java {
 			</tr>
 		</table>
 	>];
-	n2 -> n3[label="value",fontsize=12];
-	n1 -> n2[label="s3",fontsize=12];
-	n1 -> n2[label="s1",fontsize=12];
-	n4[label=<
+	n5 -> n6[label="value",fontsize=12];
+	n1 -> n5[label="s1",fontsize=12];
+	n7[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
 				<td rowspan='3'>String</td>
@@ -53,7 +86,7 @@ digraph Java {
 			</tr>
 		</table>
 	>];
-	n5[label=<
+	n8[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
 				<td>72</td>
@@ -65,40 +98,7 @@ digraph Java {
 			</tr>
 		</table>
 	>];
-	n4 -> n5[label="value",fontsize=12];
-	n1 -> n4[label="s2",fontsize=12];
-	n6[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
-				<td rowspan='2'>Integer</td>
-			</tr>
-			<tr>
-				<td>value: 42</td>
-			</tr>
-		</table>
-	>];
-	n1 -> n6[label="i1",fontsize=12];
-	n1 -> n6[label="i2",fontsize=12];
-	n7[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
-				<td rowspan='2'>Integer</td>
-			</tr>
-			<tr>
-				<td>value: 2020</td>
-			</tr>
-		</table>
-	>];
-	n1 -> n7[label="i3",fontsize=12];
-	n8[label=<
-		<table border='0' cellborder='1' cellspacing='0'>
-			<tr>
-				<td rowspan='2'>Integer</td>
-			</tr>
-			<tr>
-				<td>value: 2020</td>
-			</tr>
-		</table>
-	>];
-	n1 -> n8[label="i4",fontsize=12];
+	n7 -> n8[label="value",fontsize=12];
+	n1 -> n7[label="s2",fontsize=12];
+	n1 -> n5[label="s3",fontsize=12];
 }

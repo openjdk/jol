@@ -7,10 +7,10 @@ digraph Java {
 				<td rowspan='3'>ArrayDeque</td>
 			</tr>
 			<tr>
-				<td>tail: 3</td>
+				<td>head: 2</td>
 			</tr>
 			<tr>
-				<td>head: 2</td>
+				<td>tail: 3</td>
 			</tr>
 		</table>
 	>];

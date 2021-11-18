@@ -20,10 +20,10 @@ digraph Java {
 				<td rowspan='3'>Node</td>
 			</tr>
 			<tr>
-				<td>prev: null</td>
+				<td>item: 1</td>
 			</tr>
 			<tr>
-				<td>item: 1</td>
+				<td>prev: null</td>
 			</tr>
 		</table>
 	>];
@@ -37,22 +37,22 @@ digraph Java {
 			</tr>
 		</table>
 	>];
-	n3 -> n2[label="prev",fontsize=12,color=blue,fontcolor=blue];
 	n4[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
 				<td rowspan='3'>Node</td>
 			</tr>
 			<tr>
-				<td>next: null</td>
+				<td>item: 21</td>
 			</tr>
 			<tr>
-				<td>item: 21</td>
+				<td>next: null</td>
 			</tr>
 		</table>
 	>];
 	n4 -> n3[label="prev",fontsize=12,color=blue,fontcolor=blue];
 	n3 -> n4[label="next",fontsize=12,color=red,fontcolor=red];
+	n3 -> n2[label="prev",fontsize=12,color=blue,fontcolor=blue];
 	n2 -> n3[label="next",fontsize=12,color=red,fontcolor=red];
 	n1 -> n2[label="first",fontsize=12,color=red,fontcolor=red];
 	n1 -> n4[label="last",fontsize=12,color=red,fontcolor=red];

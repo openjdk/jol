@@ -228,6 +228,7 @@ public final class LJV {
      * Enable highlighting array elements that was changed since previous run of ljv.
      *
      * @return current ljv object
+     * @return current ljv object
      */
     public LJV highlightChangingArrayElements() {
         addArrayElementAttributeProvider(new ChangingArrayElementHighlighter());

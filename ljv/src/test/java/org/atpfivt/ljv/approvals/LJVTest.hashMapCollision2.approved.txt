@@ -7,25 +7,25 @@ digraph Java {
 				<td rowspan='8'>HashMap</td>
 			</tr>
 			<tr>
-				<td>threshold: 12</td>
-			</tr>
-			<tr>
 				<td>keySet: null</td>
-			</tr>
-			<tr>
-				<td>entrySet: null</td>
 			</tr>
 			<tr>
 				<td>values: null</td>
 			</tr>
 			<tr>
-				<td>modCount: 3</td>
-			</tr>
-			<tr>
 				<td>size: 3</td>
 			</tr>
 			<tr>
+				<td>modCount: 3</td>
+			</tr>
+			<tr>
+				<td>threshold: 12</td>
+			</tr>
+			<tr>
 				<td>loadFactor: 0.75</td>
+			</tr>
+			<tr>
+				<td>entrySet: null</td>
 			</tr>
 		</table>
 	>];
