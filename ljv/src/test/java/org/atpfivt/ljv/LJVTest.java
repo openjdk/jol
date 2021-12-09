@@ -283,4 +283,34 @@ public class LJVTest {
         map.put("four", 4);
         Approvals.verify(ljv.drawGraph(map));
     }
+
+    @Test
+    void arrayWithFieldAttribute() {
+        String actualGraph = new LJV()
+                .addFieldAttribute("value", "color=red,fontcolor=red")
+                .drawGraph("Hello");
+        Approvals.verify(actualGraph);
+    }
+
+    @Test
+    void twoObjectsLinksToOneArray() {
+        int[] arr = {1,2,3};
+        A x = new A(arr);
+        B y = new B(arr);
+        String actualGraph = new LJV()
+                .addFieldAttribute("a", "color=blue,fontcolor=red")
+                .addFieldAttribute("b", "color=yellow,fontcolor=green")
+                .addRoot(x).addRoot(y)
+                .drawGraph();
+        Approvals.verify(actualGraph);
+    }
+
+    @Test
+    void arrayItemLinksToArray() {
+        ArrayItem child = new ArrayItem();
+        ArrayItem[] array = { child };
+        child.prev = array;
+        String actualGraph = new LJV().drawGraph(array);
+        Approvals.verify(actualGraph);
+    }
 }

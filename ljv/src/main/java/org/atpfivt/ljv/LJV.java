@@ -19,6 +19,7 @@ package org.atpfivt.ljv;
 //-   with this program; if not, write to the Free Software Foundation, Inc.,
 //-   59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+import org.atpfivt.ljv.nodes.Node;
 import org.atpfivt.ljv.provider.ArrayElementAttributeProvider;
 import org.atpfivt.ljv.provider.FieldAttributesProvider;
 import org.atpfivt.ljv.provider.ObjectAttributesProvider;
@@ -112,7 +113,6 @@ public final class LJV {
                 .filter(s -> !(s == null || s.isEmpty()))
                 .collect(Collectors.joining(","));
     }
-
 
     /**
      * Set the DOT attributes for a specific field. This allows you to
@@ -227,7 +227,6 @@ public final class LJV {
     /**
      * Enable highlighting array elements that was changed since previous run of ljv.
      *
-     * @return current ljv object
      * @return current ljv object
      */
     public LJV highlightChangingArrayElements() {
@@ -359,7 +358,7 @@ public final class LJV {
     /**
      * add an Object to {@code roots}
      *
-     * @param root
+     * @param root New root object to visialize
      * @return this
      */
     public LJV addRoot(Object root) {
@@ -384,8 +383,20 @@ public final class LJV {
      * @return String representation containing DOT commands to build the graph
      */
     public String drawGraph() {
-        return new GraphBuilder(this).generateDOT();
+        Visualization visualizer = new GraphvizVisualization(this);
+        visualizer.diagramBegin();
+
+        for (Object obj : getRoots()) {
+            if (visualizer.alreadyVisualized(obj)) continue;
+            Node root = parseGraph(obj);
+            root.visit(visualizer);
+        }
+
+        return visualizer.diagramEnd();
     }
 
-
+    private Node parseGraph(Object obj) {
+        Introspection introspection = new IntrospectionWithReflectionAPI(this);
+        return introspection.parseGraph(obj, introspection.getObjClassName(obj, false), false, null);
+    }
 }

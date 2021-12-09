@@ -1,14 +1,18 @@
 package org.atpfivt.ljv;
 
+import org.atpfivt.ljv.nodes.ArrayNode;
+import org.atpfivt.ljv.nodes.Node;
+import org.atpfivt.ljv.nodes.ObjectNode;
+
 import java.util.IdentityHashMap;
 
-public class VisualizationCommon implements Visualization {
+public class GraphvizVisualization implements Visualization {
     private final StringBuilder out = new StringBuilder();
     private final LJV ljv;
     private final IdentityHashMap<Object, String> alreadyDrawnObjectsIds = new IdentityHashMap<>();
     private boolean alreadyDrawnNull = false;
 
-    public VisualizationCommon(LJV ljv) {
+    public GraphvizVisualization(LJV ljv) {
         this.ljv = ljv;
     }
 
@@ -22,7 +26,7 @@ public class VisualizationCommon implements Visualization {
     }
 
     @Override
-    public void beginDOT() {
+    public void diagramBegin() {
         out.setLength(0); // Clearing String Builder before starting new DOT
         out.append("digraph Java {\n")
                 .append("\trankdir=\"")
@@ -32,7 +36,7 @@ public class VisualizationCommon implements Visualization {
     }
 
     @Override
-    public String finishDOT() {
+    public String diagramEnd() {
         out.append("}\n");
         return out.toString();
     }
@@ -46,12 +50,12 @@ public class VisualizationCommon implements Visualization {
     }
 
     @Override
-    public void visitArrayBegin(Object array, boolean hasPrimitiveValues) {
+    public void visitArrayBegin(ArrayNode arrayNode) {
         out.append("\t")
-           .append(dotName(array))
+           .append(dotName(arrayNode.getValue()))
            .append("[label=<\n");
 
-        if (hasPrimitiveValues) {
+        if (arrayNode.areValuesPrimitive()) {
            out.append("\t\t<table border='0' cellborder='1' cellspacing='0'>\n");
         } else {
            out.append("\t\t<table border='0' cellborder='1' cellspacing='0' cellpadding='9'>\n");
@@ -61,18 +65,18 @@ public class VisualizationCommon implements Visualization {
     }
 
     @Override
-    public void visitArrayElement(Object array, Object element, int elementIndex, boolean isPrimitive) {        
+    public void visitArrayElement(ArrayNode arrayNode, String element, int elementIndex) {
         out.append("\t\t\t\t<td");
-        if (!isPrimitive) {
+        if (!arrayNode.areValuesPrimitive()) {
             out.append(" port=\"f").append(elementIndex).append("\"");
         }
-        out.append(ljv.getArrayElementAttributes(array, elementIndex))
+        out.append(ljv.getArrayElementAttributes(arrayNode.getValue(), elementIndex))
            .append(">");
 
         // If array element is treated as primitive - than filling array cell with value
         // Otherwise cell will be empty, but arrow-connected with object it is containing
-        if (isPrimitive) {
-            out.append(Quote.quote(String.valueOf(element)));
+        if (arrayNode.areValuesPrimitive()) {
+            out.append(Quote.quote(element));
         }
 
         out.append("</td>\n");
@@ -98,27 +102,27 @@ public class VisualizationCommon implements Visualization {
     }
 
     @Override
-    public void visitObjectBegin(Object obj, String className, int primitiveFieldsNum) {
+    public void visitObjectBegin(ObjectNode objectNode) {
         out.append("\t")
-           .append(dotName(obj))
+           .append(dotName(objectNode.getValue()))
            .append("[label=<\n")
            .append("\t\t<table border='0' cellborder='1' cellspacing='0'>\n");
 
         // Adding header row with object class name
         out.append("\t\t\t<tr>\n");
-        if (primitiveFieldsNum > 0) {
+        if (objectNode.getPrimitiveFieldsNum() > 0) {
             out.append("\t\t\t\t<td rowspan='")
-               .append(primitiveFieldsNum + 1)
+               .append(objectNode.getPrimitiveFieldsNum() + 1)
                .append("'>");
         } else {
             out.append("\t\t\t\t<td>");
         }
-        out.append(className)
+        out.append(objectNode.getClassName())
            .append("</td>\n\t\t\t</tr>\n");
     }
     
     @Override
-    public void visitObjectPrimitiveField(Object obj, String fieldName, String fieldValueStr) {
+    public void visitObjectPrimitiveField(String fieldName, String fieldValueStr) {
         out.append("\t\t\t<tr>\n\t\t\t\t<td>");
         if (ljv.isShowFieldNamesInLabels()) {
             out.append(fieldName).append(": ");
@@ -128,13 +132,13 @@ public class VisualizationCommon implements Visualization {
     }
 
     @Override
-    public void visitObjectFieldRelationWithNonPrimitiveObject(Object obj, String fieldName, String ljvFieldAttributes, Object relatedObject) {
+    public void visitObjectFieldRelationWithNonPrimitiveObject(Object obj, Node childNode, String ljvFieldAttributes) {
         out.append("\t")
            .append(dotName(obj))
            .append(" -> ")
-           .append(dotName(relatedObject))
+           .append(dotName(childNode.getValue()))
            .append("[label=\"")
-           .append(fieldName)
+           .append(childNode.getName())
            .append("\",fontsize=12")
            .append(ljvFieldAttributes.isEmpty() ? "" : "," + ljvFieldAttributes)
            .append("];\n");
