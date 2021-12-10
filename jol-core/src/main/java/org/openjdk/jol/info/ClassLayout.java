@@ -103,6 +103,7 @@ public class ClassLayout {
     }
 
     private final ClassData classData;
+    private final boolean isArray;
     private final SortedSet<FieldLayout> fields;
     private final DataModel model;
     private final long size;
@@ -118,6 +119,7 @@ public class ClassLayout {
         this.lossesInternal = lossesInternal;
         this.lossesExternal = lossesExternal;
         this.lossesTotal = lossesTotal;
+        this.isArray = classData.isArray();
     }
 
     /**
@@ -135,7 +137,7 @@ public class ClassLayout {
             checkInvariants(fields, instanceSize);
         }
         // calculate loses
-        long next = model.headerSize();
+        long next = classData.isArray() ? model.arrayHeaderSize() : model.headerSize();
         long internal = 0;
         for (FieldLayout fl : fields) {
             if (fl.offset() > next) {
@@ -188,7 +190,7 @@ public class ClassLayout {
      * @return header size
      */
     public int headerSize() {
-        return model.headerSize();
+        return isArray ? model.arrayHeaderSize() : model.headerSize();
     }
 
     /**
