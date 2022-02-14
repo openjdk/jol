@@ -1,0 +1,648 @@
+digraph Java {
+	rankdir="TB";
+	node[shape=plaintext]
+	n1[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='6'>HashMap</td>
+			</tr>
+			<tr>
+				<td>entrySet: null</td>
+			</tr>
+			<tr>
+				<td>size: 34</td>
+			</tr>
+			<tr>
+				<td>modCount: 34</td>
+			</tr>
+			<tr>
+				<td>threshold: 48</td>
+			</tr>
+			<tr>
+				<td>loadFactor: 0.75</td>
+			</tr>
+		</table>
+	>];
+	n2[label=<
+		<table border='0' cellborder='1' cellspacing='0' cellpadding='9'>
+			<tr>
+				<td port="f0"></td>
+				<td port="f1"></td>
+				<td port="f2"></td>
+				<td port="f3"></td>
+				<td port="f4"></td>
+				<td port="f5"></td>
+				<td port="f6"></td>
+				<td port="f7"></td>
+				<td port="f8"></td>
+				<td port="f9"></td>
+				<td port="f10"></td>
+				<td port="f11"></td>
+				<td port="f12"></td>
+				<td port="f13"></td>
+				<td port="f14"></td>
+				<td port="f15"></td>
+				<td port="f16"></td>
+				<td port="f17"></td>
+				<td port="f18"></td>
+				<td port="f19"></td>
+				<td port="f20"></td>
+				<td port="f21"></td>
+				<td port="f22"></td>
+				<td port="f23"></td>
+				<td port="f24"></td>
+				<td port="f25"></td>
+				<td port="f26"></td>
+				<td port="f27"></td>
+				<td port="f28"></td>
+				<td port="f29"></td>
+				<td port="f30"></td>
+				<td port="f31"></td>
+				<td port="f32"></td>
+				<td port="f33"></td>
+				<td port="f34"></td>
+				<td port="f35"></td>
+				<td port="f36"></td>
+				<td port="f37"></td>
+				<td port="f38"></td>
+				<td port="f39"></td>
+				<td port="f40"></td>
+				<td port="f41"></td>
+				<td port="f42"></td>
+				<td port="f43"></td>
+				<td port="f44"></td>
+				<td port="f45"></td>
+				<td port="f46"></td>
+				<td port="f47"></td>
+				<td port="f48"></td>
+				<td port="f49"></td>
+				<td port="f50"></td>
+				<td port="f51"></td>
+				<td port="f52"></td>
+				<td port="f53"></td>
+				<td port="f54"></td>
+				<td port="f55"></td>
+				<td port="f56"></td>
+				<td port="f57"></td>
+				<td port="f58"></td>
+				<td port="f59"></td>
+				<td port="f60"></td>
+				<td port="f61"></td>
+				<td port="f62"></td>
+				<td port="f63"></td>
+			</tr>
+		</table>
+	>];
+	n3[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>parent: null</td>
+			</tr>
+			<tr>
+				<td>prev: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n4[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n4 -> n3[label="parent",fontsize=12];
+	n5[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n5 -> n4[label="parent",fontsize=12];
+	n6[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n6 -> n5[label="parent",fontsize=12];
+	n6 -> n4[label="prev",fontsize=12];
+	n5 -> n6[label="left",fontsize=12];
+	n7[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n7 -> n5[label="parent",fontsize=12];
+	n7 -> n5[label="prev",fontsize=12];
+	n5 -> n7[label="right",fontsize=12];
+	n5 -> n6[label="prev",fontsize=12];
+	n4 -> n5[label="left",fontsize=12];
+	n8[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n8 -> n4[label="parent",fontsize=12];
+	n9[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n9 -> n8[label="parent",fontsize=12];
+	n9 -> n7[label="prev",fontsize=12];
+	n8 -> n9[label="left",fontsize=12];
+	n10[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n10 -> n8[label="parent",fontsize=12];
+	n10 -> n8[label="prev",fontsize=12];
+	n8 -> n10[label="right",fontsize=12];
+	n8 -> n9[label="prev",fontsize=12];
+	n4 -> n8[label="right",fontsize=12];
+	n4 -> n3[label="prev",fontsize=12];
+	n3 -> n4[label="left",fontsize=12];
+	n11[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: true</td>
+			</tr>
+		</table>
+	>];
+	n11 -> n3[label="parent",fontsize=12];
+	n12[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n12 -> n11[label="parent",fontsize=12];
+	n13[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n13 -> n12[label="parent",fontsize=12];
+	n14[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n14 -> n13[label="parent",fontsize=12];
+	n14 -> n10[label="prev",fontsize=12];
+	n13 -> n14[label="left",fontsize=12];
+	n15[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n15 -> n13[label="parent",fontsize=12];
+	n15 -> n13[label="prev",fontsize=12];
+	n13 -> n15[label="right",fontsize=12];
+	n13 -> n14[label="prev",fontsize=12];
+	n12 -> n13[label="left",fontsize=12];
+	n16[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n16 -> n12[label="parent",fontsize=12];
+	n17[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n17 -> n16[label="parent",fontsize=12];
+	n17 -> n12[label="prev",fontsize=12];
+	n16 -> n17[label="left",fontsize=12];
+	n18[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n18 -> n16[label="parent",fontsize=12];
+	n18 -> n16[label="prev",fontsize=12];
+	n16 -> n18[label="right",fontsize=12];
+	n16 -> n17[label="prev",fontsize=12];
+	n12 -> n16[label="right",fontsize=12];
+	n12 -> n15[label="prev",fontsize=12];
+	n11 -> n12[label="left",fontsize=12];
+	n19[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n19 -> n11[label="parent",fontsize=12];
+	n20[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: true</td>
+			</tr>
+		</table>
+	>];
+	n20 -> n19[label="parent",fontsize=12];
+	n21[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n21 -> n20[label="parent",fontsize=12];
+	n22[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n22 -> n21[label="parent",fontsize=12];
+	n22 -> n11[label="prev",fontsize=12];
+	n21 -> n22[label="left",fontsize=12];
+	n23[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n23 -> n21[label="parent",fontsize=12];
+	n23 -> n21[label="prev",fontsize=12];
+	n21 -> n23[label="right",fontsize=12];
+	n21 -> n22[label="prev",fontsize=12];
+	n20 -> n21[label="left",fontsize=12];
+	n24[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n24 -> n20[label="parent",fontsize=12];
+	n25[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n25 -> n24[label="parent",fontsize=12];
+	n25 -> n20[label="prev",fontsize=12];
+	n24 -> n25[label="left",fontsize=12];
+	n26[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n26 -> n24[label="parent",fontsize=12];
+	n26 -> n24[label="prev",fontsize=12];
+	n24 -> n26[label="right",fontsize=12];
+	n24 -> n25[label="prev",fontsize=12];
+	n20 -> n24[label="right",fontsize=12];
+	n20 -> n23[label="prev",fontsize=12];
+	n19 -> n20[label="left",fontsize=12];
+	n27[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: true</td>
+			</tr>
+		</table>
+	>];
+	n27 -> n19[label="parent",fontsize=12];
+	n28[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n28 -> n27[label="parent",fontsize=12];
+	n29[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n29 -> n28[label="parent",fontsize=12];
+	n29 -> n19[label="prev",fontsize=12];
+	n28 -> n29[label="left",fontsize=12];
+	n30[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n30 -> n28[label="parent",fontsize=12];
+	n30 -> n28[label="prev",fontsize=12];
+	n28 -> n30[label="right",fontsize=12];
+	n28 -> n29[label="prev",fontsize=12];
+	n27 -> n28[label="left",fontsize=12];
+	n31[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n31 -> n27[label="parent",fontsize=12];
+	n32[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n32 -> n31[label="parent",fontsize=12];
+	n32 -> n27[label="prev",fontsize=12];
+	n31 -> n32[label="left",fontsize=12];
+	n33[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>red: true</td>
+			</tr>
+		</table>
+	>];
+	n33 -> n31[label="parent",fontsize=12];
+	n34[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n34 -> n33[label="parent",fontsize=12];
+	n34 -> n31[label="prev",fontsize=12];
+	n33 -> n34[label="left",fontsize=12];
+	n35[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='3'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>red: false</td>
+			</tr>
+		</table>
+	>];
+	n35 -> n33[label="parent",fontsize=12];
+	n36[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>TreeNode</td>
+			</tr>
+			<tr>
+				<td>left: null</td>
+			</tr>
+			<tr>
+				<td>right: null</td>
+			</tr>
+			<tr>
+				<td>red: true</td>
+			</tr>
+		</table>
+	>];
+	n36 -> n35[label="parent",fontsize=12];
+	n36 -> n35[label="prev",fontsize=12];
+	n35 -> n36[label="right",fontsize=12];
+	n35 -> n33[label="prev",fontsize=12];
+	n33 -> n35[label="right",fontsize=12];
+	n33 -> n34[label="prev",fontsize=12];
+	n31 -> n33[label="right",fontsize=12];
+	n31 -> n32[label="prev",fontsize=12];
+	n27 -> n31[label="right",fontsize=12];
+	n27 -> n30[label="prev",fontsize=12];
+	n19 -> n27[label="right",fontsize=12];
+	n19 -> n26[label="prev",fontsize=12];
+	n11 -> n19[label="right",fontsize=12];
+	n11 -> n18[label="prev",fontsize=12];
+	n3 -> n11[label="right",fontsize=12];
+	n2:f15 -> n3[label="15",fontsize=12];
+	n1 -> n2[label="table",fontsize=12];
+}

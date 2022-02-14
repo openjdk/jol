@@ -1,0 +1,32 @@
+digraph Java {
+	rankdir="TB";
+	node[shape=plaintext]
+	n1[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='3'>ArrayDeque</td>
+			</tr>
+			<tr>
+				<td>head: 5</td>
+			</tr>
+			<tr>
+				<td>tail: 1</td>
+			</tr>
+		</table>
+	>];
+	n2[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td>3</td>
+				<td>null</td>
+				<td>null</td>
+				<td>null</td>
+				<td>null</td>
+				<td>0</td>
+				<td>1</td>
+				<td>2</td>
+			</tr>
+		</table>
+	>];
+	n1 -> n2[label="elements",fontsize=12];
+}

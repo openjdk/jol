@@ -1,0 +1,56 @@
+digraph Java {
+	rankdir="TB";
+	node[shape=plaintext]
+	n1[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>LinkedHashMap</td>
+			</tr>
+			<tr>
+				<td>accessOrder: false</td>
+			</tr>
+		</table>
+	>];
+	n2[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>Entry</td>
+			</tr>
+			<tr>
+				<td>before: null</td>
+			</tr>
+		</table>
+	>];
+	n3[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td>two=2</td>
+			</tr>
+		</table>
+	>];
+	n3 -> n2[label="before",fontsize=12];
+	n4[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td>three=3</td>
+			</tr>
+		</table>
+	>];
+	n4 -> n3[label="before",fontsize=12];
+	n5[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='2'>Entry</td>
+			</tr>
+			<tr>
+				<td>after: null</td>
+			</tr>
+		</table>
+	>];
+	n5 -> n4[label="before",fontsize=12];
+	n4 -> n5[label="after",fontsize=12];
+	n3 -> n4[label="after",fontsize=12];
+	n2 -> n3[label="after",fontsize=12];
+	n1 -> n2[label="head",fontsize=12];
+	n1 -> n5[label="tail",fontsize=12];
+}
