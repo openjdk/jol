@@ -175,20 +175,31 @@ class HotspotUnsafe implements VirtualMachine {
     }
 
     private boolean guessLilliput(int addressSize) {
-        // Check that difference is always in the first word.
-        // Lilliput encodes classes in that word, so objects of different type
-        // would be different in first word. Non Lilliput VMs can have different
-        // first words due to biased locking startup, so we try several times.
-        nextTry: for (int t = 0; t < 1000; t++) {
+        // Lilliput encodes classes in mark word, so objects of different types
+        // would be different there. Non Lilliput VMs can have different mark words
+        // due to different prototype headers, so we try several times, with a little
+        // (safepointing) sleep in between.
+        for (int t = 0; t < 100; t++) {
             Object o1 = new Experiments.MyObject0();
             Object o2 = new Experiments.MyObject1();
-            for (int c = 0; c < addressSize; c += 4) {
-                if (getInt(o1, c) != getInt(o2, c)) {
-                    continue nextTry;
+            if (addressSize == 4) {
+                if (getInt(o1, 0) == getInt(o2, 0)) {
+                    // Mark words are identical, definitely not Lilliput.
+                    return false;
                 }
+            } else if (addressSize == 8) {
+                if (getLong(o1, 0) == getLong(o2, 0)) {
+                    // Mark words are identical, definitely not Lilliput.
+                    return false;
+                }
+            } else {
+                throw new IllegalArgumentException("Unknown address size: " + addressSize);
             }
-            // Mark words are identical, definitely not Lilliput.
-            return false;
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                // Do nothing.
+            }
         }
         return true;
     }
