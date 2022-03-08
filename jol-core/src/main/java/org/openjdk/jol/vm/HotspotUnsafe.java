@@ -79,6 +79,8 @@ class HotspotUnsafe implements VirtualMachine {
 
     private final Sizes sizes;
 
+    private final boolean lilliputVM;
+
     private volatile boolean mfoInitialized;
     private Object mfoUnsafe;
     private Method mfoMethod;
@@ -115,6 +117,7 @@ class HotspotUnsafe implements VirtualMachine {
         narrowKlassBase = saDetails.getNarrowKlassBase();
 
         sizes = new Sizes(this);
+        lilliputVM = guessLilliput(objectHeaderSize);
     }
 
     HotspotUnsafe(Unsafe u, Instrumentation inst) {
@@ -167,6 +170,27 @@ class HotspotUnsafe implements VirtualMachine {
         narrowKlassBase = 0;
 
         sizes = new Sizes(this);
+
+        lilliputVM = guessLilliput(addressSize);
+    }
+
+    private boolean guessLilliput(int addressSize) {
+        // Check that difference is always in the first word.
+        // Lilliput encodes classes in that word, so objects of different type
+        // would be different in first word. Non Lilliput VMs can have different
+        // first words due to biased locking startup, so we try several times.
+        nextTry: for (int t = 0; t < 1000; t++) {
+            Object o1 = new Experiments.MyObject0();
+            Object o2 = new Experiments.MyObject1();
+            for (int c = 0; c < addressSize; c += 4) {
+                if (getInt(o1, c) != getInt(o2, c)) {
+                    continue nextTry;
+                }
+            }
+            // Mark words are identical, definitely not Lilliput.
+            return false;
+        }
+        return true;
     }
 
     private long guessNarrowOopBase() {
@@ -246,6 +270,10 @@ class HotspotUnsafe implements VirtualMachine {
 
     @Override
     public int classPointerSize() {
+        if (lilliputVM) {
+            // Lilliput does not have a class word.
+            return 0;
+        }
         switch (addressSize) {
             case 4:
                 return 4;
@@ -262,6 +290,10 @@ class HotspotUnsafe implements VirtualMachine {
         PrintWriter out = new PrintWriter(sw);
 
         out.println("# Running " + (addressSize * 8) + "-bit HotSpot VM.");
+
+        if (lilliputVM) {
+            out.println("# Lilliput VM detected (experimental).");
+        }
 
         if (compressedOopsEnabled) {
             if (narrowOopBase != 0) {
@@ -289,8 +321,21 @@ class HotspotUnsafe implements VirtualMachine {
 
         out.println("# Objects are " + objectAlignment + " bytes aligned.");
 
-        out.printf("# %-19s: %d, %d, %d, %d, %d, %d, %d, %d, %d [bytes]%n",
-                "Field sizes by type",
+        out.printf("# %-20s %4s, %4s, %4s, %4s, %4s, %4s, %4s, %4s, %4s%n",
+                "",
+                "ref",
+                "bool",
+                "byte",
+                "char",
+                "shrt",
+                "int",
+                "flt",
+                "lng",
+                "dbl"
+        );
+
+        out.printf("# %-20s %4d, %4d, %4d, %4d, %4d, %4d, %4d, %4d, %4d%n",
+                "Field sizes:",
                 oopSize,
                 sizes.booleanSize,
                 sizes.byteSize,
@@ -302,8 +347,8 @@ class HotspotUnsafe implements VirtualMachine {
                 sizes.doubleSize
         );
 
-        out.printf("# %-19s: %d, %d, %d, %d, %d, %d, %d, %d, %d [bytes]%n",
-                "Array element sizes",
+        out.printf("# %-20s %4d, %4d, %4d, %4d, %4d, %4d, %4d, %4d, %4d%n",
+                "Array element sizes:",
                 U.arrayIndexScale(Object[].class),
                 U.arrayIndexScale(boolean[].class),
                 U.arrayIndexScale(byte[].class),
@@ -313,6 +358,19 @@ class HotspotUnsafe implements VirtualMachine {
                 U.arrayIndexScale(float[].class),
                 U.arrayIndexScale(long[].class),
                 U.arrayIndexScale(double[].class)
+        );
+
+        out.printf("# %-20s %4d, %4d, %4d, %4d, %4d, %4d, %4d, %4d, %4d%n",
+                "Array base offsets:",
+                U.arrayBaseOffset(Object[].class),
+                U.arrayBaseOffset(boolean[].class),
+                U.arrayBaseOffset(byte[].class),
+                U.arrayBaseOffset(char[].class),
+                U.arrayBaseOffset(short[].class),
+                U.arrayBaseOffset(int[].class),
+                U.arrayBaseOffset(float[].class),
+                U.arrayBaseOffset(long[].class),
+                U.arrayBaseOffset(double[].class)
         );
 
         out.close();
