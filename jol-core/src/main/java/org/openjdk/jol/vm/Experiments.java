@@ -35,6 +35,10 @@ class Experiments {
         public boolean b1;
     }
 
+    public static class MyObject0 {
+
+    }
+
     public static class MyObject1 {
 
     }
