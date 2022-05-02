@@ -106,7 +106,7 @@ public class FieldLayout implements Comparable<FieldLayout> {
         }
     }
 
-    FieldData data() {
+    public FieldData data() {
         return f;
     }
 

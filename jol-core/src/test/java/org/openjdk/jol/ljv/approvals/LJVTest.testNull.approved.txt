@@ -1,0 +1,5 @@
+digraph Java {
+	rankdir="TB";
+	node[shape=plaintext]
+	NULL[label="null", shape=plaintext];
+}
