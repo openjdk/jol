@@ -24,11 +24,6 @@
  */
 package org.openjdk.jol.ljv;
 
-// import org.atpfivt.ljv.jol.ClassLayout;
-// import org.atpfivt.ljv.jol.FieldLayout;
-// import org.openjdk.jol.info.ClassLayout;
-// import org.openjdk.jol.info.FieldLayout;
-
 import org.openjdk.jol.ljv.nodes.*;
 import org.openjdk.jol.info.FieldLayout;
 import org.openjdk.jol.info.ClassLayout;
