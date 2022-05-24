@@ -63,27 +63,37 @@ public class ClassData {
     }
 
     private static int arrayLength(Object o) {
-        if (o == null)
+        if (o == null) {
             return 0;
+        }
         Class<?> k = o.getClass();
-        if (!k.isArray())
+        if (!k.isArray()) {
             throw new IllegalArgumentException(k.getName() + " is not an array class");
-        if (k == byte[].class)
+        }
+        if (k == byte[].class) {
             return ((byte[]) o).length;
-        if (k == boolean[].class)
+        }
+        if (k == boolean[].class) {
             return ((boolean[]) o).length;
-        if (k == short[].class)
+        }
+        if (k == short[].class) {
             return ((short[]) o).length;
-        if (k == char[].class)
+        }
+        if (k == char[].class) {
             return ((char[]) o).length;
-        if (k == int[].class)
+        }
+        if (k == int[].class) {
             return ((int[]) o).length;
-        if (k == float[].class)
+        }
+        if (k == float[].class) {
             return ((float[]) o).length;
-        if (k == double[].class)
+        }
+        if (k == double[].class) {
             return ((double[]) o).length;
-        if (k == long[].class)
+        }
+        if (k == long[].class) {
             return ((long[]) o).length;
+        }
         return ((Object[])o).length;
     }
 
@@ -373,18 +383,33 @@ public class ClassData {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ClassData classData = (ClassData) o;
 
-        if (isArray != classData.isArray) return false;
-        if (length != classData.length) return false;
-        if (arrayComponentKlass != null ? !arrayComponentKlass.equals(classData.arrayComponentKlass) : classData.arrayComponentKlass != null)
+        if (isArray != classData.isArray) {
             return false;
-        if (arrayKlass != null ? !arrayKlass.equals(classData.arrayKlass) : classData.arrayKlass != null) return false;
-        if (classNames != null ? !classNames.equals(classData.classNames) : classData.classNames != null) return false;
-        if (fields != null ? !fields.equals(classData.fields) : classData.fields != null) return false;
+        }
+        if (length != classData.length) {
+            return false;
+        }
+        if (arrayComponentKlass != null ? !arrayComponentKlass.equals(classData.arrayComponentKlass) : classData.arrayComponentKlass != null) {
+            return false;
+        }
+        if (arrayKlass != null ? !arrayKlass.equals(classData.arrayKlass) : classData.arrayKlass != null) {
+            return false;
+        }
+        if (classNames != null ? !classNames.equals(classData.classNames) : classData.classNames != null) {
+            return false;
+        }
+        if (fields != null ? !fields.equals(classData.fields) : classData.fields != null) {
+            return false;
+        }
 
         return true;
     }

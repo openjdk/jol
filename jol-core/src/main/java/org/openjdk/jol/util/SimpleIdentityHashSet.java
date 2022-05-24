@@ -65,7 +65,9 @@ public final class SimpleIdentityHashSet {
             }
 
             final int s = size + 1;
-            if (s*3 > len && resize(len)) continue;
+            if (s*3 > len && resize(len)) {
+                continue;
+            }
 
             tab[i] = o;
             size = s;
@@ -84,8 +86,9 @@ public final class SimpleIdentityHashSet {
             }
             return false;
         }
-        if (oldLength >= newLength)
+        if (oldLength >= newLength) {
             return false;
+        }
 
         Object[] newTable = new Object[newLength];
 

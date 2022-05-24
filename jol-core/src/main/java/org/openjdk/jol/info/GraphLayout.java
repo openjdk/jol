@@ -92,7 +92,9 @@ public class GraphLayout {
     }
 
     private void ensureProcessedAddresses() {
-        if (processedAddresses) return;
+        if (processedAddresses) {
+            return;
+        }
 
         synchronized (this) {
             if (gprs.isEmpty()) {
@@ -194,7 +196,9 @@ public class GraphLayout {
 
 
     private void ensureProcessedHisto() {
-        if (processedHisto) return;
+        if (processedHisto) {
+            return;
+        }
 
         synchronized (this) {
             classes = new TreeSet<>(new Comparator<Class<?>>() {
@@ -394,7 +398,9 @@ public class GraphLayout {
      * @throws IOException when I/O fails
      */
     public void toImage(String fileName) throws IOException {
-        if (addresses().isEmpty()) return;
+        if (addresses().isEmpty()) {
+            return;
+        }
 
         long start = startAddress();
         long end = endAddress() + record(endAddress()).size();
