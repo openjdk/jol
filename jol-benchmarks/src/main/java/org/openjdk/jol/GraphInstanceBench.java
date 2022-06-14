@@ -46,7 +46,7 @@ public class GraphInstanceBench {
     public void setup() {
         arr = new Integer[size];
         for (int c = 0; c < size; c++) {
-            arr[c] = c;
+            arr[c] = new Integer(c);
         }
     }
 
