@@ -420,6 +420,7 @@ class HotspotUnsafe implements VirtualMachine {
         return (int) min;
     }
 
+    @Override
     public long addressOf(Object o) {
         Object[] array = BUFFERS.get();
 

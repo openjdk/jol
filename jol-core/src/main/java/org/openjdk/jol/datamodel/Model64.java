@@ -70,15 +70,22 @@ public class Model64 implements DataModel {
 
     @Override
     public int sizeOf(String klass) {
-        if (klass.equals("byte"))    return 1;
-        if (klass.equals("boolean")) return 1;
-        if (klass.equals("short"))   return 2;
-        if (klass.equals("char"))    return 2;
-        if (klass.equals("int"))     return 4;
-        if (klass.equals("float"))   return 4;
-        if (klass.equals("long"))    return 8;
-        if (klass.equals("double"))  return 8;
-        return 8;
+        switch (klass) {
+            case "byte":
+            case "boolean":
+                return 1;
+            case "short":
+            case "char":
+                return 2;
+            case "int":
+            case "float":
+                return 4;
+            case "long":
+            case "double":
+                return 8;
+            default:
+                return 8;
+        }
     }
 
     @Override
@@ -93,8 +100,12 @@ public class Model64 implements DataModel {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Model64 model64 = (Model64) o;
         return align == model64.align;
     }

@@ -296,10 +296,14 @@ public class HotSpotLayouter implements Layouter {
             for (FieldData f : clsData.ownFields()) {
 
                 // skip already laid out fields
-                if (layoutedFields.contains(f)) continue;
+                if (layoutedFields.contains(f)) {
+                    continue;
+                }
 
                 // contended instance fields are handled below
-                if (f.isContended()) continue;
+                if (f.isContended()) {
+                    continue;
+                }
 
                 FieldAllocationType atype = FieldAllocationType.allocationTypeFor(f);
                 int allocationTypeSize = allocationTypeSizes.get(atype);
@@ -352,10 +356,14 @@ public class HotSpotLayouter implements Layouter {
                     for (FieldData f : clsData.ownFields()) {
 
                         // skip already laid out fields
-                        if (layoutedFields.contains(f)) continue;
+                        if (layoutedFields.contains(f)) {
+                            continue;
+                        }
 
                         // skip non-contended fields and fields from different group
-                        if (!f.isContended() || !f.contendedGroup().equals(currentGroup)) continue;
+                        if (!f.isContended() || !f.contendedGroup().equals(currentGroup)) {
+                            continue;
+                        }
 
                         FieldAllocationType atype = FieldAllocationType.allocationTypeFor(f);
 

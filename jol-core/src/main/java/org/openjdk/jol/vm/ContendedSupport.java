@@ -103,7 +103,9 @@ public class ContendedSupport {
     static volatile boolean shown;
 
     static void printErrorOnce(Throwable err) {
-        if (shown) return;
+        if (shown) {
+            return;
+        }
         shown = true;
         System.out.println("Error while accessing @Contended value: " + err.getMessage());
         System.out.println();
