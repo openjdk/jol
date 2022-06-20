@@ -39,6 +39,7 @@ public class OptionFormatter implements HelpFormatter {
         this.label = label;
     }
 
+    @Override
     public String format(Map<String, ? extends OptionDescriptor> options) {
         StringBuilder sb = new StringBuilder();
         sb.append("Usage: java -jar ... " + label + " [options] <classes*>");

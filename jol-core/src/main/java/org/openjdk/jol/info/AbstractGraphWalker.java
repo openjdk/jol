@@ -54,8 +54,12 @@ abstract class AbstractGraphWalker {
             List<Field> results = new ArrayList<>();
 
             for (Field f : klass.getDeclaredFields()) {
-                if (Modifier.isStatic(f.getModifiers())) continue;
-                if (f.getType().isPrimitive()) continue;
+                if (Modifier.isStatic(f.getModifiers())) {
+                    continue;
+                }
+                if (f.getType().isPrimitive()) {
+                    continue;
+                }
                 results.add(f);
             }
 

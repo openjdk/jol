@@ -40,18 +40,36 @@ public class ObjectUtils {
      * @return toString
      */
     public static String safeToString(Object o) {
-        if (o == null) return "null";
+        if (o == null) {
+            return "null";
+        }
 
         if (o.getClass().isArray()) {
             Class<?> type = o.getClass().getComponentType();
-            if (type == boolean.class) return Arrays.toString((boolean[]) o);
-            if (type == byte.class) return Arrays.toString((byte[]) o);
-            if (type == short.class) return Arrays.toString((short[]) o);
-            if (type == char.class) return Arrays.toString((char[]) o);
-            if (type == int.class) return Arrays.toString((int[]) o);
-            if (type == float.class) return Arrays.toString((float[]) o);
-            if (type == long.class) return Arrays.toString((long[]) o);
-            if (type == double.class) return Arrays.toString((double[]) o);
+            if (type == boolean.class) {
+                return Arrays.toString((boolean[]) o);
+            }
+            if (type == byte.class) {
+                return Arrays.toString((byte[]) o);
+            }
+            if (type == short.class) {
+                return Arrays.toString((short[]) o);
+            }
+            if (type == char.class) {
+                return Arrays.toString((char[]) o);
+            }
+            if (type == int.class) {
+                return Arrays.toString((int[]) o);
+            }
+            if (type == float.class) {
+                return Arrays.toString((float[]) o);
+            }
+            if (type == long.class) {
+                return Arrays.toString((long[]) o);
+            }
+            if (type == double.class) {
+                return Arrays.toString((double[]) o);
+            }
 
             Object[] oos = (Object[]) o;
             String[] strs = new String[oos.length];
@@ -61,15 +79,33 @@ public class ObjectUtils {
             return Arrays.toString(strs);
         }
 
-        if (o.getClass().isPrimitive()) return o.toString();
-        if (o.getClass() == Boolean.class) return o.toString();
-        if (o.getClass() == Byte.class) return o.toString();
-        if (o.getClass() == Short.class) return o.toString();
-        if (o.getClass() == Character.class) return o.toString();
-        if (o.getClass() == Integer.class) return o.toString();
-        if (o.getClass() == Float.class) return o.toString();
-        if (o.getClass() == Long.class) return o.toString();
-        if (o.getClass() == Double.class) return o.toString();
+        if (o.getClass().isPrimitive()) {
+            return o.toString();
+        }
+        if (o.getClass() == Boolean.class) {
+            return o.toString();
+        }
+        if (o.getClass() == Byte.class) {
+            return o.toString();
+        }
+        if (o.getClass() == Short.class) {
+            return o.toString();
+        }
+        if (o.getClass() == Character.class) {
+            return o.toString();
+        }
+        if (o.getClass() == Integer.class) {
+            return o.toString();
+        }
+        if (o.getClass() == Float.class) {
+            return o.toString();
+        }
+        if (o.getClass() == Long.class) {
+            return o.toString();
+        }
+        if (o.getClass() == Double.class) {
+            return o.toString();
+        }
         return "(object)";
     }
 
