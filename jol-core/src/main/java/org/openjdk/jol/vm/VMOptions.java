@@ -44,7 +44,6 @@ class VMOptions {
         try {
             return Boolean.valueOf(getString("UseCompressedOops"));
         } catch (Exception exp) {
-            // TODO: log
             return null;
         }
     }
@@ -53,7 +52,6 @@ class VMOptions {
         try {
             return Boolean.valueOf(getString("UseCompressedClassPointers"));
         } catch (Exception exp) {
-            // TODO: log
             return null;
         }
     }
@@ -63,11 +61,9 @@ class VMOptions {
             try {
                 return Integer.valueOf(getString("ObjectAlignmentInBytes"));
             } catch (Exception exp) {
-                // TODO: log
                 return null;
             }
         }
-        // TODO: log
         return null;
     }
 
