@@ -44,7 +44,6 @@ class VMOptions {
         try {
             return Boolean.valueOf(getString("UseCompressedOops"));
         } catch (Exception exp) {
-            System.out.println("# WARNING: Unable to get compressed oops. " + exp.getMessage());
             return null;
         }
     }
@@ -53,7 +52,6 @@ class VMOptions {
         try {
             return Boolean.valueOf(getString("UseCompressedClassPointers"));
         } catch (Exception exp) {
-            System.out.println("# WARNING: Unable to get compressed class pointers" + exp.getMessage());
             return null;
         }
     }
@@ -63,11 +61,9 @@ class VMOptions {
             try {
                 return Integer.valueOf(getString("ObjectAlignmentInBytes"));
             } catch (Exception exp) {
-                System.out.println("# WARNING: Unable to get object alignment in bytes. " + exp.getMessage());
                 return null;
             }
         }
-        System.out.println("# WARNING: the compressed oops is unavailable");
         return null;
     }
 
