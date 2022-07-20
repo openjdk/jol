@@ -309,12 +309,10 @@ public class ClassLayout {
             VirtualMachine vm = VM.current();
             if (markSize == 8) {
                 long mark = vm.getLong(instance, markOffset);
-                String decoded = (classSize > 0) ? parseMarkWord(mark) : "(Lilliput)";
-                markStr = toHex(mark) + " " + decoded;
+                markStr = toHex(mark) + " " + parseMarkWord(mark);
             } else if (markSize == 4) {
                 int mark = vm.getInt(instance, markOffset);
-                String decoded = (classSize > 0) ? parseMarkWord(mark) : "(Lilliput)";
-                markStr = toHex(mark) + " " + decoded;
+                markStr = toHex(mark) + " " + parseMarkWord(mark);
             }
 
             if (classSize == 8) {
@@ -329,9 +327,7 @@ public class ClassLayout {
         }
 
         pw.printf(format, markOffset, markSize, "", MSG_MARK_WORD, markStr);
-        if (classSize > 0) {
-            pw.printf(format, classOffset, classSize, "", MSG_CLASS_WORD, classStr);
-        }
+        pw.printf(format, classOffset, classSize, "", MSG_CLASS_WORD, classStr);
         if (classData.isArray()) {
             pw.printf(format, arrOffset, arrSize, "", MSG_ARR_LEN, arrLenStr);
         }
