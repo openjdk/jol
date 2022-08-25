@@ -94,7 +94,7 @@ public class GraphStatsTest {
     }
 
     @Test
-    public void layoutAndStatsAccordance() {
+    public void layoutAndStatsMatch() {
         E e = new E();
 
         GraphLayout layout = GraphLayout.parseInstance(e);
