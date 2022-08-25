@@ -67,6 +67,7 @@ public class GraphStatsWalker extends AbstractGraphWalker {
 
                 for (Object e : (Object[]) o) {
                     if (e != null && visited.add(e)) {
+                        data.addRecord(vm.sizeOf(e));
                         s.push(e);
                     }
                 }

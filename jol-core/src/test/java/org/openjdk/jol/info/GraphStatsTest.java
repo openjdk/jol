@@ -23,6 +23,14 @@ public class GraphStatsTest {
         public D(D d) { this.d = d; }
     }
 
+    static class E {
+        private final A[] as;
+
+        E() {
+            as = new A[] { new A() };
+        }
+    }
+
     @Test
     public void basicCounts() {
         A a = new A();
@@ -85,4 +93,14 @@ public class GraphStatsTest {
         }
     }
 
+    @Test
+    public void layoutAndStatsAccordance() {
+        E e = new E();
+
+        GraphLayout layout = GraphLayout.parseInstance(e);
+        GraphStats stats = GraphStats.parseInstance(e);
+
+        Assert.assertEquals(layout.totalSize(), stats.totalSize());
+        Assert.assertEquals(layout.totalCount(), stats.totalCount());
+    }
 }
