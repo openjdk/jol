@@ -49,7 +49,7 @@ public interface Introspection {
 
     boolean canTreatObjAsPrimitive(Object obj);
 
-    boolean catTreatObjAsArrayOfPrimitives(Object obj);
+    boolean canTreatObjAsArrayOfPrimitives(Object obj);
 
     boolean canTreatClassAsPrimitive(Class<?> cz);
 }

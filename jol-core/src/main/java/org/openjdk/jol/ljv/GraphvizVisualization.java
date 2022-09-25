@@ -34,7 +34,7 @@ public class GraphvizVisualization implements Visualization {
     private final StringBuilder out = new StringBuilder();
     private final LJV ljv;
     private final IdentityHashMap<Object, String> alreadyDrawnObjectsIds = new IdentityHashMap<>();
-    private boolean alreadyDrawnNull = false;
+    private boolean alreadyDrawnNull;
 
     public GraphvizVisualization(LJV ljv) {
         this.ljv = ljv;

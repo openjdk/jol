@@ -13,10 +13,10 @@ digraph Java {
 				<td>values: null</td>
 			</tr>
 			<tr>
-				<td>size: 3</td>
+				<td>size: 8</td>
 			</tr>
 			<tr>
-				<td>modCount: 3</td>
+				<td>modCount: 8</td>
 			</tr>
 			<tr>
 				<td>threshold: 12</td>
@@ -57,10 +57,10 @@ digraph Java {
 				<td rowspan='4'>Node</td>
 			</tr>
 			<tr>
-				<td>hash: 96320</td>
+				<td>hash: 1952488608</td>
 			</tr>
 			<tr>
-				<td>key: aaa</td>
+				<td>key: AaAaAa</td>
 			</tr>
 			<tr>
 				<td>value: 0</td>
@@ -73,10 +73,10 @@ digraph Java {
 				<td rowspan='4'>Node</td>
 			</tr>
 			<tr>
-				<td>hash: 96320</td>
+				<td>hash: 1952488608</td>
 			</tr>
 			<tr>
-				<td>key: abB</td>
+				<td>key: BBAaAa</td>
 			</tr>
 			<tr>
 				<td>value: 1</td>
@@ -86,22 +86,107 @@ digraph Java {
 	n5[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
-				<td rowspan='5'>Node</td>
+				<td rowspan='4'>Node</td>
 			</tr>
 			<tr>
-				<td>hash: 96320</td>
+				<td>hash: 1952488608</td>
 			</tr>
 			<tr>
-				<td>key: bBa</td>
+				<td>key: AaBBAa</td>
 			</tr>
 			<tr>
 				<td>value: 2</td>
+			</tr>
+		</table>
+	>];
+	n6[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Node</td>
+			</tr>
+			<tr>
+				<td>hash: 1952488608</td>
+			</tr>
+			<tr>
+				<td>key: BBBBAa</td>
+			</tr>
+			<tr>
+				<td>value: 3</td>
+			</tr>
+		</table>
+	>];
+	n7[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Node</td>
+			</tr>
+			<tr>
+				<td>hash: 1952488608</td>
+			</tr>
+			<tr>
+				<td>key: AaAaBB</td>
+			</tr>
+			<tr>
+				<td>value: 4</td>
+			</tr>
+		</table>
+	>];
+	n8[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Node</td>
+			</tr>
+			<tr>
+				<td>hash: 1952488608</td>
+			</tr>
+			<tr>
+				<td>key: BBAaBB</td>
+			</tr>
+			<tr>
+				<td>value: 5</td>
+			</tr>
+		</table>
+	>];
+	n9[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Node</td>
+			</tr>
+			<tr>
+				<td>hash: 1952488608</td>
+			</tr>
+			<tr>
+				<td>key: AaBBBB</td>
+			</tr>
+			<tr>
+				<td>value: 6</td>
+			</tr>
+		</table>
+	>];
+	n10[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='5'>Node</td>
+			</tr>
+			<tr>
+				<td>hash: 1952488608</td>
+			</tr>
+			<tr>
+				<td>key: BBBBBB</td>
+			</tr>
+			<tr>
+				<td>value: 7</td>
 			</tr>
 			<tr>
 				<td>next: null</td>
 			</tr>
 		</table>
 	>];
+	n9 -> n10[label="next",fontsize=12];
+	n8 -> n9[label="next",fontsize=12];
+	n7 -> n8[label="next",fontsize=12];
+	n6 -> n7[label="next",fontsize=12];
+	n5 -> n6[label="next",fontsize=12];
 	n4 -> n5[label="next",fontsize=12];
 	n3 -> n4[label="next",fontsize=12];
 	n2:f0 -> n3[label="0",fontsize=12];

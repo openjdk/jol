@@ -28,7 +28,6 @@ import org.openjdk.jol.ljv.nodes.*;
 import org.openjdk.jol.info.FieldLayout;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.util.ObjectUtils;
-import org.openjdk.jol.info.FieldData;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -63,7 +62,7 @@ public class IntrospectionWithReflectionAPI implements Introspection {
         }
 
         if (obj.getClass().isArray()) {
-            ArrayNode arrayNode = new ArrayNode(obj, name, catTreatObjAsArrayOfPrimitives(obj), getArrayContent(obj));
+            ArrayNode arrayNode = new ArrayNode(obj, name, canTreatObjAsArrayOfPrimitives(obj), getArrayContent(obj));
             if (field != null) {
                 arrayNode.setAttributes(ljv.getFieldAttributes(field, obj));
             }
@@ -225,7 +224,7 @@ public class IntrospectionWithReflectionAPI implements Introspection {
     }
 
     @Override
-    public boolean catTreatObjAsArrayOfPrimitives(Object obj) {
+    public boolean canTreatObjAsArrayOfPrimitives(Object obj) {
         Class<?> c = obj.getClass();
         if (c.getComponentType().isPrimitive()) {
             return true;

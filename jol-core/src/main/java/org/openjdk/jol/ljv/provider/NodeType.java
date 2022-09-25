@@ -25,10 +25,24 @@
 package org.openjdk.jol.ljv.provider;
 
 public enum NodeType {
+    /**
+     * Array node.
+     */
     ARRAY,
-    REFERENCE, //non-primitive object, if a value of a field, then an arrow should exist
-    PRIMITIVE, //valid only for a field
-    NULL_REFERENCE, //we draw it as a separate node, we do not deduplicate nulls
-    //'null' value can be either PRIMITIVE, NULL or IGNORE
-    IGNORE //do not show
+    /**
+     * Non-primitive object. If a value of a field, then it is represented as an arrow.
+     */
+    REFERENCE,
+    /**
+     * Primitive field of an object.
+     */
+    PRIMITIVE,
+    /**
+     * Null reference. We always draw it as a separate node, we do not deduplicate nulls.
+     */
+    NULL_REFERENCE,
+    /**
+     * Hidden node.
+     */
+    IGNORE
 }
