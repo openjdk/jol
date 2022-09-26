@@ -45,11 +45,9 @@ public class IntrospectionWithReflectionAPI implements Introspection {
         if (isPrimitive) {
             return new PrimitiveNode(obj, name);
         }
-
         if (obj == null) {
             return new NullNode(null, name);
         }
-        
         ObjectNode oldNode = alreadyVisitedObjects.get(obj);
         if (oldNode != null) {
             ObjectNode objectNode = new ObjectNode(oldNode);
