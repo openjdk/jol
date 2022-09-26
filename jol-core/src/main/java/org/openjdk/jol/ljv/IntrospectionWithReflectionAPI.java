@@ -49,8 +49,7 @@ public class IntrospectionWithReflectionAPI implements Introspection {
         if (obj == null) {
             return new NullNode(null, name);
         }
-
-        // Не зацикливаемся, смотрим обошли мы этот объект уже или ещё нет.
+        
         ObjectNode oldNode = alreadyVisitedObjects.get(obj);
         if (oldNode != null) {
             ObjectNode objectNode = new ObjectNode(oldNode);

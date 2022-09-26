@@ -24,7 +24,6 @@
  */
 package org.openjdk.jol.ljv.provider;
 
-//@FunctionalInterface
 public interface ArrayElementAttributeProvider {
     String getAttribute(Object array, int index);
 }
