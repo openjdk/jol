@@ -66,18 +66,15 @@ class AttachMain {
 
             final Object agent = hotspotAgent;
             Future<?> future = Executors.newCachedThreadPool(new MyThreadFactory())
-                    .submit(new Callable<Object>() {
-                                @Override
-                                public Object call() {
-                                    try {
-                                        // Attach to the caller process as Hotspot agent
-                                        attachMethod.invoke(agent, (int) request.getProcessId());
-                                        return ClassUtils.loadClass(VM_CLASSNAME).getMethod("getVM").invoke(null);
-                                    } catch (Exception t) {
-                                        throw new RuntimeException(t);
-                                    }
-                                }
-                            }
+                    .submit(() -> {
+                        try {
+                            // Attach to the caller process as Hotspot agent
+                            attachMethod.invoke(agent, (int) request.getProcessId());
+                            return ClassUtils.loadClass(VM_CLASSNAME).getMethod("getVM").invoke(null);
+                        } catch (Exception t) {
+                            throw new RuntimeException(t);
+                        }
+                    }
                     );
 
             Object vm = future.get(request.getTimeout(), TimeUnit.MILLISECONDS);

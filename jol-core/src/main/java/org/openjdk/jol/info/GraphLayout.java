@@ -201,12 +201,7 @@ public class GraphLayout {
         }
 
         synchronized (this) {
-            classes = new TreeSet<>(new Comparator<Class<?>>() {
-                @Override
-                public int compare(Class<?> o1, Class<?> o2) {
-                    return o1.getName().compareTo(o2.getName());
-                }
-            });
+            classes = new TreeSet<>(Comparator.comparing(Class::getName));
             classSizes = new Multiset<>();
             classCounts = new Multiset<>();
 

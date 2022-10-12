@@ -78,12 +78,7 @@ public class HeapDumpStats implements Operation {
         }
 
         List<String> sorted = new ArrayList<>(sizes.keys());
-        Collections.sort(sorted, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return Long.compare(sizes.count(o2), sizes.count(o1));
-            }
-        });
+        sorted.sort((o1, o2) -> Long.compare(sizes.count(o2), sizes.count(o1)));
 
         final int printFirst = Integer.getInteger("printFirst", 30);
 
