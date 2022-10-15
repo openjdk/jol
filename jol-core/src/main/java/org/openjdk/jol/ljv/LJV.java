@@ -24,9 +24,6 @@
  */
 package org.openjdk.jol.ljv;
 
-//- Author:     John Hamer <J.Hamer@cs.auckland.ac.nz>
-//- Created:    Sat May 10 15:27:48 2003
-
 import org.openjdk.jol.ljv.nodes.Node;
 import org.openjdk.jol.ljv.provider.ArrayElementAttributeProvider;
 import org.openjdk.jol.ljv.provider.FieldAttributesProvider;
@@ -231,13 +228,11 @@ public final class LJV {
     }
 
     public boolean canIgnoreField(Field field) {
-        return
-                Modifier.isStatic(field.getModifiers())
-                        || ignoreSet.contains(field)
-                        || ignoreSet.contains(field.getName())
-                        || ignoreSet.contains(field.getType())
-                        || ignoreSet.contains(field.getType().getPackage())
-                ;
+        return Modifier.isStatic(field.getModifiers()) ||
+                        ignoreSet.contains(field) ||
+                        ignoreSet.contains(field.getName()) ||
+                        ignoreSet.contains(field.getType()) ||
+                        ignoreSet.contains(field.getType().getPackage());
     }
 
     public LJV addArrayElementAttributeProvider(ArrayElementAttributeProvider provider) {

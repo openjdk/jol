@@ -85,10 +85,10 @@ public class IntrospectionWithReflectionAPI implements Introspection {
         Field[] fields = getObjFields(obj);
 
         for (Field field : fields) {
-            if (!(Modifier.isStatic(field.getModifiers()))
-                    && !ljv.canIgnoreField(field)
+            if (!(Modifier.isStatic(field.getModifiers())) && !ljv.canIgnoreField(field)
             ) {
-                Node node = parseGraph(ObjectUtils.value(obj, field), field.getName(), objectFieldIsPrimitive(field, obj), field);
+                Node node = parseGraph(ObjectUtils.value(obj, field), field.getName(),
+                        objectFieldIsPrimitive(field, obj), field);
                 if (node != null) result.add(node);
             }
         }

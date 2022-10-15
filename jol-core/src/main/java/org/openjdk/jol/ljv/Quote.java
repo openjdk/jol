@@ -35,10 +35,8 @@ public final class Quote {
     private static final String canAppearUnquotedInLabelChars = " $&*@#!-+()^%;[],;.=";
 
     private static boolean canAppearUnquotedInLabel(char c) {
-        return canAppearUnquotedInLabelChars.indexOf(c) != -1
-                || Character.isLetter(c)
-                || Character.isDigit(c)
-                ;
+        return canAppearUnquotedInLabelChars.indexOf(c) != -1 ||
+                Character.isLetter(c) || Character.isDigit(c);
     }
 
     public static String quote(String s) {
