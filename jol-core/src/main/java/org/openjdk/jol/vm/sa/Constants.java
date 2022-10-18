@@ -28,6 +28,8 @@ class Constants {
 
     static final String HOTSPOT_AGENT_CLASSNAME = "sun.jvm.hotspot.HotSpotAgent";
     static final String VM_CLASSNAME = "sun.jvm.hotspot.runtime.VM";
+    static final String COMP_OOPS_CLASSNAME = "sun.jvm.hotspot.oops.CompressedOops";
+    static final String COMP_KLASS_CLASSNAME = "sun.jvm.hotspot.oops.CompressedKlassPointers";
     static final String UNIVERSE_CLASSNAME = "sun.jvm.hotspot.memory.Universe";
 
     static final String SKIP_HOTSPOT_SA_ATTACH_FLAG = "jol.skipHotspotSAAttach";
