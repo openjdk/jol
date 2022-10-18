@@ -306,8 +306,10 @@ class HotspotUnsafe implements VirtualMachine {
             if (narrowOopBase != 0) {
                 out.print(" and " + formatAddressAsHexByAddressSize(narrowOopBase) + " base");
             }
+        } else if (addressSize == 4){
+            out.print("not needed");
         } else {
-            out.print("not enabled");
+            out.print("disabled");
         }
         out.println();
 
@@ -317,8 +319,10 @@ class HotspotUnsafe implements VirtualMachine {
             if (narrowKlassBase != 0) {
                 out.print(" and " + formatAddressAsHexByAddressSize(narrowKlassBase) + " base");
             }
+        } else if (addressSize == 4) {
+            out.print("not needed");
         } else {
-            out.print("not enabled");
+            out.print("disabled");
         }
         out.println();
 
@@ -686,7 +690,7 @@ class HotspotUnsafe implements VirtualMachine {
     }
 
     private String formatAddressAsHexByAddressSize(long address) {
-        return "0x" + String.format("%" + (addressSize * 2) + "s",
+        return "0x" + String.format("%s",
                 Long.toHexString(address).toUpperCase()).replace(' ', '0');
     }
 
