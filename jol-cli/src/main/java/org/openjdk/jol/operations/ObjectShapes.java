@@ -64,20 +64,10 @@ public class ObjectShapes implements Operation {
 
         for (final String arg : args) {
             if (arg.endsWith(".jar")) {
-                cs.submit(new Callable<Multiset<String>>() {
-                    @Override
-                    public Multiset<String> call() throws Exception {
-                        return processJAR(arg);
-                    }
-                });
+                cs.submit(() -> processJAR(arg));
             }
             if (arg.endsWith(".dump") || arg.endsWith("hprof") || arg.endsWith("hprof.gz")) {
-                cs.submit(new Callable<Multiset<String>>() {
-                    @Override
-                    public Multiset<String> call() throws Exception {
-                        return processHeapDump(arg);
-                    }
-                });
+                cs.submit(() -> processHeapDump(arg));
             }
         }
 

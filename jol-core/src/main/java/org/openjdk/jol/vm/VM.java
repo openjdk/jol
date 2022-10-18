@@ -36,20 +36,15 @@ import java.security.PrivilegedAction;
 public class VM {
 
     private static Unsafe tryUnsafe() {
-        return AccessController.doPrivileged(
-                new PrivilegedAction<Unsafe>() {
-                    @Override
-                    public Unsafe run() {
-                        try {
-                            Field unsafe = Unsafe.class.getDeclaredField("theUnsafe");
-                            unsafe.setAccessible(true);
-                            return (Unsafe) unsafe.get(null);
-                        } catch (NoSuchFieldException | IllegalAccessException e) {
-                            throw new IllegalStateException(e);
-                        }
-                    }
-                }
-        );
+        return AccessController.doPrivileged((PrivilegedAction<Unsafe>) () -> {
+            try {
+                Field unsafe = Unsafe.class.getDeclaredField("theUnsafe");
+                unsafe.setAccessible(true);
+                return (Unsafe) unsafe.get(null);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new IllegalStateException(e);
+            }
+        });
     }
 
     private static VirtualMachine INSTANCE;

@@ -85,13 +85,7 @@ class HotspotUnsafe implements VirtualMachine {
     private Object mfoUnsafe;
     private Method mfoMethod;
 
-    private final ThreadLocal<Object[]> BUFFERS = new ThreadLocal<Object[]>() {
-        @Override
-        protected Object[] initialValue() {
-            return new Object[1];
-        }
-    };
-
+    private final ThreadLocal<Object[]> BUFFERS = ThreadLocal.withInitial(() -> new Object[1]);
 
     HotspotUnsafe(Unsafe u, Instrumentation inst, UniverseData saDetails) {
         U = u;

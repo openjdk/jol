@@ -119,13 +119,13 @@ public abstract class ClasspathedOperation implements Operation {
 
     private static Object makeDefaultValue(Class<?> type) {
         if (type == boolean.class || type == Boolean.class)   return Boolean.FALSE;
-        if (type == byte.class    || type == Byte.class)      return Byte.valueOf((byte) 0);
-        if (type == short.class   || type == Short.class)     return Short.valueOf((short)0);
-        if (type == char.class    || type == Character.class) return Character.valueOf((char)0);
-        if (type == int.class     || type == Integer.class)   return Integer.valueOf(0);
-        if (type == float.class   || type == Float.class)     return Float.valueOf(0f);
-        if (type == long.class    || type == Long.class)      return Long.valueOf(0);
-        if (type == double.class  || type == Double.class)    return Double.valueOf(0d);
+        if (type == byte.class    || type == Byte.class)      return (byte) 0;
+        if (type == short.class   || type == Short.class)     return (short) 0;
+        if (type == char.class    || type == Character.class) return (char) 0;
+        if (type == int.class     || type == Integer.class)   return 0;
+        if (type == float.class   || type == Float.class)     return 0F;
+        if (type == long.class    || type == Long.class)      return 0L;
+        if (type == double.class  || type == Double.class)    return 0D;
         return null;
     }
 

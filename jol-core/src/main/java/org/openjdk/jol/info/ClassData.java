@@ -30,6 +30,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.vm.ContendedSupport;
@@ -398,16 +399,16 @@ public class ClassData {
         if (length != classData.length) {
             return false;
         }
-        if (arrayComponentKlass != null ? !arrayComponentKlass.equals(classData.arrayComponentKlass) : classData.arrayComponentKlass != null) {
+        if (!Objects.equals(arrayComponentKlass, classData.arrayComponentKlass)) {
             return false;
         }
-        if (arrayKlass != null ? !arrayKlass.equals(classData.arrayKlass) : classData.arrayKlass != null) {
+        if (!Objects.equals(arrayKlass, classData.arrayKlass)) {
             return false;
         }
-        if (classNames != null ? !classNames.equals(classData.classNames) : classData.classNames != null) {
+        if (!Objects.equals(classNames, classData.classNames)) {
             return false;
         }
-        if (fields != null ? !fields.equals(classData.fields) : classData.fields != null) {
+        if (!Objects.equals(fields, classData.fields)) {
             return false;
         }
 

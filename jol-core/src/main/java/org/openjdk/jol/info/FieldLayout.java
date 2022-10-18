@@ -129,7 +129,7 @@ public class FieldLayout implements Comparable<FieldLayout> {
 
     @Override
     public int compareTo(FieldLayout o) {
-        return Long.valueOf(offset).compareTo(o.offset);
+        return Long.compare(offset, o.offset);
     }
 
     @Override

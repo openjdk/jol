@@ -97,13 +97,10 @@ public class JOLSample_27_Colocation {
     private static void addElements(final int count, final Map<Object, Object> chm) throws InterruptedException {
         ExecutorService pool = Executors.newCachedThreadPool();
 
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                for (int c = 0; c < count; c++) {
-                    Object o = new Object();
-                    chm.put(o, o);
-                }
+        Runnable task = () -> {
+            for (int c = 0; c < count; c++) {
+                Object o = new Object();
+                chm.put(o, o);
             }
         };
 

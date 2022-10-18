@@ -128,7 +128,7 @@ questions.
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jol.target>1.7</jol.target>
+        <jol.target>1.8</jol.target>
     </properties>
 
 </project>
