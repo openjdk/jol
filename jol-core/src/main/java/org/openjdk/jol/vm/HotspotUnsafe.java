@@ -111,7 +111,7 @@ class HotspotUnsafe implements VirtualMachine {
         narrowKlassBase = saDetails.getNarrowKlassBase();
 
         sizes = new Sizes(this);
-        lilliputVM = guessLilliput(objectHeaderSize);
+        lilliputVM = guessLilliput(addressSize);
     }
 
     HotspotUnsafe(Unsafe u, Instrumentation inst) {
