@@ -317,10 +317,12 @@ public class HeapDumpReader {
     private long readValue(int type) throws HeapDumpException {
         switch (type) {
             case 2: // object
-                if (idSize == 4)
+                if (idSize == 4) {
                     return read_U4();
-                if (idSize == 8)
+                }
+                if (idSize == 8) {
                     return read_U8();
+                }
                 throw new HeapDumpException("Illegal ID size");
 
             case 4: // boolean
@@ -345,10 +347,12 @@ public class HeapDumpReader {
     private int getSize(int type) throws HeapDumpException {
         switch (type) {
             case 2: // object
-                if (idSize == 4)
+                if (idSize == 4) {
                     return 4;
-                if (idSize == 8)
+                }
+                if (idSize == 8) {
                     return 8;
+                }
                 throw new HeapDumpException("Illegal ID size");
             case 4: // boolean
             case 8: // byte
@@ -398,10 +402,12 @@ public class HeapDumpReader {
 
     private long read_ID() throws HeapDumpException {
         int read = read(buf, idSize);
-        if (read == 4)
+        if (read == 4) {
             return ((long)wrapBuf.getInt(0) & 0xFFFFFFFFL);
-        if (read == 8)
+        }
+        if (read == 8) {
             return wrapBuf.getLong(0);
+        }
         throw new HeapDumpException("Unable to read " + idSize + " bytes");
     }
 
@@ -433,7 +439,9 @@ public class HeapDumpReader {
         int r;
         StringBuilder sb = new StringBuilder();
         while ((r = read()) != -1) {
-            if (r == 0) break;
+            if (r == 0) {
+                break;
+            }
             sb.append((char) (r & 0xFF));
         }
         return sb.toString();
@@ -443,7 +451,9 @@ public class HeapDumpReader {
         StringBuilder sb = new StringBuilder();
         for (long l = 0; l < len; l++) {
             int r = read();
-            if (r == -1) break;
+            if (r == -1) {
+                break;
+            }
             sb.append((char) (r & 0xFF));
         }
         return sb.toString();

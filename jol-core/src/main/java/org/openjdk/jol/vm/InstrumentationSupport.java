@@ -57,13 +57,17 @@ class InstrumentationSupport {
     }
 
     static Instrumentation instance() {
-        if (INSTRUMENTATION != null) return INSTRUMENTATION;
+        if (INSTRUMENTATION != null) {
+            return INSTRUMENTATION;
+        }
 
         if (TRY_INSTALL_ATTACH) {
             tryAlreadyAttached();
         }
 
-        if (INSTRUMENTATION != null) return INSTRUMENTATION;
+        if (INSTRUMENTATION != null) {
+            return INSTRUMENTATION;
+        }
 
         if (TRY_DYNAMIC_ATTACH) {
             try {

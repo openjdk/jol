@@ -169,7 +169,7 @@ public class HotSpotLayouter implements Layouter {
             for (FieldAllocationType atype : FieldAllocationType.values()) {
                 fieldsAllocationCount.put(atype, 0);
                 nextOffset.put(atype,  0);
-                spaceOffset.put(atype, new ArrayDeque<Integer>());
+                spaceOffset.put(atype, new ArrayDeque<>());
             }
             allocationTypeSizes.put(OOP,    model.sizeOf("oop"));
             allocationTypeSizes.put(BYTE,   model.sizeOf("byte"));
@@ -209,11 +209,11 @@ public class HotSpotLayouter implements Layouter {
             // The packing code below relies on these counts to determine if some field
             // can be squeezed into the alignment gap. Contended fields are obviously
             // exempt from that.
-            int doubleCount = fieldsAllocationCount.get(DOUBLE) - (facContended.containsKey(DOUBLE) ? facContended.get(DOUBLE) : 0);
-            int wordCount   = fieldsAllocationCount.get(WORD)   - (facContended.containsKey(WORD)   ? facContended.get(WORD)   : 0);
-            int shortCount  = fieldsAllocationCount.get(SHORT)  - (facContended.containsKey(SHORT)  ? facContended.get(SHORT)  : 0);
-            int byteCount   = fieldsAllocationCount.get(BYTE)   - (facContended.containsKey(BYTE)   ? facContended.get(BYTE)   : 0);
-            int oopCount    = fieldsAllocationCount.get(OOP)    - (facContended.containsKey(OOP)    ? facContended.get(OOP)    : 0);
+            int doubleCount = fieldsAllocationCount.get(DOUBLE) - (facContended.getOrDefault(DOUBLE, 0));
+            int wordCount   = fieldsAllocationCount.get(WORD)   - (facContended.getOrDefault(WORD, 0));
+            int shortCount  = fieldsAllocationCount.get(SHORT)  - (facContended.getOrDefault(SHORT, 0));
+            int byteCount   = fieldsAllocationCount.get(BYTE)   - (facContended.getOrDefault(BYTE, 0));
+            int oopCount    = fieldsAllocationCount.get(OOP)    - (facContended.getOrDefault(OOP, 0));
 
             int firstOopOffset = 0; // will be set for first oop field
 
@@ -296,10 +296,14 @@ public class HotSpotLayouter implements Layouter {
             for (FieldData f : clsData.ownFields()) {
 
                 // skip already laid out fields
-                if (layoutedFields.contains(f)) continue;
+                if (layoutedFields.contains(f)) {
+                    continue;
+                }
 
                 // contended instance fields are handled below
-                if (f.isContended()) continue;
+                if (f.isContended()) {
+                    continue;
+                }
 
                 FieldAllocationType atype = FieldAllocationType.allocationTypeFor(f);
                 int allocationTypeSize = allocationTypeSizes.get(atype);
@@ -352,10 +356,14 @@ public class HotSpotLayouter implements Layouter {
                     for (FieldData f : clsData.ownFields()) {
 
                         // skip already laid out fields
-                        if (layoutedFields.contains(f)) continue;
+                        if (layoutedFields.contains(f)) {
+                            continue;
+                        }
 
                         // skip non-contended fields and fields from different group
-                        if (!f.isContended() || !f.contendedGroup().equals(currentGroup)) continue;
+                        if (!f.isContended() || !f.contendedGroup().equals(currentGroup)) {
+                            continue;
+                        }
 
                         FieldAllocationType atype = FieldAllocationType.allocationTypeFor(f);
 

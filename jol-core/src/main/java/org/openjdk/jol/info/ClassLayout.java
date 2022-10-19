@@ -465,8 +465,12 @@ public class ClassLayout {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ClassLayout that = (ClassLayout) o;
         return fields.equals(that.fields) &&
                 model.equals(that.model);

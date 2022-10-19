@@ -72,15 +72,12 @@ public class JOLSample_14_FatLocking {
         out.println("**** Fresh object");
         out.println(layout.toPrintable());
 
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (a) {
-                    try {
-                        TimeUnit.SECONDS.sleep(10);
-                    } catch (InterruptedException e) {
-                        return;
-                    }
+        Thread t = new Thread(() -> {
+            synchronized (a) {
+                try {
+                    TimeUnit.SECONDS.sleep(10);
+                } catch (InterruptedException e) {
+                    // Do nothing
                 }
             }
         });

@@ -271,6 +271,7 @@ public class ServiceabilityAgentSupport {
                 args.add("--add-exports"); args.add("jdk.hotspot.agent/sun.jvm.hotspot=ALL-UNNAMED");
                 args.add("--add-exports"); args.add("jdk.hotspot.agent/sun.jvm.hotspot.runtime=ALL-UNNAMED");
                 args.add("--add-exports"); args.add("jdk.hotspot.agent/sun.jvm.hotspot.memory=ALL-UNNAMED");
+                args.add("--add-exports"); args.add("jdk.hotspot.agent/sun.jvm.hotspot.oops=ALL-UNNAMED");
                 break;
             default:
                 throw new IllegalStateException("Unhandled style: " + style);

@@ -43,57 +43,53 @@ class UniverseTask implements Task {
         try {
             Class<?> universeClass = ClassUtils.loadClass(UNIVERSE_CLASSNAME);
             Class<?> vmClass = ClassUtils.loadClass(VM_CLASSNAME);
-            Object vm = ClassUtils.loadClass(VM_CLASSNAME).getMethod("getVM").invoke(null);
 
-            Method getOopSizeMethod = vmClass.getMethod("getOopSize");
-            Method getObjectAlignmentInBytesMethod = vmClass.getMethod("getObjectAlignmentInBytes");
+            Method vmMethod = vmClass.getMethod("getVM");
 
-            Method getHeapOopSizeMethod = vmClass.getMethod("getHeapOopSize");
-            Method isCompressedOopsEnabledMethod = vmClass.getMethod("isCompressedOopsEnabled");
-            Method getNarrowOopBaseMethod = universeClass.getMethod("getNarrowOopBase");
-            Method getNarrowOopShiftMethod = universeClass.getMethod("getNarrowOopShift");
+            Method heapOopSizeMethod = vmClass.getMethod("getHeapOopSize");
+            Method oopSizeMethod = vmClass.getMethod("getOopSize");
+            Method objectAlignmentMethod = vmClass.getMethod("getObjectAlignmentInBytes");
 
-            Method isCompressedKlassPtrsEnabledMethod = null;
-            Method getNarrowKlassBaseMethod = null;
-            Method getNarrowKlassShiftMethod = null;
+            Method compOopsEnabledMethod = vmClass.getMethod("isCompressedOopsEnabled");
+            Method compKlassEnabledMethod = vmClass.getMethod("isCompressedKlassPointersEnabled");
 
+            Method narrowOopBaseMethod = null;
+            Method narrowOopShiftMethod = null;
             try {
-                isCompressedKlassPtrsEnabledMethod = vmClass.getMethod("isCompressedKlassPointersEnabled");
-                getNarrowKlassBaseMethod = universeClass.getMethod("getNarrowKlassBase");
-                getNarrowKlassShiftMethod = universeClass.getMethod("getNarrowKlassShift");
-            } catch (NoSuchMethodException e) {
-                // There is nothing to do, seems target JVM is not Java 8
+                // Past JDK 13, JDK-8223136, we have a special class for this data.
+                Class<?> coopClass = ClassUtils.loadClass(COMP_OOPS_CLASSNAME);
+                narrowOopBaseMethod = coopClass.getMethod("getBase");
+                narrowOopShiftMethod = coopClass.getMethod("getShift");
+            } catch (Exception e) {
+                narrowOopBaseMethod = universeClass.getMethod("getNarrowOopBase");
+                narrowOopShiftMethod = universeClass.getMethod("getNarrowOopShift");
             }
 
-            int addressSize = ((Long) getOopSizeMethod.invoke(vm)).intValue();
-            int objectAlignment = (Integer) getObjectAlignmentInBytesMethod.invoke(vm);
+            Method narrowKlassBaseMethod = null;
+            Method narrowKlassShiftMethod = null;
+            try {
+                // Past JDK 13, JDK-8223136, we have a special class for this data.
+                Class<?> coopClass = ClassUtils.loadClass(COMP_KLASS_CLASSNAME);
+                narrowKlassBaseMethod = coopClass.getMethod("getBase");
+                narrowKlassShiftMethod = coopClass.getMethod("getShift");
+            } catch (Exception e) {
+                narrowKlassBaseMethod = universeClass.getMethod("getNarrowKlassBase");
+                narrowKlassShiftMethod = universeClass.getMethod("getNarrowKlassShift");
+            }
 
-            int oopSize = (Integer) getHeapOopSizeMethod.invoke(vm);
-            boolean compressedOopsEnabled = (Boolean) isCompressedOopsEnabledMethod.invoke(vm);
-            long narrowOopBase = (Long) getNarrowOopBaseMethod.invoke(null);
-            int narrowOopShift = (Integer) getNarrowOopShiftMethod.invoke(null);
+            Object vm = vmMethod.invoke(null);
 
-            /*
-             * If compressed klass references is not supported (before Java 8),
-             * use compressed oop references values instead of them.
-             */
-
-            boolean compressedKlassPtrsEnabled = isCompressedKlassPtrsEnabledMethod != null ?
-                    (Boolean) isCompressedKlassPtrsEnabledMethod.invoke(vm) : compressedOopsEnabled;
-            long narrowKlassBase = getNarrowKlassBaseMethod != null ?
-                    (Long) getNarrowKlassBaseMethod.invoke(null) : narrowOopBase;
-            int narrowKlassShift = getNarrowKlassShiftMethod != null ?
-                    (Integer) getNarrowKlassShiftMethod.invoke(null) : narrowOopShift;
-
-            return new UniverseData(addressSize,
-                                                        objectAlignment,
-                                                        oopSize,
-                                                        compressedOopsEnabled,
-                                                        narrowOopBase,
-                                                        narrowOopShift,
-                                                        compressedKlassPtrsEnabled,
-                                                        narrowKlassBase,
-                                                        narrowKlassShift);
+            return new UniverseData(
+                    ((Long) oopSizeMethod.invoke(vm)).intValue(),
+                    (Integer) objectAlignmentMethod.invoke(vm),
+                    (Integer) heapOopSizeMethod.invoke(vm),
+                    (Boolean) compOopsEnabledMethod.invoke(vm),
+                    (Long) narrowOopBaseMethod.invoke(null),
+                    (Integer) narrowOopShiftMethod.invoke(null),
+                    (Boolean) compKlassEnabledMethod.invoke(vm),
+                    (Long) narrowKlassBaseMethod.invoke(null),
+                    (Integer) narrowKlassShiftMethod.invoke(null)
+            );
         } catch (Throwable t) {
             throw new RuntimeException(t.getMessage(), t);
         }
