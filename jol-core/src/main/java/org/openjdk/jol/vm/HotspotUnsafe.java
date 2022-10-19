@@ -294,37 +294,45 @@ class HotspotUnsafe implements VirtualMachine {
         StringWriter sw = new StringWriter();
         PrintWriter out = new PrintWriter(sw);
 
-        out.println("# Running " + (addressSize * 8) + "-bit HotSpot VM.");
+        out.println("# VM mode: " + (addressSize * 8) + " bits");
 
         if (lilliputVM) {
-            out.println("# Lilliput VM detected (experimental).");
+            out.println("# Lilliput VM detected (experimental)");
         }
 
+        out.print("# Compressed references (oops): ");
         if (compressedOopsEnabled) {
+            out.print(narrowOopShift + "-bit shift");
             if (narrowOopBase != 0) {
-                out.println("# Using compressed oop with " +
-                        formatAddressAsHexByAddressSize(narrowOopBase) + " base address and " +
-                        narrowOopShift + "-bit shift.");
-            } else {
-                out.println("# Using compressed oop with " + narrowOopShift + "-bit shift.");
+                out.print(" and " + formatAddressAsHexByAddressSize(narrowOopBase) + " base");
             }
+        } else if (addressSize == 4){
+            out.print("not needed");
+        } else {
+            out.print("disabled");
         }
+        out.println();
+
+        out.print("# Compressed class pointers: ");
         if (compressedKlassOopsEnabled) {
+            out.print(narrowKlassShift + "-bit shift");
             if (narrowKlassBase != 0) {
-                out.println("# Using compressed klass with " +
-                        formatAddressAsHexByAddressSize(narrowKlassBase) + " base address and " +
-                        narrowKlassShift + "-bit shift.");
-            } else {
-                out.println("# Using compressed klass with " + narrowKlassShift + "-bit shift.");
+                out.print(" and " + formatAddressAsHexByAddressSize(narrowKlassBase) + " base");
             }
+        } else if (addressSize == 4) {
+            out.print("not needed");
+        } else {
+            out.print("disabled");
         }
-        if (!isAccurate && (compressedOopsEnabled || compressedKlassOopsEnabled)) {
+        out.println();
+
+        if (addressSize != 4 && !isAccurate && (compressedOopsEnabled || compressedKlassOopsEnabled)) {
             out.println("# WARNING | Compressed references base/shifts are guessed by the experiment!");
             out.println("# WARNING | Therefore, computed addresses are just guesses, and ARE NOT RELIABLE.");
             out.println("# WARNING | Make sure to attach Serviceability Agent to get the reliable addresses.");
         }
 
-        out.println("# Objects are " + objectAlignment + " bytes aligned.");
+        out.println("# Object alignment: " + objectAlignment + " bytes");
 
         out.printf("# %-20s %4s, %4s, %4s, %4s, %4s, %4s, %4s, %4s, %4s%n",
                 "",
@@ -682,7 +690,7 @@ class HotspotUnsafe implements VirtualMachine {
     }
 
     private String formatAddressAsHexByAddressSize(long address) {
-        return "0x" + String.format("%" + (addressSize * 2) + "s",
+        return "0x" + String.format("%s",
                 Long.toHexString(address).toUpperCase()).replace(' ', '0');
     }
 
