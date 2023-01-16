@@ -99,7 +99,8 @@ public class Model64_Lilliput implements DataModel {
     public String toString() {
         return "64-bit model" +
                 ", Lilliput (" + (target ? "ultimate target" : "current experiment") + ")" +
-                (compRefs ? ", compressed references" : "") +
+                ", " + (compRefs ? "" : "NO ") + "compressed references" +
+                ", compressed classes" +
                 ", " + align + "-byte aligned";
     }
 
