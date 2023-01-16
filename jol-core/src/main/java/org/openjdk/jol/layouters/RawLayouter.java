@@ -34,7 +34,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * Layouter which packs all the fields together, regardless of the alignment.
+ * Layouter which packs all the fields together, regardless of the alignment or headers.
  *
  * @author Aleksey Shipilev
  */
@@ -52,7 +52,7 @@ public class RawLayouter implements Layouter {
 
         if (data.isArray()) {
             // special case of arrays
-            int base = model.arrayHeaderSize();
+            int base = 0;
             int scale = model.sizeOf(data.arrayComponentType());
 
             long instanceSize = base + data.arrayLength() * scale;
@@ -60,7 +60,7 @@ public class RawLayouter implements Layouter {
             return ClassLayout.create(data, result, model, instanceSize, false);
         }
 
-        int offset = model.headerSize();
+        int offset = 0;
         for (FieldData f : data.fields()) {
             int size = model.sizeOf(f.typeClass());
             result.add(new FieldLayout(f, offset, size));
@@ -68,7 +68,7 @@ public class RawLayouter implements Layouter {
         }
 
         if (result.isEmpty()) {
-            return ClassLayout.create(data, result, model, model.headerSize(), false);
+            return ClassLayout.create(data, result, model, 0, false);
         } else {
             FieldLayout f = result.last();
             return ClassLayout.create(data, result, model, f.offset() + f.size(), false);

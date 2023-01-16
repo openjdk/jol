@@ -43,6 +43,7 @@ public class Main {
         registerOperation(new ObjectShapes());
         registerOperation(new StringCompress());
         registerOperation(new HeapDumpStats());
+        registerOperation(new HeapDumpEstimates());
     }
 
     private static void registerOperation(Operation op) {
