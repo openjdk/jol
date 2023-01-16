@@ -33,24 +33,26 @@ public class Model64_Lilliput implements DataModel {
 
     private final int align;
     private final boolean compRefs;
+    private final boolean target;
 
     public Model64_Lilliput() {
-        this(false, 8);
+        this(false, 8, false);
     }
 
-    public Model64_Lilliput(boolean compRefs, int align) {
+    public Model64_Lilliput(boolean compRefs, int align, boolean target) {
         this.compRefs = compRefs;
         this.align = align;
+        this.target = target;
     }
 
     @Override
     public int markHeaderSize() {
-        return 8;
+        return target ? 1 : 8;
     }
 
     @Override
     public int classHeaderSize() {
-        return 0;
+        return target ? 3 : 0;
     }
 
     @Override
@@ -95,7 +97,8 @@ public class Model64_Lilliput implements DataModel {
 
     @Override
     public String toString() {
-        return "64-bit model, Lilliput (experimental)" +
+        return "64-bit model" +
+                ", Lilliput (" + (target ? "ultimate target" : "current experiment") + ")" +
                 (compRefs ? ", compressed references" : "") +
                 ", " + align + "-byte aligned";
     }

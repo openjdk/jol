@@ -42,10 +42,12 @@ public class EstimatedModels {
     };
 
     static final DataModel[] MODELS_LILLIPUT = new DataModel[]{
-            new Model64_Lilliput(false, 8),
-            new Model64_Lilliput(false, 16),
-            new Model64_Lilliput(true, 8),
-            new Model64_Lilliput(true, 16),
+            new Model64_Lilliput(false, 8, false),
+            new Model64_Lilliput(true, 8, false),
+            new Model64_Lilliput(true, 16, false),
+            new Model64_Lilliput(false, 8, true),
+            new Model64_Lilliput(true, 8, true),
+            new Model64_Lilliput(true, 16, true),
     };
 
 }
