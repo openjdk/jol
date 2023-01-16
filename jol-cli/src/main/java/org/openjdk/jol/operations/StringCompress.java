@@ -60,11 +60,11 @@ public class StringCompress implements Operation {
 
     static final DataModel[] DATA_MODELS = new DataModel[]{
             new Model32(),
-            new Model64(),
-            new Model64_COOPS_CCPS(),
-            new Model64_COOPS_CCPS(16),
-            new Model64_CCPS(),
-            new Model64_CCPS(16),
+            new Model64(false, false),
+            new Model64(true, true),
+            new Model64(true, true, 16),
+            new Model64(false, true),
+            new Model64(false, true, 16),
     };
 
 
