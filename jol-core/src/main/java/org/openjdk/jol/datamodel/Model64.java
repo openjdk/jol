@@ -27,20 +27,24 @@ package org.openjdk.jol.datamodel;
 import java.util.Objects;
 
 /**
- * 64 bits model, no compressed references, no compressed class pointers.
+ * 64 bits model.
  *
  * @author Aleksey Shipilev
  */
 public class Model64 implements DataModel {
 
     private final int align;
+    private final boolean compRefs;
+    private final boolean compKlass;
 
-    public Model64() {
-        this(8);
+    public Model64(boolean compressedRefs, boolean compressedClasses, int align) {
+        this.compRefs = compressedRefs;
+        this.compKlass = compressedClasses;
+        this.align = align;
     }
 
-    public Model64(int align) {
-        this.align = align;
+    public Model64(boolean compressedRefs, boolean compressedClasses) {
+        this(compressedRefs, compressedClasses, 8);
     }
 
     @Override
@@ -50,7 +54,7 @@ public class Model64 implements DataModel {
 
     @Override
     public int classHeaderSize() {
-        return 8;
+        return compKlass ? 4 : 8;
     }
 
     @Override
@@ -84,7 +88,7 @@ public class Model64 implements DataModel {
             case "double":
                 return 8;
             default:
-                return 8;
+                return (compRefs ? 4 : 8);
         }
     }
 
@@ -95,7 +99,10 @@ public class Model64 implements DataModel {
 
     @Override
     public String toString() {
-        return "64-bit model, " + align + "-byte aligned";
+        return "64-bit model" +
+                ", " + (compRefs ? "" : "NO ") + "compressed references" +
+                ", " + (compKlass ? "" : "NO ") + "compressed classes" +
+                ", " + align + "-byte aligned";
     }
 
     @Override
