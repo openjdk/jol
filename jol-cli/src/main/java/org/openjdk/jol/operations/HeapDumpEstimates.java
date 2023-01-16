@@ -60,23 +60,17 @@ public class HeapDumpEstimates implements Operation {
         String path = args[0];
 
         out.println("Heap Dump: " + path);
+        out.println();
 
         HeapDumpReader reader = new HeapDumpReader(new File(path));
         Multiset<ClassData> data = reader.parse();
 
         long rawSize = 0;
-        long rawCount = 0;
         {
             RawLayouter rawLayouter = new RawLayouter(new Model32());
             for (ClassData cd : data.keys()) {
                 rawSize += rawLayouter.layout(cd).instanceSize() * data.count(cd);
-                rawCount += data.count(cd);
             }
-
-            out.println("***** User data");
-            out.printf("  Total data size: %d bytes%n", rawSize);
-            out.printf("  Object count: %d%n", rawCount);
-            out.println();
         }
 
         for (DataModel model : EstimatedModels.MODELS_JDK8) {
@@ -106,8 +100,9 @@ public class HeapDumpEstimates implements Operation {
         for (ClassData cd : data.keys()) {
             size += layouter.layout(cd).instanceSize() * data.count(cd);
         }
+        out.printf("  Total data size:   %d bytes%n", rawSize);
         out.printf("  Total object size: %d bytes%n", size);
-        out.printf("  Object overhead: %.2f%%%n", (size - rawSize) * 100.0 / rawSize);
+        out.printf("  Object overhead:   %.1f%%%n", (size - rawSize) * 100.0 / size);
         out.println();
     }
 
