@@ -88,7 +88,7 @@ public class HeapDumpEstimates implements Operation {
         out.println();
 
         final String msg_noCoops =          "64-bit, no comp refs (>32 GB heap, default align)";
-        final String msg_noCoops_ccp =      "64-bit, no comp refs, but comp klasses (>32 GB heap, default align)";
+        final String msg_noCoops_ccp =      "64-bit, no comp refs, but comp classes (>32 GB heap, default align)";
         final String msg_coops =            "64-bit, comp refs (<32 GB heap, default align)";
         final String msg_coops_align16 =    "64-bit, comp refs with large align (   32..64GB heap,  16-byte align)";
         final String msg_coops_align32 =    "64-bit, comp refs with large align (  64..128GB heap,  32-byte align)";
@@ -116,8 +116,8 @@ public class HeapDumpEstimates implements Operation {
         out.println("=== Stock 64-bit OpenJDK (JDK < 15)");
         out.println();
 
-        long jdk8_coops =           computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true), 8));
         long jdk8_noCoops =         computeWithLayouter(data, new HotSpotLayouter(new Model64(false, false), 8));
+        long jdk8_coops =           computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 8), 8));
         long jdk8_coops_align16 =   computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 16), 8));
         long jdk8_coops_align32 =   computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 32), 8));
         long jdk8_coops_align64 =   computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 64), 8));
@@ -180,8 +180,8 @@ public class HeapDumpEstimates implements Operation {
         }
         out.println();
 
-        long jdk15_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true), 15));
         long jdk15_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64(false, true), 15));
+        long jdk15_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 8), 15));
         long jdk15_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 16), 15));
         long jdk15_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 32), 15));
         long jdk15_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 64), 15));
@@ -258,8 +258,8 @@ public class HeapDumpEstimates implements Operation {
         out.println("=== Experimental 64-bit OpenJDK: Lilliput, 64-bit headers");
         out.println();
 
-        long jdkLilliput_coops =            computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 8, false), 99));
         long jdkLilliput_noCoops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false, 8, false), 99));
+        long jdkLilliput_coops =            computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 8, false), 99));
         long jdkLilliput_coops_align16 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 16, false), 99));
         long jdkLilliput_coops_align32 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 32, false), 99));
         long jdkLilliput_coops_align64 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 64, false), 99));
@@ -340,8 +340,8 @@ public class HeapDumpEstimates implements Operation {
         out.println("=== Experimental 64-bit OpenJDK: Lilliput, 32-bit headers");
         out.println();
 
-        long jdkLilliput32_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 8, true), 99));
         long jdkLilliput32_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false, 8, true), 99));
+        long jdkLilliput32_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 8, true), 99));
         long jdkLilliput32_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 16, true), 99));
         long jdkLilliput32_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 32, true), 99));
         long jdkLilliput32_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 64, true), 99));
