@@ -6,6 +6,8 @@ on:
       - master
       - pr/*
   workflow_dispatch:
+  schedule:
+      - cron: 0 0 * * 0
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -29,6 +31,7 @@ jobs:
         distribution: temurin
         java-version: ${{ matrix.java }}
         cache: maven
+        check-latest: true
     - name: Build all without tests
       run: mvn clean install -DskipTests -B --file pom.xml
     - name: Run tests
