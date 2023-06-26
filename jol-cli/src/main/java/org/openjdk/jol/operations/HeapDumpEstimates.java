@@ -62,6 +62,11 @@ public class HeapDumpEstimates implements Operation {
         out.println("Heap Dump: " + path);
         out.println();
 
+        out.println("'Overhead' comes from additional metadata, representation and alignment losses.");
+        out.println("'JVM mode' is the relative footprint change compared to the best JVM mode in this JDK.");
+        out.println("'Upgrade From' is the relative footprint change against the same mode in other JDKs.");
+        out.println();
+
         HeapDumpReader reader = new HeapDumpReader(new File(path));
         Multiset<ClassData> data = reader.parse();
 
@@ -85,20 +90,14 @@ public class HeapDumpEstimates implements Operation {
         final String msg_noCoops =          "64-bit, no comp refs (>32 GB heap, default align)";
         final String msg_noCoops_ccp =      "64-bit, no comp refs, but comp klasses (>32 GB heap, default align)";
         final String msg_coops =            "64-bit, comp refs (<32 GB heap, default align)";
-        final String msg_coops_align16 =    "64-bit, comp refs with large align (32..64GB heap, 16-byte align)";
-        final String msg_coops_align32 =    "64-bit, comp refs with large align (64..128GB heap, 32-byte align)";
-        final String msg_coops_align64 =    "64-bit, comp refs with large align (128..256GB heap, 64-byte align)";
-        final String msg_coops_align128 =   "64-bit, comp refs with large align (256..512GB heap, 128-byte align)";
+        final String msg_coops_align16 =    "64-bit, comp refs with large align (   32..64GB heap,  16-byte align)";
+        final String msg_coops_align32 =    "64-bit, comp refs with large align (  64..128GB heap,  32-byte align)";
+        final String msg_coops_align64 =    "64-bit, comp refs with large align ( 128..256GB heap,  64-byte align)";
+        final String msg_coops_align128 =   "64-bit, comp refs with large align ( 256..512GB heap, 128-byte align)";
         final String msg_coops_align256 =   "64-bit, comp refs with large align (512..1024GB heap, 256-byte align)";
-
-        final String desc = "  'Overhead' comes from additional metadata, representation and alignment losses.\n" +
-                "  'JVM mode' is relative footprint change compared to the best JVM mode in this JDK.\n" +
-                "  'Upgrade From' is the relative footprint change against the same mode in other JDKs.\n";
-
 
         out.println("=== Stock 32-bit OpenJDK");
         out.println();
-        out.println(desc);
 
         long jdk8_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 8));;
         {
@@ -116,7 +115,6 @@ public class HeapDumpEstimates implements Operation {
 
         out.println("=== Stock 64-bit OpenJDK (JDK < 15)");
         out.println();
-        out.println(desc);
 
         long jdk8_coops =           computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true), 8));
         long jdk8_noCoops =         computeWithLayouter(data, new HotSpotLayouter(new Model64(false, false), 8));
@@ -192,7 +190,6 @@ public class HeapDumpEstimates implements Operation {
 
         out.println("=== Stock 64-bit OpenJDK (JDK >= 15)");
         out.println();
-        out.println(desc);
 
         {
             out.printf("%37s %s%n", "", "Upgrade From:");
@@ -260,7 +257,6 @@ public class HeapDumpEstimates implements Operation {
 
         out.println("=== Experimental 64-bit OpenJDK: Lilliput, 64-bit headers");
         out.println();
-        out.println(desc);
 
         long jdkLilliput_coops =            computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 8, false), 99));
         long jdkLilliput_noCoops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false, 8, false), 99));
@@ -343,7 +339,6 @@ public class HeapDumpEstimates implements Operation {
 
         out.println("=== Experimental 64-bit OpenJDK: Lilliput, 32-bit headers");
         out.println();
-        out.println(desc);
 
         long jdkLilliput32_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 8, true), 99));
         long jdkLilliput32_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false, 8, true), 99));
