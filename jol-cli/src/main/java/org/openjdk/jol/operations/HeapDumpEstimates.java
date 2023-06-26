@@ -31,6 +31,7 @@ import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.layouters.HotSpotLayouter;
 import org.openjdk.jol.layouters.Layouter;
 import org.openjdk.jol.layouters.RawLayouter;
+import org.openjdk.jol.util.MathUtil;
 import org.openjdk.jol.util.Multiset;
 
 import java.io.File;
@@ -82,8 +83,8 @@ public class HeapDumpEstimates implements Operation {
 
         out.println("=== Overall Statistics");
         out.println();
-        out.printf("%10s,     %s%n", inProperUnits(rawCount), "Total objects");
-        out.printf("%10s,     %s%n", inProperUnits(rawSize), "Total data size");
+        out.printf("%10s,     %s%n", MathUtil.inProperUnits(rawCount), "Total objects");
+        out.printf("%10s,     %s%n", MathUtil.inProperUnits(rawSize), "Total data size");
         out.printf("%10s,     %s%n", String.format("%.2f", 1F * rawSize / rawCount), "Average data per object");
         out.println();
 
@@ -106,8 +107,8 @@ public class HeapDumpEstimates implements Operation {
             );
 
             out.printf("%10s, %10s,     %s%n",
-                    inProperUnits(jdk8_32),
-                    diff(jdk8_32, rawSize),
+                    MathUtil.inProperUnits(jdk8_32),
+                    MathUtil.diffPercent(jdk8_32, rawSize),
                     "32-bit (<4 GB heap)"
             );
         }
@@ -130,51 +131,51 @@ public class HeapDumpEstimates implements Operation {
             );
 
             out.printf("%10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk8_noCoops),
-                    diff(jdk8_noCoops, rawSize),
-                    diff(jdk8_noCoops, jdk8_coops),
+                    MathUtil.inProperUnits(jdk8_noCoops),
+                    MathUtil.diffPercent(jdk8_noCoops, rawSize),
+                    MathUtil.diffPercent(jdk8_noCoops, jdk8_coops),
                     msg_noCoops
             );
 
             out.printf("%10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk8_coops),
-                    diff(jdk8_coops, rawSize),
-                    diff(jdk8_coops, jdk8_coops),
+                    MathUtil.inProperUnits(jdk8_coops),
+                    MathUtil.diffPercent(jdk8_coops, rawSize),
+                    MathUtil.diffPercent(jdk8_coops, jdk8_coops),
                     msg_coops
             );
 
             out.printf("%10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk8_coops_align16),
-                    diff(jdk8_coops_align16, rawSize),
-                    diff(jdk8_coops_align16, jdk8_coops),
+                    MathUtil.inProperUnits(jdk8_coops_align16),
+                    MathUtil.diffPercent(jdk8_coops_align16, rawSize),
+                    MathUtil.diffPercent(jdk8_coops_align16, jdk8_coops),
                     msg_coops_align16
             );
 
             out.printf("%10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk8_coops_align32),
-                    diff(jdk8_coops_align32, rawSize),
-                    diff(jdk8_coops_align32, jdk8_coops),
+                    MathUtil.inProperUnits(jdk8_coops_align32),
+                    MathUtil.diffPercent(jdk8_coops_align32, rawSize),
+                    MathUtil.diffPercent(jdk8_coops_align32, jdk8_coops),
                     msg_coops_align32
             );
 
             out.printf("%10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk8_coops_align64),
-                    diff(jdk8_coops_align64, rawSize),
-                    diff(jdk8_coops_align64, jdk8_coops),
+                    MathUtil.inProperUnits(jdk8_coops_align64),
+                    MathUtil.diffPercent(jdk8_coops_align64, rawSize),
+                    MathUtil.diffPercent(jdk8_coops_align64, jdk8_coops),
                     msg_coops_align64
             );
 
             out.printf("%10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk8_coops_align128),
-                    diff(jdk8_coops_align128, rawSize),
-                    diff(jdk8_coops_align128, jdk8_coops),
+                    MathUtil.inProperUnits(jdk8_coops_align128),
+                    MathUtil.diffPercent(jdk8_coops_align128, rawSize),
+                    MathUtil.diffPercent(jdk8_coops_align128, jdk8_coops),
                     msg_coops_align128
             );
 
             out.printf("%10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk8_coops_align256),
-                    diff(jdk8_coops_align256, rawSize),
-                    diff(jdk8_coops_align256, jdk8_coops),
+                    MathUtil.inProperUnits(jdk8_coops_align256),
+                    MathUtil.diffPercent(jdk8_coops_align256, rawSize),
+                    MathUtil.diffPercent(jdk8_coops_align256, jdk8_coops),
                     msg_coops_align256
             );
         }
@@ -198,58 +199,58 @@ public class HeapDumpEstimates implements Operation {
             );
 
             out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk15_noCoops),
-                    diff(jdk15_noCoops, rawSize),
-                    diff(jdk15_noCoops, jdk15_coops),
-                    diff(jdk15_noCoops, jdk8_noCoops),
+                    MathUtil.inProperUnits(jdk15_noCoops),
+                    MathUtil.diffPercent(jdk15_noCoops, rawSize),
+                    MathUtil.diffPercent(jdk15_noCoops, jdk15_coops),
+                    MathUtil.diffPercent(jdk15_noCoops, jdk8_noCoops),
                     msg_noCoops_ccp
             );
 
             out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk15_coops),
-                    diff(jdk15_coops, rawSize),
-                    diff(jdk15_coops, jdk15_coops),
-                    diff(jdk15_coops, jdk8_coops),
+                    MathUtil.inProperUnits(jdk15_coops),
+                    MathUtil.diffPercent(jdk15_coops, rawSize),
+                    MathUtil.diffPercent(jdk15_coops, jdk15_coops),
+                    MathUtil.diffPercent(jdk15_coops, jdk8_coops),
                     msg_coops
             );
 
             out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk15_coops_align16),
-                    diff(jdk15_coops_align16, rawSize),
-                    diff(jdk15_coops_align16, jdk15_coops),
-                    diff(jdk15_coops_align16, jdk8_coops_align16),
+                    MathUtil.inProperUnits(jdk15_coops_align16),
+                    MathUtil.diffPercent(jdk15_coops_align16, rawSize),
+                    MathUtil.diffPercent(jdk15_coops_align16, jdk15_coops),
+                    MathUtil.diffPercent(jdk15_coops_align16, jdk8_coops_align16),
                     msg_coops_align16
             );
 
             out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk15_coops_align32),
-                    diff(jdk15_coops_align32, rawSize),
-                    diff(jdk15_coops_align32, jdk15_coops),
-                    diff(jdk15_coops_align32, jdk8_coops_align32),
+                    MathUtil.inProperUnits(jdk15_coops_align32),
+                    MathUtil.diffPercent(jdk15_coops_align32, rawSize),
+                    MathUtil.diffPercent(jdk15_coops_align32, jdk15_coops),
+                    MathUtil.diffPercent(jdk15_coops_align32, jdk8_coops_align32),
                     msg_coops_align32
             );
 
             out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk15_coops_align64),
-                    diff(jdk15_coops_align64, rawSize),
-                    diff(jdk15_coops_align64, jdk15_coops),
-                    diff(jdk15_coops_align64, jdk8_coops_align64),
+                    MathUtil.inProperUnits(jdk15_coops_align64),
+                    MathUtil.diffPercent(jdk15_coops_align64, rawSize),
+                    MathUtil.diffPercent(jdk15_coops_align64, jdk15_coops),
+                    MathUtil.diffPercent(jdk15_coops_align64, jdk8_coops_align64),
                     msg_coops_align64
             );
 
             out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk15_coops_align128),
-                    diff(jdk15_coops_align128, rawSize),
-                    diff(jdk15_coops_align128, jdk15_coops),
-                    diff(jdk15_coops_align128, jdk8_coops_align128),
+                    MathUtil.inProperUnits(jdk15_coops_align128),
+                    MathUtil.diffPercent(jdk15_coops_align128, rawSize),
+                    MathUtil.diffPercent(jdk15_coops_align128, jdk15_coops),
+                    MathUtil.diffPercent(jdk15_coops_align128, jdk8_coops_align128),
                     msg_coops_align128
             );
 
             out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdk15_coops_align256),
-                    diff(jdk15_coops_align256, rawSize),
-                    diff(jdk15_coops_align256, jdk15_coops),
-                    diff(jdk15_coops_align256, jdk8_coops_align256),
+                    MathUtil.inProperUnits(jdk15_coops_align256),
+                    MathUtil.diffPercent(jdk15_coops_align256, rawSize),
+                    MathUtil.diffPercent(jdk15_coops_align256, jdk15_coops),
+                    MathUtil.diffPercent(jdk15_coops_align256, jdk8_coops_align256),
                     msg_coops_align256
             );
         }
@@ -273,65 +274,65 @@ public class HeapDumpEstimates implements Operation {
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput_noCoops),
-                    diff(jdkLilliput_noCoops, rawSize),
-                    diff(jdkLilliput_noCoops, jdkLilliput_coops),
-                    diff(jdkLilliput_noCoops, jdk8_noCoops),
-                    diff(jdkLilliput_noCoops, jdk15_noCoops),
+                    MathUtil.inProperUnits(jdkLilliput_noCoops),
+                    MathUtil.diffPercent(jdkLilliput_noCoops, rawSize),
+                    MathUtil.diffPercent(jdkLilliput_noCoops, jdkLilliput_coops),
+                    MathUtil.diffPercent(jdkLilliput_noCoops, jdk8_noCoops),
+                    MathUtil.diffPercent(jdkLilliput_noCoops, jdk15_noCoops),
                     msg_noCoops_ccp
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput_coops),
-                    diff(jdkLilliput_coops, rawSize),
-                    diff(jdkLilliput_coops, jdkLilliput_coops),
-                    diff(jdkLilliput_coops, jdk8_coops),
-                    diff(jdkLilliput_coops, jdk15_coops),
+                    MathUtil.inProperUnits(jdkLilliput_coops),
+                    MathUtil.diffPercent(jdkLilliput_coops, rawSize),
+                    MathUtil.diffPercent(jdkLilliput_coops, jdkLilliput_coops),
+                    MathUtil.diffPercent(jdkLilliput_coops, jdk8_coops),
+                    MathUtil.diffPercent(jdkLilliput_coops, jdk15_coops),
                     msg_coops
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput_coops_align16),
-                    diff(jdkLilliput_coops_align16, rawSize),
-                    diff(jdkLilliput_coops_align16, jdkLilliput_coops),
-                    diff(jdkLilliput_coops_align16, jdk8_coops_align16),
-                    diff(jdkLilliput_coops_align16, jdk15_coops_align16),
+                    MathUtil.inProperUnits(jdkLilliput_coops_align16),
+                    MathUtil.diffPercent(jdkLilliput_coops_align16, rawSize),
+                    MathUtil.diffPercent(jdkLilliput_coops_align16, jdkLilliput_coops),
+                    MathUtil.diffPercent(jdkLilliput_coops_align16, jdk8_coops_align16),
+                    MathUtil.diffPercent(jdkLilliput_coops_align16, jdk15_coops_align16),
                     msg_coops_align16
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput_coops_align32),
-                    diff(jdkLilliput_coops_align32, rawSize),
-                    diff(jdkLilliput_coops_align32, jdkLilliput_coops),
-                    diff(jdkLilliput_coops_align32, jdk8_coops_align32),
-                    diff(jdkLilliput_coops_align32, jdk15_coops_align32),
+                    MathUtil.inProperUnits(jdkLilliput_coops_align32),
+                    MathUtil.diffPercent(jdkLilliput_coops_align32, rawSize),
+                    MathUtil.diffPercent(jdkLilliput_coops_align32, jdkLilliput_coops),
+                    MathUtil.diffPercent(jdkLilliput_coops_align32, jdk8_coops_align32),
+                    MathUtil.diffPercent(jdkLilliput_coops_align32, jdk15_coops_align32),
                     msg_coops_align32
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput_coops_align64),
-                    diff(jdkLilliput_coops_align64, rawSize),
-                    diff(jdkLilliput_coops_align64, jdkLilliput_coops),
-                    diff(jdkLilliput_coops_align64, jdk8_coops_align64),
-                    diff(jdkLilliput_coops_align64, jdk15_coops_align64),
+                    MathUtil.inProperUnits(jdkLilliput_coops_align64),
+                    MathUtil.diffPercent(jdkLilliput_coops_align64, rawSize),
+                    MathUtil.diffPercent(jdkLilliput_coops_align64, jdkLilliput_coops),
+                    MathUtil.diffPercent(jdkLilliput_coops_align64, jdk8_coops_align64),
+                    MathUtil.diffPercent(jdkLilliput_coops_align64, jdk15_coops_align64),
                     msg_coops_align64
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput_coops_align128),
-                    diff(jdkLilliput_coops_align128, rawSize),
-                    diff(jdkLilliput_coops_align128, jdkLilliput_coops),
-                    diff(jdkLilliput_coops_align128, jdk8_coops_align128),
-                    diff(jdkLilliput_coops_align128, jdk15_coops_align128),
+                    MathUtil.inProperUnits(jdkLilliput_coops_align128),
+                    MathUtil.diffPercent(jdkLilliput_coops_align128, rawSize),
+                    MathUtil.diffPercent(jdkLilliput_coops_align128, jdkLilliput_coops),
+                    MathUtil.diffPercent(jdkLilliput_coops_align128, jdk8_coops_align128),
+                    MathUtil.diffPercent(jdkLilliput_coops_align128, jdk15_coops_align128),
                     msg_coops_align128
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput_coops_align256),
-                    diff(jdkLilliput_coops_align256, rawSize),
-                    diff(jdkLilliput_coops_align256, jdkLilliput_coops),
-                    diff(jdkLilliput_coops_align256, jdk8_coops_align256),
-                    diff(jdkLilliput_coops_align256, jdk15_coops_align256),
+                    MathUtil.inProperUnits(jdkLilliput_coops_align256),
+                    MathUtil.diffPercent(jdkLilliput_coops_align256, rawSize),
+                    MathUtil.diffPercent(jdkLilliput_coops_align256, jdkLilliput_coops),
+                    MathUtil.diffPercent(jdkLilliput_coops_align256, jdk8_coops_align256),
+                    MathUtil.diffPercent(jdkLilliput_coops_align256, jdk15_coops_align256),
                     msg_coops_align256
             );
         }
@@ -355,72 +356,72 @@ public class HeapDumpEstimates implements Operation {
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput32_noCoops),
-                    diff(jdkLilliput32_noCoops, rawSize),
-                    diff(jdkLilliput32_noCoops, jdkLilliput32_coops),
-                    diff(jdkLilliput32_noCoops, jdk8_noCoops),
-                    diff(jdkLilliput32_noCoops, jdk15_noCoops),
-                    diff(jdkLilliput32_noCoops, jdkLilliput_noCoops),
+                    MathUtil.inProperUnits(jdkLilliput32_noCoops),
+                    MathUtil.diffPercent(jdkLilliput32_noCoops, rawSize),
+                    MathUtil.diffPercent(jdkLilliput32_noCoops, jdkLilliput32_coops),
+                    MathUtil.diffPercent(jdkLilliput32_noCoops, jdk8_noCoops),
+                    MathUtil.diffPercent(jdkLilliput32_noCoops, jdk15_noCoops),
+                    MathUtil.diffPercent(jdkLilliput32_noCoops, jdkLilliput_noCoops),
                     msg_noCoops_ccp
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput32_coops),
-                    diff(jdkLilliput32_coops, rawSize),
-                    diff(jdkLilliput32_coops, jdkLilliput32_coops),
-                    diff(jdkLilliput32_coops, jdk8_coops),
-                    diff(jdkLilliput32_coops, jdk15_coops),
-                    diff(jdkLilliput32_coops, jdkLilliput_coops),
+                    MathUtil.inProperUnits(jdkLilliput32_coops),
+                    MathUtil.diffPercent(jdkLilliput32_coops, rawSize),
+                    MathUtil.diffPercent(jdkLilliput32_coops, jdkLilliput32_coops),
+                    MathUtil.diffPercent(jdkLilliput32_coops, jdk8_coops),
+                    MathUtil.diffPercent(jdkLilliput32_coops, jdk15_coops),
+                    MathUtil.diffPercent(jdkLilliput32_coops, jdkLilliput_coops),
                     msg_coops
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput32_coops_align16),
-                    diff(jdkLilliput32_coops_align16, rawSize),
-                    diff(jdkLilliput32_coops_align16, jdkLilliput32_coops),
-                    diff(jdkLilliput32_coops_align16, jdk8_coops_align16),
-                    diff(jdkLilliput32_coops_align16, jdk15_coops_align16),
-                    diff(jdkLilliput32_coops_align16, jdkLilliput_coops_align16),
+                    MathUtil.inProperUnits(jdkLilliput32_coops_align16),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align16, rawSize),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align16, jdkLilliput32_coops),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align16, jdk8_coops_align16),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align16, jdk15_coops_align16),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align16, jdkLilliput_coops_align16),
                     msg_coops_align16
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput32_coops_align32),
-                    diff(jdkLilliput32_coops_align32, rawSize),
-                    diff(jdkLilliput32_coops_align32, jdkLilliput32_coops),
-                    diff(jdkLilliput32_coops_align32, jdk8_coops_align32),
-                    diff(jdkLilliput32_coops_align32, jdk15_coops_align32),
-                    diff(jdkLilliput32_coops_align32, jdkLilliput_coops_align32),
+                    MathUtil.inProperUnits(jdkLilliput32_coops_align32),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align32, rawSize),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align32, jdkLilliput32_coops),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align32, jdk8_coops_align32),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align32, jdk15_coops_align32),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align32, jdkLilliput_coops_align32),
                     msg_coops_align32
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput32_coops_align64),
-                    diff(jdkLilliput32_coops_align64, rawSize),
-                    diff(jdkLilliput32_coops_align64, jdkLilliput32_coops),
-                    diff(jdkLilliput32_coops_align64, jdk8_coops_align64),
-                    diff(jdkLilliput32_coops_align64, jdk15_coops_align64),
-                    diff(jdkLilliput32_coops_align64, jdkLilliput_coops_align64),
+                    MathUtil.inProperUnits(jdkLilliput32_coops_align64),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align64, rawSize),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align64, jdkLilliput32_coops),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align64, jdk8_coops_align64),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align64, jdk15_coops_align64),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align64, jdkLilliput_coops_align64),
                     msg_coops_align64
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput32_coops_align128),
-                    diff(jdkLilliput32_coops_align128, rawSize),
-                    diff(jdkLilliput32_coops_align128, jdkLilliput32_coops),
-                    diff(jdkLilliput32_coops_align128, jdk8_coops_align128),
-                    diff(jdkLilliput32_coops_align128, jdk15_coops_align128),
-                    diff(jdkLilliput32_coops_align128, jdkLilliput_coops_align128),
+                    MathUtil.inProperUnits(jdkLilliput32_coops_align128),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align128, rawSize),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align128, jdkLilliput32_coops),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align128, jdk8_coops_align128),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align128, jdk15_coops_align128),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align128, jdkLilliput_coops_align128),
                     msg_coops_align128
             );
 
             out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    inProperUnits(jdkLilliput32_coops_align256),
-                    diff(jdkLilliput32_coops_align256, rawSize),
-                    diff(jdkLilliput32_coops_align256, jdkLilliput32_coops),
-                    diff(jdkLilliput32_coops_align256, jdk8_coops_align256),
-                    diff(jdkLilliput32_coops_align256, jdk15_coops_align256),
-                    diff(jdkLilliput32_coops_align256, jdkLilliput_coops_align256),
+                    MathUtil.inProperUnits(jdkLilliput32_coops_align256),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align256, rawSize),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align256, jdkLilliput32_coops),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align256, jdk8_coops_align256),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align256, jdk15_coops_align256),
+                    MathUtil.diffPercent(jdkLilliput32_coops_align256, jdkLilliput_coops_align256),
                     msg_coops_align256
             );
         }
@@ -436,27 +437,5 @@ public class HeapDumpEstimates implements Operation {
         return size;
     }
 
-    private String inProperUnits(long bytes) {
-        final long K = 1000L;
-        final long M = K * K;
-        final long G = K * K * K;
-        if (bytes > 100 * G) {
-            return (bytes / G) + "G";
-        } else if (bytes > 100 * M) {
-            return (bytes / M) + "M";
-        } else if (bytes > 100 * K) {
-            return (bytes / K) + "K";
-        } else {
-            return bytes + "";
-        }
-    }
-
-    private String diff(long size, long baseline) {
-        if (size == baseline) {
-            return "(same)";
-        } else {
-            return String.format("%+.1f%%", 100F * size / baseline - 100F);
-        }
-    }
 
 }
