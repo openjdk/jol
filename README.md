@@ -6,8 +6,6 @@ heavily to decode the actual object layout, footprint, and references.
 This makes JOL much more accurate than other tools relying on heap dumps,
 specification assumptions, etc.
 
-![Pre-integration testing status](https://github.com/openjdk/jol/actions/workflows/pre-integration.yml/badge.svg)
-
 ## Usage
 
 ### JOL Samples
