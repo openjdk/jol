@@ -26,8 +26,6 @@ package org.openjdk.jol.operations;
 
 import org.openjdk.jol.info.ClassLayout;
 
-import java.lang.reflect.Constructor;
-
 import static java.lang.System.out;
 
 /**
@@ -45,14 +43,7 @@ public class ObjectInternals extends ClasspathedOperation {
         return "Show the object internals: field layout and default contents, object header";
     }
 
-    public void runWith(Class<?> klass) throws Exception {
-        try {
-            Object o = tryInstantiate(klass);
-            out.println(ClassLayout.parseInstance(o).toPrintable());
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException e) {
-            out.println("Failed to find matching constructor, falling back to class-only introspection.");
-            out.println();
-            out.println(ClassLayout.parseClass(klass).toPrintable());
-        }
+    public void runWith(Object o) {
+        out.println(ClassLayout.parseInstance(o).toPrintable());
     }
 }

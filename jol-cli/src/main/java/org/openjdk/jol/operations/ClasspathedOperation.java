@@ -30,9 +30,11 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.openjdk.jol.Operation;
 import org.openjdk.jol.OptionFormatter;
+import org.openjdk.jol.util.ArrayDimensionParser;
 import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.vm.VM;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.List;
 
@@ -73,7 +75,7 @@ public abstract class ClasspathedOperation implements Operation {
 
         for (String klassName : classes) {
             try {
-                runWith(ClassUtils.loadClass(klassName));
+                runWith(klassName);
             } catch (Throwable t) {
                 t.printStackTrace(System.err);
             }
@@ -129,5 +131,30 @@ public abstract class ClasspathedOperation implements Operation {
         return null;
     }
 
-    protected abstract void runWith(Class<?> klass) throws Exception;
+    private void runWith(String klassName) throws Exception {
+        final int arrayDimensionIndexOf = klassName.indexOf('[');
+        if (arrayDimensionIndexOf == -1) {
+            runWith(ClassUtils.loadClass(klassName));
+        } else {
+            final String elementClassName = klassName.substring(0, arrayDimensionIndexOf);
+            final Object array = Array.newInstance(
+                    ClassUtils.loadClass(elementClassName),
+                    ArrayDimensionParser.parse(klassName.substring(arrayDimensionIndexOf))
+            );
+            runWith(array);
+        }
+    }
+
+    protected void runWith(Class<?> klass) throws Exception {
+        try {
+            Object o = tryInstantiate(klass);
+            runWith(o);
+        } catch (NoSuchMethodException | InstantiationException e) {
+            throw new IllegalStateException("Instantiation exception, does the class have the default constructor?", e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException("Illegal access exception, does the class have the public default constructor?", e);
+        }
+    }
+
+    protected void runWith(Object o) {}
 }

@@ -26,8 +26,6 @@ package org.openjdk.jol.operations;
 
 import org.openjdk.jol.info.GraphLayout;
 
-import java.lang.reflect.Constructor;
-
 import static java.lang.System.out;
 
 /**
@@ -45,15 +43,9 @@ public class ObjectFootprint extends ClasspathedOperation {
         return "Estimate the footprint of all objects reachable from a given instance";
     }
 
-    public void runWith(Class<?> klass) throws Exception {
-        try {
-            Object o = tryInstantiate(klass);
-            out.println(GraphLayout.parseInstance(o).toFootprint());
-        } catch (NoSuchMethodException | InstantiationException e) {
-            throw new IllegalStateException("Instantiation exception, does the class have the default constructor?", e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException("Illegal access exception, does the class have the public default constructor?", e);
-        }
+    @Override
+    public void runWith(Object o) {
+        out.println(GraphLayout.parseInstance(o).toFootprint());
     }
 
 }
