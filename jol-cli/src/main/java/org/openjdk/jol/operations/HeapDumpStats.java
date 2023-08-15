@@ -79,6 +79,7 @@ public class HeapDumpStats implements Operation {
         final Multiset<String> sizes = new Multiset<>();
 
         Layouter layouter = new HotSpotLayouter(new ModelVM(), getVMVersion());
+        out.println();
         out.println(layouter);
         out.println();
 
@@ -93,7 +94,7 @@ public class HeapDumpStats implements Operation {
 
         final int printFirst = Integer.getInteger("printFirst", 30);
 
-        out.println("Printing first " + printFirst + " objects by size. Use -DprintFirst=# to override.");
+        out.println("Printing first " + printFirst + " object classes by size. Use -DprintFirst=# to override.");
         out.println();
 
         int idx = 0;
@@ -104,6 +105,9 @@ public class HeapDumpStats implements Operation {
             long cnt = counts.count(name);
             long size = sizes.count(name);
             out.printf(" %10d %10d %10d   %s%n", cnt, size / cnt, size, name);
+        }
+        if (sorted.size() > printFirst) {
+            out.printf(" %10s %10s %10s   %s%n", "", "", "", "...");
         }
         out.println("-------------------------------------------------------------------------");
         out.printf(" %10d %10s %10d   %s%n", counts.size(), "", sizes.size(), "(total)");
