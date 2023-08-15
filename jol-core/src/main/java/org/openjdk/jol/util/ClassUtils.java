@@ -97,4 +97,54 @@ public class ClassUtils {
         }
         return klass.getName();
     }
+
+    public static String binaryToHuman(String name) {
+        if (name == null) {
+            return "<null>";
+        }
+
+        int braces = 0;
+        for (int c = 0; c < name.length(); c++) {
+            if (name.charAt(c) == '[') {
+                braces++;
+            } else {
+                break;
+            }
+        }
+
+        if (braces > 0) {
+            name = name.substring(braces);
+        }
+
+        switch (name) {
+            case "Z": name = "boolean"; break;
+            case "B": name = "byte";    break;
+            case "C": name = "char";    break;
+            case "S": name = "short";   break;
+            case "I": name = "int";     break;
+            case "F": name = "float";   break;
+            case "J": name = "long";    break;
+            case "D": name = "double";  break;
+            case "":  name = "<error>"; braces = 0; break;
+            default: {
+                if (name.charAt(name.length() - 1) == ';') {
+                    // Object arrays, cut out the leading "L" and the trailing ";"
+                    name = name.substring(1, name.length() - 1);
+                }
+                name = name.replace('/', '.');
+                break;
+            }
+        }
+
+        if (braces > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(name);
+            for (int b = 0; b < braces; b++) {
+                sb.append("[]");
+            }
+            return sb.toString();
+        } else {
+            return name;
+        }
+    }
 }

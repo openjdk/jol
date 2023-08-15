@@ -86,4 +86,46 @@ public class MathUtil {
     public static long align(long v, int a) {
         return (v + a - 1) & -a;
     }
+
+    /**
+     * Computes the human-readable string representation of percent ratio of value/base.
+     *
+     * @param value value to compute from
+     * @param base base to compute from
+     * @return human-readable representation
+     */
+    public static String diffPercent(long value, long base) {
+        if (value == base) {
+            return "0%";
+        } else {
+            double v = 100D * value / base - 100D;
+            if (Math.abs(v) < 0.1) {
+                return "~0%";
+            } else {
+                return String.format("%+.1f%%", v);
+            }
+        }
+    }
+
+    /**
+     * Returns the value formatted in proper units. Assumes power-of-ten suffixes.
+     *
+     * @param value value to compute from
+     * @return string representation of the value
+     */
+    public static String inProperUnits(long value) {
+        final long K = 1000L;
+        final long M = K * K;
+        final long G = K * K * K;
+        if (value > 100 * G) {
+            return (value / G) + "G";
+        } else if (value > 100 * M) {
+            return (value / M) + "M";
+        } else if (value > 100 * K) {
+            return (value / K) + "K";
+        } else {
+            return value + "";
+        }
+    }
+
 }
