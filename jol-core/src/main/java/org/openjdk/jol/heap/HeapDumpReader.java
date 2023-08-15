@@ -113,11 +113,13 @@ public class HeapDumpReader {
 
         if (verboseOut != null) {
             verboseOut.print("Read progress: ");
+            verboseOut.flush();
         }
 
         while (true) {
             if ((verboseOut != null) && (readBytes - lastPrint > printEach)) {
                 verboseOut.print(readBytes / 1000 / 1000 + "M... ");
+                verboseOut.flush();
                 lastPrint = readBytes;
             }
 
