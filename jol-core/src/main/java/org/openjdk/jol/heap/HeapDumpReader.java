@@ -26,14 +26,13 @@ package org.openjdk.jol.heap;
 
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.FieldData;
+import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.util.Multiset;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -141,7 +140,7 @@ public class HeapDumpReader {
                     read_U4(); // stack trace
                     long nameID = read_ID();
 
-                    classNames.put(id, strings.get(nameID));
+                    classNames.put(id, ClassUtils.binaryToHuman(strings.get(nameID)));
                     break;
                 }
 
@@ -236,11 +235,14 @@ public class HeapDumpReader {
         read_ID(); // array id
         read_U4(); // stack trace
         int elements = (int) read_U4(); // always fits
-        read_ID(); // type class
+        long klassId = read_ID(); // array class
         read_null((long) elements * idSize);
 
-        // assume Object, we don't care about the exact types here
-        classCounts.add(new ClassData("Object[]", "Object", elements));
+        String name = classNames.get(klassId);
+
+        // Assume Object as component type, the name of the actual class
+        // is what we want for the printouts.
+        classCounts.add(new ClassData(name, "Object", elements));
     }
 
     private void digestInstance() throws HeapDumpException {
