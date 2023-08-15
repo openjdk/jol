@@ -33,6 +33,11 @@ import org.openjdk.jol.vm.VM;
  */
 public class ModelVM implements DataModel {
 
+    public ModelVM() {
+        // Initialize early to capture any errors here.
+        VM.current();
+    }
+
     @Override
     public int markHeaderSize() {
         return VM.current().addressSize();
