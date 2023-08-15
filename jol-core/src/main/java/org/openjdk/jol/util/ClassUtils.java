@@ -99,6 +99,10 @@ public class ClassUtils {
     }
 
     public static String binaryToHuman(String name) {
+        if (name == null) {
+            return "<null>";
+        }
+
         int braces = 0;
         for (int c = 0; c < name.length(); c++) {
             if (name.charAt(c) == '[') {
@@ -121,12 +125,13 @@ public class ClassUtils {
             case "F": name = "float";   break;
             case "J": name = "long";    break;
             case "D": name = "double";  break;
+            case "":  name = "<error>"; braces = 0; break;
             default: {
                 if (name.charAt(name.length() - 1) == ';') {
                     // Object arrays, cut out the leading "L" and the trailing ";"
                     name = name.substring(1, name.length() - 1);
                 }
-                name = name.replace("/", ".");
+                name = name.replace('/', '.');
                 break;
             }
         }

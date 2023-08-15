@@ -32,6 +32,13 @@ public class ClassUtilsTest {
 
     @Test
     public void testSingle() {
+        Assert.assertEquals("<null>",        ClassUtils.binaryToHuman(null));
+
+        Assert.assertEquals("<error>",       ClassUtils.binaryToHuman(""));
+        Assert.assertEquals("<error>",       ClassUtils.binaryToHuman("["));
+        Assert.assertEquals("<error>",       ClassUtils.binaryToHuman("[["));
+        Assert.assertEquals("<error>",       ClassUtils.binaryToHuman("[[["));
+
         Assert.assertEquals("boolean",       ClassUtils.binaryToHuman("Z"));
         Assert.assertEquals("boolean[]",     ClassUtils.binaryToHuman("[Z"));
         Assert.assertEquals("boolean[][]",   ClassUtils.binaryToHuman("[[Z"));
