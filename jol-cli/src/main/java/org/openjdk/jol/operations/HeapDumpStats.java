@@ -34,8 +34,6 @@ import org.openjdk.jol.util.Multiset;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import static java.lang.System.out;
@@ -55,6 +53,14 @@ public class HeapDumpStats implements Operation {
         return "Consume the heap dump and print the most frequent instances.";
     }
 
+    private int getVMVersion() {
+        try {
+            return Integer.parseInt(System.getProperty("java.specification.version"));
+        } catch (Exception e) {
+            return 8;
+        }
+    }
+
     public void run(String... args) throws Exception {
         if (args.length == 0) {
             System.err.println("Expected a hprof file name.");
@@ -67,10 +73,16 @@ public class HeapDumpStats implements Operation {
         HeapDumpReader reader = new HeapDumpReader(new File(path), out);
         Multiset<ClassData> data = reader.parse();
 
+        out.println();
+
         final Multiset<String> counts = new Multiset<>();
         final Multiset<String> sizes = new Multiset<>();
 
-        Layouter layouter = new HotSpotLayouter(new ModelVM(), 8);
+        Layouter layouter = new HotSpotLayouter(new ModelVM(), getVMVersion());
+        out.println();
+        out.println(layouter);
+        out.println();
+
         for (ClassData cd : data.keys()) {
             long size = layouter.layout(cd).instanceSize();
             counts.add(cd.name(), data.count(cd));
@@ -82,6 +94,9 @@ public class HeapDumpStats implements Operation {
 
         final int printFirst = Integer.getInteger("printFirst", 30);
 
+        out.println("Printing first " + printFirst + " object classes by size. Use -DprintFirst=# to override.");
+        out.println();
+
         int idx = 0;
         out.printf(" %10s %10s %10s   %s%n", "COUNT", "AVG", "SIZE", "DESCRIPTION");
         out.println("-------------------------------------------------------------------------");
@@ -90,6 +105,9 @@ public class HeapDumpStats implements Operation {
             long cnt = counts.count(name);
             long size = sizes.count(name);
             out.printf(" %10d %10d %10d   %s%n", cnt, size / cnt, size, name);
+        }
+        if (sorted.size() > printFirst) {
+            out.printf(" %10s %10s %10s   %s%n", "", "", "", "...");
         }
         out.println("-------------------------------------------------------------------------");
         out.printf(" %10d %10s %10d   %s%n", counts.size(), "", sizes.size(), "(total)");
