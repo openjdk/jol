@@ -87,7 +87,7 @@ public class ObjectShapes implements Operation {
     private Multiset<String> processHeapDump(String arg) {
         Multiset<String> shapes = new Multiset<>();
         try {
-            HeapDumpReader reader = new HeapDumpReader(new File(arg));
+            HeapDumpReader reader = new HeapDumpReader(new File(arg), System.out);
             Multiset<ClassData> data = reader.parse();
             for (ClassData cd : data.keys()) {
                 String shape = parseClassData(cd);

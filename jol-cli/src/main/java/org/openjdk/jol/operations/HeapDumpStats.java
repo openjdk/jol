@@ -64,7 +64,7 @@ public class HeapDumpStats implements Operation {
 
         out.println("Heap Dump: " + path);
 
-        HeapDumpReader reader = new HeapDumpReader(new File(path));
+        HeapDumpReader reader = new HeapDumpReader(new File(path), out);
         Multiset<ClassData> data = reader.parse();
 
         final Multiset<String> counts = new Multiset<>();
