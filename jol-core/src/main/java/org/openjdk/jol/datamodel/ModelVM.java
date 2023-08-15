@@ -71,7 +71,7 @@ public class ModelVM implements DataModel {
     @Override
     public String toString() {
         return "Current VM: " +
-                (VM.current().objectHeaderSize() + "-byte object header, ") +
+                (headerSize() + "-byte object header, ") +
                 (sizeOf("java.lang.Object") + "-byte references, ") +
                 (objectAlignment() + "-byte aligned");
     }
