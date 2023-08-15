@@ -68,7 +68,7 @@ public class HeapDumpEstimates implements Operation {
         out.println("'Upgrade From' is the relative footprint change against the same mode in other JDKs.");
         out.println();
 
-        HeapDumpReader reader = new HeapDumpReader(new File(path));
+        HeapDumpReader reader = new HeapDumpReader(new File(path), out);
         Multiset<ClassData> data = reader.parse();
 
         long rawSize = 0;

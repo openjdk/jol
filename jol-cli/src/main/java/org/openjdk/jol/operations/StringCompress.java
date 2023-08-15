@@ -132,7 +132,7 @@ public class StringCompress implements Operation {
             final Map<Long, Boolean> isCompressible = new HashMap<>();
             final Map<Long, Integer> size = new HashMap<>();
 
-            HeapDumpReader reader = new HeapDumpReader(new File(path)) {
+            HeapDumpReader reader = new HeapDumpReader(new File(path), null) {
                 @Override
                 protected void visitClass(long id, String name, List<Integer> oopIdx, int oopSize) {
                     if (name.equals("java/lang/String")) {

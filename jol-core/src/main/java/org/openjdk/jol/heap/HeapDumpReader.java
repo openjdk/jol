@@ -29,12 +29,7 @@ import org.openjdk.jol.info.FieldData;
 import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.util.Multiset;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +51,7 @@ public class HeapDumpReader {
     private final Multiset<ClassData> classCounts;
     private final Map<Long, ClassData> classDatas;
     private final File file;
+    private final PrintStream verboseOut;
 
     private int idSize;
     private long readBytes;
@@ -64,8 +60,9 @@ public class HeapDumpReader {
     private final ByteBuffer wrapBuf;
     private String header;
 
-    public HeapDumpReader(File file) throws IOException {
+    public HeapDumpReader(File file, PrintStream verboseOut) throws IOException {
         this.file = file;
+        this.verboseOut = verboseOut;
         if (file.getName().endsWith(".gz")) {
             this.is = new BufferedInputStream(new GZIPInputStream(new FileInputStream(file)), 16 * 1024 * 1024);
         } else {
@@ -111,7 +108,20 @@ public class HeapDumpReader {
         read_U4(); // timestamp, lo
         read_U4(); // timestamp, hi
 
+        long lastPrint = 0L;
+        final long printEach = 256 * 1024 * 1024;
+
+        if (verboseOut != null) {
+            verboseOut.print("Read progress: ");
+            verboseOut.flush();
+        }
+
         while (true) {
+            if ((verboseOut != null) && (readBytes - lastPrint > printEach)) {
+                verboseOut.print(readBytes / 1000 / 1000 + "M... ");
+                verboseOut.flush();
+                lastPrint = readBytes;
+            }
 
             int tag;
             try {
@@ -157,6 +167,10 @@ public class HeapDumpReader {
             if (readBytes - lastCount != len) {
                 throw new HeapDumpException(errorMessage("Expected to read " + len + " bytes, but read " + (readBytes - lastCount) + " bytes"));
             }
+        }
+
+        if (verboseOut != null) {
+            verboseOut.println("DONE");
         }
 
         return classCounts;
