@@ -44,6 +44,9 @@ import java.util.zip.GZIPInputStream;
  */
 public class HeapDumpReader {
 
+    private static final int GZIP_BUF_SIZE =       512 * 1024;
+    private static final int READ_BUF_SIZE =  4 * 1024 * 1024;
+
     private final InputStream is;
 
     private final Map<Long, String> strings;
@@ -52,6 +55,7 @@ public class HeapDumpReader {
     private final Map<Long, ClassData> classDatas;
     private final File file;
     private final PrintStream verboseOut;
+    private final Visitor visitor;
 
     private int idSize;
     private long readBytes;
@@ -60,13 +64,14 @@ public class HeapDumpReader {
     private final ByteBuffer wrapBuf;
     private String header;
 
-    public HeapDumpReader(File file, PrintStream verboseOut) throws IOException {
+    public HeapDumpReader(File file, PrintStream verboseOut, Visitor visitor) throws IOException {
         this.file = file;
         this.verboseOut = verboseOut;
+        this.visitor = visitor;
         if (file.getName().endsWith(".gz")) {
-            this.is = new BufferedInputStream(new GZIPInputStream(new FileInputStream(file)), 16 * 1024 * 1024);
+            this.is = new BufferedInputStream(new GZIPInputStream(new FileInputStream(file), GZIP_BUF_SIZE), READ_BUF_SIZE);
         } else {
-            this.is = new BufferedInputStream(new FileInputStream(file), 16 * 1024 * 1024);
+            this.is = new BufferedInputStream(new FileInputStream(file), READ_BUF_SIZE);
         }
         this.strings = new HashMap<>();
         this.classNames = new HashMap<>();
@@ -109,7 +114,7 @@ public class HeapDumpReader {
         read_U4(); // timestamp, hi
 
         long lastPrint = 0L;
-        final long printEach = 256 * 1024 * 1024;
+        final long printEach = 256L * 1024 * 1024;
 
         if (verboseOut != null) {
             verboseOut.print("Read progress: ");
@@ -161,7 +166,7 @@ public class HeapDumpReader {
                     }
                     break;
                 default:
-                    read_null(len);
+                    skipContents(len);
             }
 
             if (readBytes - lastCount != len) {
@@ -235,14 +240,16 @@ public class HeapDumpReader {
         int elements = (int) read_U4(); // always fits
         int typeClass = read_U1();
 
-        int len = elements * getSize(typeClass);
-        byte[] bytes = read_contents(len);
-
         String typeString = getTypeString(typeClass);
-
         classCounts.add(new ClassData(typeString + "[]", typeString, elements));
 
-        visitPrimArray(id, typeString, elements, bytes);
+        int len = elements * getSize(typeClass);
+        if (visitor != null) {
+            byte[] bytes = readContents(len);
+            visitor.visitPrimArray(id, typeString, elements, bytes);
+        } else {
+            skipContents(len);
+        }
     }
 
     private void digestObjArray() throws HeapDumpException {
@@ -250,7 +257,7 @@ public class HeapDumpReader {
         read_U4(); // stack trace
         int elements = (int) read_U4(); // always fits
         long klassId = read_ID(); // array class
-        read_null((long) elements * idSize);
+        skipContents((long) elements * idSize);
 
         String name = classNames.get(klassId);
 
@@ -268,9 +275,12 @@ public class HeapDumpReader {
 
         int instanceBytes = (int) read_U4(); // always fits
 
-        byte[] bytes = read_contents(instanceBytes);
-
-        visitInstance(id, klassID, bytes);
+        if (visitor != null) {
+            byte[] bytes = readContents(instanceBytes);
+            visitor.visitInstance(id, klassID, bytes);
+        } else {
+            skipContents(instanceBytes);
+        }
     }
 
     private void digestClass() throws HeapDumpException {
@@ -327,7 +337,9 @@ public class HeapDumpReader {
 
         classDatas.put(klassID, cd);
 
-        visitClass(klassID, name, oopIdx, idSize);
+        if (visitor != null) {
+            visitor.visitClass(klassID, name, oopIdx, idSize);
+        }
     }
 
     private long readValue(int type) throws HeapDumpException {
@@ -427,7 +439,7 @@ public class HeapDumpReader {
         throw new HeapDumpException("Unable to read " + idSize + " bytes");
     }
 
-    byte[] read_null(long len) throws HeapDumpException {
+    void skipContents(long len) throws HeapDumpException {
         long rem = len;
         int read;
         do {
@@ -435,10 +447,9 @@ public class HeapDumpReader {
             read = read(buf, toRead);
             rem -= read;
         } while (rem > 0);
-        return new byte[0];
     }
 
-    byte[] read_contents(long len) throws HeapDumpException {
+    byte[] readContents(long len) throws HeapDumpException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         long rem = len;
         int read;
@@ -511,16 +522,10 @@ public class HeapDumpReader {
         return String.format("%s at offset 0x%x in %s (%s)", message, readBytes, file, header);
     }
 
-    protected void visitInstance(long id, long klassID, byte[] bytes) {
-
-    }
-
-    protected void visitClass(long id, String name, List<Integer> oopIdx, int oopSize) {
-
-    }
-
-    protected void visitPrimArray(long id, String componentType, int count, byte[] bytes) {
-
+    public interface Visitor {
+        void visitInstance(long id, long klassID, byte[] bytes);
+        void visitClass(long id, String name, List<Integer> oopIdx, int oopSize);
+        void visitPrimArray(long id, String componentType, int count, byte[] bytes);
     }
 
 }

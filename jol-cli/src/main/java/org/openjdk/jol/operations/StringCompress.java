@@ -132,10 +132,10 @@ public class StringCompress implements Operation {
             final Map<Long, Boolean> isCompressible = new HashMap<>();
             final Map<Long, Integer> size = new HashMap<>();
 
-            HeapDumpReader reader = new HeapDumpReader(new File(path), null) {
+            HeapDumpReader.Visitor visitor = new HeapDumpReader.Visitor() {
                 @Override
-                protected void visitClass(long id, String name, List<Integer> oopIdx, int oopSize) {
-                    if (name.equals("java/lang/String")) {
+                public void visitClass(long id, String name, List<Integer> oopIdx, int oopSize) {
+                    if (name.equals("java.lang.String")) {
                         stringID = id;
                         stringValueIdx = oopIdx.get(0);
                         stringValueSize = oopSize;
@@ -143,9 +143,9 @@ public class StringCompress implements Operation {
                 }
 
                 @Override
-                protected void visitInstance(long id, long klassID, byte[] bytes) {
+                public void visitInstance(long id, long klassID, byte[] bytes) {
                     if (stringID == 0) {
-                        throw new IllegalStateException("java/lang/String was not discovered yet in " + path);
+                        throw new IllegalStateException("java.lang.String was not discovered yet in " + path);
                     }
                     if (klassID == stringID) {
                         ByteBuffer wrap = ByteBuffer.wrap(bytes);
@@ -167,13 +167,15 @@ public class StringCompress implements Operation {
                 }
 
                 @Override
-                protected void visitPrimArray(long id, String typeClass, int count, byte[] bytes) {
+                public void visitPrimArray(long id, String typeClass, int count, byte[] bytes) {
                     if (typeClass.equals("char")) {
                         isCompressible.put(id, isCompressible(bytes));
                         size.put(id, count);
                     }
                 }
             };
+
+            HeapDumpReader reader = new HeapDumpReader(new File(path), null, visitor);
 
             Multiset<ClassData> data = reader.parse();
 
@@ -216,7 +218,7 @@ public class StringCompress implements Operation {
             for (ClassData cd : data.keys()) {
                 long count = data.count(cd);
 
-                if (cd.name().equals("java/lang/String")) {
+                if (cd.name().equals("java.lang.String")) {
                     ClassData mcd = ClassData.parseClass(Object.class);
                     mcd.addField(FieldData.create("Object", "value", "char[]"));
                     mcd.addField(FieldData.create("Object", "hash", "int"));
@@ -231,7 +233,7 @@ public class StringCompress implements Operation {
                     ClassData mcdOop = ClassData.parseClass(Object.class);
                     mcdOop.addField(FieldData.create("Object", "value", "char[]"));
                     mcdOop.addField(FieldData.create("Object", "hash", "int"));
-                    mcdOop.addField(FieldData.create("Object", "coder", "java/lang/Object"));
+                    mcdOop.addField(FieldData.create("Object", "coder", "java.lang.Object"));
                     stringsOop += l.layout(mcdOop).instanceSize() * count;
                 } else {
                     totalFootprint += l.layout(cd).instanceSize() * count;
