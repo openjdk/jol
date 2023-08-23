@@ -222,12 +222,7 @@ public class ClassLayout {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (FieldLayout f : fields()) {
-            sb.append(f).append("\n");
-        }
-        sb.append("size = ").append(size).append("\n");
-        return sb.toString();
+        return toPrintable();
     }
 
     /**
@@ -471,9 +466,12 @@ public class ClassLayout {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+
         ClassLayout that = (ClassLayout) o;
         return fields.equals(that.fields) &&
-                model.equals(that.model);
+                model.equals(that.model) &&
+                isArray == that.isArray &&
+                size == that.size;
     }
 
     @Override

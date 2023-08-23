@@ -98,6 +98,11 @@ public class Model64 implements DataModel {
     }
 
     @Override
+    public int addressSize() {
+        return 8;
+    }
+
+    @Override
     public String toString() {
         return "64-bit model" +
                 ", " + (compRefs ? "" : "NO ") + "compressed references" +
