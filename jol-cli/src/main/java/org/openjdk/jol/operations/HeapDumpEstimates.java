@@ -100,17 +100,13 @@ public class HeapDumpEstimates implements Operation {
         out.println("=== Stock 32-bit OpenJDK");
         out.println();
 
-        long jdk8_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 8));;
+        long jdk8_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 8));
         {
             out.printf("%10s, %10s,     %s%n",
                     "Footprint", "Overhead", "Description"
             );
 
-            out.printf("%10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk8_32),
-                    MathUtil.diffPercent(jdk8_32, rawSize),
-                    "32-bit (<4 GB heap)"
-            );
+            printLine("32-bit (<4 GB heap)",              rawSize,    jdk8_32);
         }
         out.println();
 
@@ -118,10 +114,10 @@ public class HeapDumpEstimates implements Operation {
         out.println();
 
         long jdk8_noCoops =         computeWithLayouter(data, new HotSpotLayouter(new Model64(false, false), 8));
-        long jdk8_coops =           computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 8), 8));
-        long jdk8_coops_align16 =   computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 16), 8));
-        long jdk8_coops_align32 =   computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 32), 8));
-        long jdk8_coops_align64 =   computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 64), 8));
+        long jdk8_coops =           computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,   8), 8));
+        long jdk8_coops_align16 =   computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  16), 8));
+        long jdk8_coops_align32 =   computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  32), 8));
+        long jdk8_coops_align64 =   computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  64), 8));
         long jdk8_coops_align128 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 128), 8));
         long jdk8_coops_align256 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 256), 8));
 
@@ -130,62 +126,21 @@ public class HeapDumpEstimates implements Operation {
                     "Footprint", "Overhead", "JVM Mode", "Description"
             );
 
-            out.printf("%10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk8_noCoops),
-                    MathUtil.diffPercent(jdk8_noCoops, rawSize),
-                    MathUtil.diffPercent(jdk8_noCoops, jdk8_coops),
-                    msg_noCoops
-            );
-
-            out.printf("%10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk8_coops),
-                    MathUtil.diffPercent(jdk8_coops, rawSize),
-                    MathUtil.diffPercent(jdk8_coops, jdk8_coops),
-                    msg_coops
-            );
-
-            out.printf("%10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk8_coops_align16),
-                    MathUtil.diffPercent(jdk8_coops_align16, rawSize),
-                    MathUtil.diffPercent(jdk8_coops_align16, jdk8_coops),
-                    msg_coops_align16
-            );
-
-            out.printf("%10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk8_coops_align32),
-                    MathUtil.diffPercent(jdk8_coops_align32, rawSize),
-                    MathUtil.diffPercent(jdk8_coops_align32, jdk8_coops),
-                    msg_coops_align32
-            );
-
-            out.printf("%10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk8_coops_align64),
-                    MathUtil.diffPercent(jdk8_coops_align64, rawSize),
-                    MathUtil.diffPercent(jdk8_coops_align64, jdk8_coops),
-                    msg_coops_align64
-            );
-
-            out.printf("%10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk8_coops_align128),
-                    MathUtil.diffPercent(jdk8_coops_align128, rawSize),
-                    MathUtil.diffPercent(jdk8_coops_align128, jdk8_coops),
-                    msg_coops_align128
-            );
-
-            out.printf("%10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk8_coops_align256),
-                    MathUtil.diffPercent(jdk8_coops_align256, rawSize),
-                    MathUtil.diffPercent(jdk8_coops_align256, jdk8_coops),
-                    msg_coops_align256
-            );
+            printLine(msg_noCoops,              rawSize,    jdk8_noCoops,           jdk8_coops);
+            printLine(msg_coops,                rawSize,    jdk8_coops,             jdk8_coops);
+            printLine(msg_coops_align16,        rawSize,    jdk8_coops_align16,     jdk8_coops);
+            printLine(msg_coops_align32,        rawSize,    jdk8_coops_align32,     jdk8_coops);
+            printLine(msg_coops_align64,        rawSize,    jdk8_coops_align64,     jdk8_coops);
+            printLine(msg_coops_align128,       rawSize,    jdk8_coops_align128,    jdk8_coops);
+            printLine(msg_coops_align256,       rawSize,    jdk8_coops_align256,    jdk8_coops);
         }
         out.println();
 
         long jdk15_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64(false, true), 15));
-        long jdk15_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 8), 15));
-        long jdk15_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 16), 15));
-        long jdk15_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 32), 15));
-        long jdk15_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 64), 15));
+        long jdk15_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,   8), 15));
+        long jdk15_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  16), 15));
+        long jdk15_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  32), 15));
+        long jdk15_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  64), 15));
         long jdk15_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 128), 15));
         long jdk15_coops_align256 = computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 256), 15));
 
@@ -198,74 +153,26 @@ public class HeapDumpEstimates implements Operation {
                     "Footprint", "Overhead", "JVM Mode", "JDK < 15", "Description"
             );
 
-            out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk15_noCoops),
-                    MathUtil.diffPercent(jdk15_noCoops, rawSize),
-                    MathUtil.diffPercent(jdk15_noCoops, jdk15_coops),
-                    MathUtil.diffPercent(jdk15_noCoops, jdk8_noCoops),
-                    msg_noCoops_ccp
-            );
-
-            out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk15_coops),
-                    MathUtil.diffPercent(jdk15_coops, rawSize),
-                    MathUtil.diffPercent(jdk15_coops, jdk15_coops),
-                    MathUtil.diffPercent(jdk15_coops, jdk8_coops),
-                    msg_coops
-            );
-
-            out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk15_coops_align16),
-                    MathUtil.diffPercent(jdk15_coops_align16, rawSize),
-                    MathUtil.diffPercent(jdk15_coops_align16, jdk15_coops),
-                    MathUtil.diffPercent(jdk15_coops_align16, jdk8_coops_align16),
-                    msg_coops_align16
-            );
-
-            out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk15_coops_align32),
-                    MathUtil.diffPercent(jdk15_coops_align32, rawSize),
-                    MathUtil.diffPercent(jdk15_coops_align32, jdk15_coops),
-                    MathUtil.diffPercent(jdk15_coops_align32, jdk8_coops_align32),
-                    msg_coops_align32
-            );
-
-            out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk15_coops_align64),
-                    MathUtil.diffPercent(jdk15_coops_align64, rawSize),
-                    MathUtil.diffPercent(jdk15_coops_align64, jdk15_coops),
-                    MathUtil.diffPercent(jdk15_coops_align64, jdk8_coops_align64),
-                    msg_coops_align64
-            );
-
-            out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk15_coops_align128),
-                    MathUtil.diffPercent(jdk15_coops_align128, rawSize),
-                    MathUtil.diffPercent(jdk15_coops_align128, jdk15_coops),
-                    MathUtil.diffPercent(jdk15_coops_align128, jdk8_coops_align128),
-                    msg_coops_align128
-            );
-
-            out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdk15_coops_align256),
-                    MathUtil.diffPercent(jdk15_coops_align256, rawSize),
-                    MathUtil.diffPercent(jdk15_coops_align256, jdk15_coops),
-                    MathUtil.diffPercent(jdk15_coops_align256, jdk8_coops_align256),
-                    msg_coops_align256
-            );
+            printLine(msg_noCoops_ccp,      rawSize,    jdk15_noCoops,          jdk15_coops,    jdk8_noCoops);
+            printLine(msg_coops,            rawSize,    jdk15_coops,            jdk15_coops,    jdk8_coops);
+            printLine(msg_coops_align16,    rawSize,    jdk15_coops_align16,    jdk15_coops,    jdk8_coops_align16);
+            printLine(msg_coops_align32,    rawSize,    jdk15_coops_align32,    jdk15_coops,    jdk8_coops_align32);
+            printLine(msg_coops_align64,    rawSize,    jdk15_coops_align64,    jdk15_coops,    jdk8_coops_align64);
+            printLine(msg_coops_align128,   rawSize,    jdk15_coops_align128,   jdk15_coops,    jdk8_coops_align128);
+            printLine(msg_coops_align256,   rawSize,    jdk15_coops_align256,   jdk15_coops,    jdk8_coops_align256);
         }
         out.println();
 
         out.println("=== Experimental 64-bit OpenJDK: Lilliput, 64-bit headers");
         out.println();
 
-        long jdkLilliput_noCoops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false, 8, false), 99));
-        long jdkLilliput_coops =            computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 8, false), 99));
-        long jdkLilliput_coops_align16 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 16, false), 99));
-        long jdkLilliput_coops_align32 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 32, false), 99));
-        long jdkLilliput_coops_align64 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 64, false), 99));
-        long jdkLilliput_coops_align128 =   computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 128, false), 99));
-        long jdkLilliput_coops_align256 =   computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 256, false), 99));
+        long jdkLilliput_noBase_noCoops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false,  8,    8, false), 99));
+        long jdkLilliput_noBase_coops =            computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,   8,    8, false), 99));
+        long jdkLilliput_noBase_coops_align16 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  16,    8, false), 99));
+        long jdkLilliput_noBase_coops_align32 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  32,    8, false), 99));
+        long jdkLilliput_noBase_coops_align64 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  64,    8, false), 99));
+        long jdkLilliput_noBase_coops_align128 =   computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 128,    8, false), 99));
+        long jdkLilliput_noBase_coops_align256 =   computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 256,    8, false), 99));
 
         {
             out.printf("%37s %s%n", "", "Upgrade From:");
@@ -273,81 +180,27 @@ public class HeapDumpEstimates implements Operation {
                     "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "Description"
             );
 
-            out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput_noCoops),
-                    MathUtil.diffPercent(jdkLilliput_noCoops, rawSize),
-                    MathUtil.diffPercent(jdkLilliput_noCoops, jdkLilliput_coops),
-                    MathUtil.diffPercent(jdkLilliput_noCoops, jdk8_noCoops),
-                    MathUtil.diffPercent(jdkLilliput_noCoops, jdk15_noCoops),
-                    msg_noCoops_ccp
-            );
+            printLine(msg_noCoops_ccp,      rawSize, jdkLilliput_noBase_noCoops,            jdkLilliput_noBase_coops, jdk8_noCoops,         jdk15_noCoops);
+            printLine(msg_coops,            rawSize, jdkLilliput_noBase_coops,              jdkLilliput_noBase_coops, jdk8_coops,           jdk15_coops);
+            printLine(msg_coops_align16,    rawSize, jdkLilliput_noBase_coops_align16,      jdkLilliput_noBase_coops, jdk8_coops_align16,   jdk15_coops_align16);
+            printLine(msg_coops_align32,    rawSize, jdkLilliput_noBase_coops_align32,      jdkLilliput_noBase_coops, jdk8_coops_align32,   jdk15_coops_align32);
+            printLine(msg_coops_align64,    rawSize, jdkLilliput_noBase_coops_align64,      jdkLilliput_noBase_coops, jdk8_coops_align64,   jdk15_coops_align64);
+            printLine(msg_coops_align128,   rawSize, jdkLilliput_noBase_coops_align128,     jdkLilliput_noBase_coops, jdk8_coops_align128,  jdk15_coops_align128);
+            printLine(msg_coops_align256,   rawSize, jdkLilliput_noBase_coops_align256,     jdkLilliput_noBase_coops, jdk8_coops_align256,  jdk15_coops_align256);
 
-            out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput_coops),
-                    MathUtil.diffPercent(jdkLilliput_coops, rawSize),
-                    MathUtil.diffPercent(jdkLilliput_coops, jdkLilliput_coops),
-                    MathUtil.diffPercent(jdkLilliput_coops, jdk8_coops),
-                    MathUtil.diffPercent(jdkLilliput_coops, jdk15_coops),
-                    msg_coops
-            );
-
-            out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput_coops_align16),
-                    MathUtil.diffPercent(jdkLilliput_coops_align16, rawSize),
-                    MathUtil.diffPercent(jdkLilliput_coops_align16, jdkLilliput_coops),
-                    MathUtil.diffPercent(jdkLilliput_coops_align16, jdk8_coops_align16),
-                    MathUtil.diffPercent(jdkLilliput_coops_align16, jdk15_coops_align16),
-                    msg_coops_align16
-            );
-
-            out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput_coops_align32),
-                    MathUtil.diffPercent(jdkLilliput_coops_align32, rawSize),
-                    MathUtil.diffPercent(jdkLilliput_coops_align32, jdkLilliput_coops),
-                    MathUtil.diffPercent(jdkLilliput_coops_align32, jdk8_coops_align32),
-                    MathUtil.diffPercent(jdkLilliput_coops_align32, jdk15_coops_align32),
-                    msg_coops_align32
-            );
-
-            out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput_coops_align64),
-                    MathUtil.diffPercent(jdkLilliput_coops_align64, rawSize),
-                    MathUtil.diffPercent(jdkLilliput_coops_align64, jdkLilliput_coops),
-                    MathUtil.diffPercent(jdkLilliput_coops_align64, jdk8_coops_align64),
-                    MathUtil.diffPercent(jdkLilliput_coops_align64, jdk15_coops_align64),
-                    msg_coops_align64
-            );
-
-            out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput_coops_align128),
-                    MathUtil.diffPercent(jdkLilliput_coops_align128, rawSize),
-                    MathUtil.diffPercent(jdkLilliput_coops_align128, jdkLilliput_coops),
-                    MathUtil.diffPercent(jdkLilliput_coops_align128, jdk8_coops_align128),
-                    MathUtil.diffPercent(jdkLilliput_coops_align128, jdk15_coops_align128),
-                    msg_coops_align128
-            );
-
-            out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput_coops_align256),
-                    MathUtil.diffPercent(jdkLilliput_coops_align256, rawSize),
-                    MathUtil.diffPercent(jdkLilliput_coops_align256, jdkLilliput_coops),
-                    MathUtil.diffPercent(jdkLilliput_coops_align256, jdk8_coops_align256),
-                    MathUtil.diffPercent(jdkLilliput_coops_align256, jdk15_coops_align256),
-                    msg_coops_align256
-            );
         }
         out.println();
 
-        out.println("=== Experimental 64-bit OpenJDK: Lilliput, 32-bit headers");
+        out.println("=== Experimental 64-bit OpenJDK: Lilliput, 64-bit headers, array base improvements");
         out.println();
 
-        long jdkLilliput32_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false, 8, true), 99));
-        long jdkLilliput32_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 8, true), 99));
-        long jdkLilliput32_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 16, true), 99));
-        long jdkLilliput32_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 32, true), 99));
-        long jdkLilliput32_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 64, true), 99));
-        long jdkLilliput32_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 128, true), 99));
-        long jdkLilliput32_coops_align256 = computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 256, true), 99));
+        long jdkLilliput_base_noCoops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false,  8,  4, false), 99));
+        long jdkLilliput_base_coops =            computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,   8,  4, false), 99));
+        long jdkLilliput_base_coops_align16 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  16,  4, false), 99));
+        long jdkLilliput_base_coops_align32 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  32,  4, false), 99));
+        long jdkLilliput_base_coops_align64 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  64,  4, false), 99));
+        long jdkLilliput_base_coops_align128 =   computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 128,  4, false), 99));
+        long jdkLilliput_base_coops_align256 =   computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 256,  4, false), 99));
 
         {
             out.printf("%37s %s%n", "", "Upgrade From:");
@@ -355,78 +208,50 @@ public class HeapDumpEstimates implements Operation {
                     "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "Lill-64", "Description"
             );
 
-            out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput32_noCoops),
-                    MathUtil.diffPercent(jdkLilliput32_noCoops, rawSize),
-                    MathUtil.diffPercent(jdkLilliput32_noCoops, jdkLilliput32_coops),
-                    MathUtil.diffPercent(jdkLilliput32_noCoops, jdk8_noCoops),
-                    MathUtil.diffPercent(jdkLilliput32_noCoops, jdk15_noCoops),
-                    MathUtil.diffPercent(jdkLilliput32_noCoops, jdkLilliput_noCoops),
-                    msg_noCoops_ccp
-            );
-
-            out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput32_coops),
-                    MathUtil.diffPercent(jdkLilliput32_coops, rawSize),
-                    MathUtil.diffPercent(jdkLilliput32_coops, jdkLilliput32_coops),
-                    MathUtil.diffPercent(jdkLilliput32_coops, jdk8_coops),
-                    MathUtil.diffPercent(jdkLilliput32_coops, jdk15_coops),
-                    MathUtil.diffPercent(jdkLilliput32_coops, jdkLilliput_coops),
-                    msg_coops
-            );
-
-            out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput32_coops_align16),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align16, rawSize),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align16, jdkLilliput32_coops),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align16, jdk8_coops_align16),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align16, jdk15_coops_align16),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align16, jdkLilliput_coops_align16),
-                    msg_coops_align16
-            );
-
-            out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput32_coops_align32),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align32, rawSize),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align32, jdkLilliput32_coops),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align32, jdk8_coops_align32),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align32, jdk15_coops_align32),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align32, jdkLilliput_coops_align32),
-                    msg_coops_align32
-            );
-
-            out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput32_coops_align64),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align64, rawSize),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align64, jdkLilliput32_coops),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align64, jdk8_coops_align64),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align64, jdk15_coops_align64),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align64, jdkLilliput_coops_align64),
-                    msg_coops_align64
-            );
-
-            out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput32_coops_align128),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align128, rawSize),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align128, jdkLilliput32_coops),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align128, jdk8_coops_align128),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align128, jdk15_coops_align128),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align128, jdkLilliput_coops_align128),
-                    msg_coops_align128
-            );
-
-            out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    MathUtil.inProperUnits(jdkLilliput32_coops_align256),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align256, rawSize),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align256, jdkLilliput32_coops),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align256, jdk8_coops_align256),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align256, jdk15_coops_align256),
-                    MathUtil.diffPercent(jdkLilliput32_coops_align256, jdkLilliput_coops_align256),
-                    msg_coops_align256
-            );
+            printLine(msg_noCoops_ccp,      rawSize, jdkLilliput_base_noCoops,          jdkLilliput_base_coops, jdk8_noCoops,           jdk15_noCoops,          jdkLilliput_noBase_noCoops);
+            printLine(msg_coops,            rawSize, jdkLilliput_base_coops,            jdkLilliput_base_coops, jdk8_coops,             jdk15_coops,            jdkLilliput_noBase_coops);
+            printLine(msg_coops_align16,    rawSize, jdkLilliput_base_coops_align16,    jdkLilliput_base_coops, jdk8_coops_align16,     jdk15_coops_align16,    jdkLilliput_noBase_coops_align16);
+            printLine(msg_coops_align32,    rawSize, jdkLilliput_base_coops_align32,    jdkLilliput_base_coops, jdk8_coops_align32,     jdk15_coops_align32,    jdkLilliput_noBase_coops_align32);
+            printLine(msg_coops_align64,    rawSize, jdkLilliput_base_coops_align64,    jdkLilliput_base_coops, jdk8_coops_align64,     jdk15_coops_align64,    jdkLilliput_noBase_coops_align64);
+            printLine(msg_coops_align128,   rawSize, jdkLilliput_base_coops_align128,   jdkLilliput_base_coops, jdk8_coops_align128,    jdk15_coops_align128,   jdkLilliput_noBase_coops_align128);
+            printLine(msg_coops_align256,   rawSize, jdkLilliput_base_coops_align256,   jdkLilliput_base_coops, jdk8_coops_align256,    jdk15_coops_align256,   jdkLilliput_noBase_coops_align256);
         }
         out.println();
 
+        out.println("=== Experimental 64-bit OpenJDK: Lilliput, 32-bit headers");
+        out.println();
+
+        long jdkLilliput32_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false,  8, 8, true), 99));
+        long jdkLilliput32_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,   8, 8, true), 99));
+        long jdkLilliput32_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  16, 8, true), 99));
+        long jdkLilliput32_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  32, 8, true), 99));
+        long jdkLilliput32_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  64, 8, true), 99));
+        long jdkLilliput32_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 128, 8, true), 99));
+        long jdkLilliput32_coops_align256 = computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 256, 8, true), 99));
+
+        {
+            out.printf("%37s %s%n", "", "Upgrade From:");
+            out.printf("%10s, %10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
+                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "Lill-64", "Lill-64-AB", "Description"
+            );
+
+            printLine(msg_noCoops_ccp,    rawSize,  jdkLilliput32_noCoops,        jdkLilliput32_coops, jdk8_noCoops,          jdk15_noCoops,          jdkLilliput_noBase_noCoops,         jdkLilliput_base_noCoops);
+            printLine(msg_coops,          rawSize,  jdkLilliput32_coops,          jdkLilliput32_coops, jdk8_coops,            jdk15_coops,            jdkLilliput_noBase_coops,           jdkLilliput_base_coops);
+            printLine(msg_coops_align16,  rawSize,  jdkLilliput32_coops_align16,  jdkLilliput32_coops, jdk8_coops_align16,    jdk15_coops_align16,    jdkLilliput_noBase_coops_align16,   jdkLilliput_base_coops_align16);
+            printLine(msg_coops_align32,  rawSize,  jdkLilliput32_coops_align32,  jdkLilliput32_coops, jdk8_coops_align32,    jdk15_coops_align32,    jdkLilliput_noBase_coops_align32,   jdkLilliput_base_coops_align32);
+            printLine(msg_coops_align64,  rawSize,  jdkLilliput32_coops_align64,  jdkLilliput32_coops, jdk8_coops_align64,    jdk15_coops_align64,    jdkLilliput_noBase_coops_align64,   jdkLilliput_base_coops_align64);
+            printLine(msg_coops_align128, rawSize,  jdkLilliput32_coops_align128, jdkLilliput32_coops, jdk8_coops_align256,   jdk15_coops_align128,   jdkLilliput_noBase_coops_align128,  jdkLilliput_base_coops_align128);
+            printLine(msg_coops_align256, rawSize,  jdkLilliput32_coops_align256, jdkLilliput32_coops, jdk8_coops_align256,   jdk15_coops_align256,   jdkLilliput_noBase_coops_align256,  jdkLilliput_base_coops_align256);
+        }
+        out.println();
+    }
+
+    private static void printLine(String msg, long rawSize, long value, long... bases) {
+        out.printf("%10s, %10s, ", MathUtil.inProperUnits(value), MathUtil.diffPercent(value, rawSize));
+        for (long base : bases) {
+            out.printf("%10s, ", MathUtil.diffPercent(value, base));
+        }
+        out.printf("    %s%n", msg);
     }
 
     private static long computeWithLayouter(Multiset<ClassData> data, Layouter layouter) {
@@ -436,6 +261,5 @@ public class HeapDumpEstimates implements Operation {
         }
         return size;
     }
-
 
 }

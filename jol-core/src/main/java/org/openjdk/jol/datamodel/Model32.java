@@ -94,7 +94,8 @@ public class Model32 implements DataModel {
     }
 
     @Override
-    public int addressSize() {
+    public int arrayBaseAlignment() {
+        // Can be just address size
         return 4;
     }
 

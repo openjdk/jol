@@ -98,7 +98,7 @@ public class Model64 implements DataModel {
     }
 
     @Override
-    public int addressSize() {
+    public int arrayBaseAlignment() {
         return 8;
     }
 
