@@ -12,7 +12,6 @@ import java.util.*;
 
 public class HotspotLayouterRealTest {
 
-    private static final DataModel[] MODELS = { new ModelVM() };
     private static final int ITERATIONS = 20000;
 
     private int getVersion() {
@@ -25,47 +24,56 @@ public class HotspotLayouterRealTest {
 
     @Test
     public void testSingleClass() throws Exception {
-        tryWith(1, 5, getVersion());
+        tryWithClasses(1, 5, getVersion());
     }
 
     @Test
     public void testTwoClasses() throws Exception {
-        tryWith(2, 5, getVersion());
+        tryWithClasses(2, 5, getVersion());
     }
 
-    public void tryWith(int hierarchyDepth, int fieldsPerClass, int jdkVersion) throws Exception {
+    @Test
+    public void testArrays() {
+        int version = getVersion();
+        for (int c = 0; c < 128; c++) {
+            tryWithArrays(new boolean[c], version);
+            tryWithArrays(new byte[c],    version);
+            tryWithArrays(new char[c],    version);
+            tryWithArrays(new int[c],     version);
+            tryWithArrays(new float[c],   version);
+            tryWithArrays(new long[c],    version);
+            tryWithArrays(new double[c],  version);
+            tryWithArrays(new Object[c],  version);
+        }
+    }
+
+    public void tryWithArrays(Object array, int jdkVersion) {
+        ClassLayout actual = ClassLayout.parseInstance(array);
+        ClassData cd = ClassData.parseInstance(array);
+
+        HotSpotLayouter layouter = new HotSpotLayouter(new ModelVM(), jdkVersion);
+        ClassLayout model = layouter.layout(cd);
+
+        System.out.println(actual);
+        System.out.println(model);
+
+        Assert.assertEquals(model, actual);
+    }
+
+    public void tryWithClasses(int hierarchyDepth, int fieldsPerClass, int jdkVersion) throws Exception {
         Random seeder = new Random();
+        HotSpotLayouter layouter = new HotSpotLayouter(new ModelVM(), jdkVersion);
+
         for (int c = 0; c < ITERATIONS; c++) {
             int seed = seeder.nextInt();
             Class<?> cl = ClassGenerator.generate(new Random(seed), hierarchyDepth, fieldsPerClass);
 
-            try {
-                ClassLayout actual = ClassLayout.parseClass(cl);
+            ClassLayout actual = ClassLayout.parseClass(cl);
+            ClassData cd = ClassData.parseClass(cl);
 
-                Map<Layouter, ClassLayout> candidates = candidateLayouts(cl, jdkVersion);
-
-                if (!candidates.containsValue(actual)) {
-                    System.out.println(actual.toPrintable());
-                    for (Layouter l : candidates.keySet()) {
-                        System.out.println(l);
-                        System.out.println(candidates.get(l).toPrintable());
-                    }
-                    Assert.fail("Actual layout should have matched at least one model layout. Seed = " + seed);
-                }
-            } catch (Exception e) {
-                Assert.fail("Failed. Seed = " + seed);
-            }
+            ClassLayout model = layouter.layout(cd);
+            Assert.assertEquals(model, actual);
         }
-    }
-
-    private Map<Layouter, ClassLayout> candidateLayouts(Class<?> cl, int jdkVersion) {
-        ClassData cd = ClassData.parseClass(cl);
-        Map<Layouter, ClassLayout> layouts = new HashMap<>();
-        for (DataModel model : MODELS) {
-            HotSpotLayouter layouter = new HotSpotLayouter(model, jdkVersion);
-            layouts.put(layouter, layouter.layout(cd));
-        }
-        return layouts;
     }
 
 }

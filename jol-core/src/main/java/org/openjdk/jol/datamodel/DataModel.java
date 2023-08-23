@@ -79,4 +79,10 @@ public interface DataModel {
      */
     int objectAlignment();
 
+    /**
+     * Return the address size for this model: the size of the native pointer.
+     *
+     * @return address size in bytes
+     */
+    int addressSize();
 }

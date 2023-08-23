@@ -31,7 +31,6 @@ import org.openjdk.jol.info.FieldData;
 import org.openjdk.jol.info.FieldLayout;
 import org.openjdk.jol.util.MathUtil;
 
-import java.lang.IllegalStateException;
 import java.util.*;
 
 import static org.openjdk.jol.layouters.FieldAllocationType.*;
@@ -80,9 +79,12 @@ public class HotSpotLayouter implements Layouter {
             int base = model.arrayHeaderSize();
             int scale = model.sizeOf(cd.arrayComponentType());
 
+            // Array bases are aligned by HeapWord size:
+            //  https://bugs.openjdk.java.net/browse/JDK-8139457
+            base = MathUtil.align(base, Math.max(model.addressSize(), scale));
+
             long instanceSize = base + cd.arrayLength() * scale;
             instanceSize = MathUtil.align(instanceSize, model.objectAlignment());
-            base = MathUtil.align(base, Math.max(4, scale));
 
             SortedSet<FieldLayout> result = new TreeSet<>();
             result.add(new FieldLayout(FieldData.create(cd.arrayClass(), "<elements>", cd.arrayComponentType()), base, scale * cd.arrayLength()));

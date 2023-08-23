@@ -96,6 +96,11 @@ public class Model64_Lilliput implements DataModel {
     }
 
     @Override
+    public int addressSize() {
+        return 8;
+    }
+
+    @Override
     public String toString() {
         return "64-bit model" +
                 ", Lilliput (" + (target ? "ultimate target" : "current experiment") + ")" +

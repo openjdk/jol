@@ -74,6 +74,11 @@ public class ModelVM implements DataModel {
     }
 
     @Override
+    public int addressSize() {
+        return VM.current().addressSize();
+    }
+
+    @Override
     public String toString() {
         return "Current VM: " +
                 (headerSize() + "-byte object header, ") +
