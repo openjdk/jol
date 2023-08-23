@@ -82,98 +82,194 @@ questions.
                         </configuration>
                     </execution>
                     <execution>
-                        <id>tests-minus-coops-minus-ccp</id>
+                        <id>tests-1g-minus-coops-minus-ccp</id>
                         <phase>test</phase>
                         <goals>
                             <goal>test</goal>
                         </goals>
                         <configuration>
-                            <argLine>-XX:-UseCompressedOops -XX:-UseCompressedClassPointers -Xmx1g</argLine>
+                            <argLine>-Xmx1g -XX:-UseCompressedOops -XX:-UseCompressedClassPointers</argLine>
                             <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>tests-plus-coops-plus-ccp</id>
+                        <id>tests-1g-plus-coops-plus-ccp</id>
                         <phase>test</phase>
                         <goals>
                             <goal>test</goal>
                         </goals>
                         <configuration>
-                            <argLine>-XX:+UseCompressedOops -XX:+UseCompressedClassPointers -Xmx1g</argLine>
+                            <argLine>-Xmx1g -XX:+UseCompressedOops -XX:+UseCompressedClassPointers</argLine>
                             <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>tests-plus-coops-minus-ccp</id>
+                        <id>tests-1g-plus-coops-minus-ccp</id>
                         <phase>test</phase>
                         <goals>
                             <goal>test</goal>
                         </goals>
                         <configuration>
-                            <argLine>-XX:+UseCompressedOops -XX:-UseCompressedClassPointers -Xmx1g</argLine>
+                            <argLine>-Xmx1g -XX:+UseCompressedOops -XX:-UseCompressedClassPointers</argLine>
                             <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>tests-minus-coops-plus-ccp</id>
+                        <id>tests-1g-minus-coops-plus-ccp</id>
                         <phase>test</phase>
                         <goals>
                             <goal>test</goal>
                         </goals>
                         <configuration>
-                            <argLine>-XX:-UseCompressedOops -XX:+UseCompressedClassPointers -Xmx1g</argLine>
+                            <argLine>-Xmx1g -XX:-UseCompressedOops -XX:+UseCompressedClassPointers</argLine>
                             <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>tests-minus-coops-minus-ccp-align16</id>
+                        <id>tests-1g-minus-coops-minus-ccp-align16</id>
                         <phase>test</phase>
                         <goals>
                             <goal>test</goal>
                         </goals>
                         <configuration>
-                            <argLine>-XX:-UseCompressedOops -XX:-UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16 -Xmx1g</argLine>
+                            <argLine>-Xmx1g -XX:-UseCompressedOops -XX:-UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16</argLine>
                             <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>tests-plus-coops-plus-ccp-align16</id>
+                        <id>tests-1g-plus-coops-plus-ccp-align16</id>
                         <phase>test</phase>
                         <goals>
                             <goal>test</goal>
                         </goals>
                         <configuration>
-                            <argLine>-XX:+UseCompressedOops -XX:+UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16 -Xmx1g</argLine>
+                            <argLine>-Xmx1g -XX:+UseCompressedOops -XX:+UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16</argLine>
                             <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>tests-plus-coops-minus-ccp-align16</id>
+                        <id>tests-1g-plus-coops-minus-ccp-align16</id>
                         <phase>test</phase>
                         <goals>
                             <goal>test</goal>
                         </goals>
                         <configuration>
-                            <argLine>-XX:+UseCompressedOops -XX:-UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16 -Xmx1g</argLine>
+                            <argLine>-Xmx1g -XX:+UseCompressedOops -XX:-UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16</argLine>
                             <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>tests-minus-coops-plus-ccp-align16</id>
+                        <id>tests-1g-minus-coops-plus-ccp-align16</id>
                         <phase>test</phase>
                         <goals>
                             <goal>test</goal>
                         </goals>
                         <configuration>
-                            <argLine>-XX:-UseCompressedOops -XX:+UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16 -Xmx1g</argLine>
+                            <argLine>-Xmx1g -XX:-UseCompressedOops -XX:+UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16</argLine>
                             <forkCount>4</forkCount>
+                            <reuseForks>true</reuseForks>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-4g-minus-coops-minus-ccp</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-Xmx4g -XX:-UseCompressedOops -XX:-UseCompressedClassPointers</argLine>
+                            <forkCount>1</forkCount>
+                            <reuseForks>true</reuseForks>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-4g-plus-coops-plus-ccp</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-Xmx4g -XX:+UseCompressedOops -XX:+UseCompressedClassPointers</argLine>
+                            <forkCount>1</forkCount>
+                            <reuseForks>true</reuseForks>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-4g-plus-coops-minus-ccp</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-Xmx4g -XX:+UseCompressedOops -XX:-UseCompressedClassPointers</argLine>
+                            <forkCount>1</forkCount>
+                            <reuseForks>true</reuseForks>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-4g-minus-coops-plus-ccp</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-Xmx4g -XX:-UseCompressedOops -XX:+UseCompressedClassPointers</argLine>
+                            <forkCount>1</forkCount>
+                            <reuseForks>true</reuseForks>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-4g-minus-coops-minus-ccp-align16</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-Xmx4g -XX:-UseCompressedOops -XX:-UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16</argLine>
+                            <forkCount>1</forkCount>
+                            <reuseForks>true</reuseForks>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-4g-plus-coops-plus-ccp-align16</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-Xmx4g -XX:+UseCompressedOops -XX:+UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16</argLine>
+                            <forkCount>1</forkCount>
+                            <reuseForks>true</reuseForks>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-4g-plus-coops-minus-ccp-align16</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-Xmx4g -XX:+UseCompressedOops -XX:-UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16</argLine>
+                            <forkCount>1</forkCount>
+                            <reuseForks>true</reuseForks>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tests-4g-minus-coops-plus-ccp-align16</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>-Xmx4g -XX:-UseCompressedOops -XX:+UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16</argLine>
+                            <forkCount>1</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
