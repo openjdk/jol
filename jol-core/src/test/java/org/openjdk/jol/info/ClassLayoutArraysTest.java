@@ -21,8 +21,6 @@ public class ClassLayoutArraysTest {
             Object.class,
     };
 
-    static final int SIZE_SLACK = 16;
-
     @Test
     public void arraySizes_0() {
         doArraySizeFor(0);
@@ -55,11 +53,17 @@ public class ClassLayoutArraysTest {
             ClassLayout l = ClassLayout.parseInstance(o);
 
             int elementSize = VM.current().arrayIndexScale(cl.getName());
-            long expected = l.headerSize() + (long) size * elementSize;
+
+            // At least the header size, plus the element storage.
+            // At most the alignment tail and the array base alignment.
+            long expectedMin = l.headerSize() + (long) size * elementSize;
+            long expectedMax = expectedMin + VM.current().objectAlignment() + 4;
+
             long actual = l.instanceSize();
 
-            Assert.assertTrue(cl + " array instance size is not within range: actual = " + actual + ", expected = " + expected,
-                    (actual - SIZE_SLACK <= expected) && (expected <= actual + SIZE_SLACK));
+            Assert.assertTrue(cl + " array instance size is not within range: actual = " + actual +
+                            ", expected range = [" + expectedMin + ", " + expectedMax + "]",
+                    (actual >= expectedMin && actual <= expectedMax));
 
             if (l.instanceSize() <= 0) {
                 Assert.fail(cl + "[" + size + "] is not positive: " + l.instanceSize());
