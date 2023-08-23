@@ -81,7 +81,7 @@ public class HotSpotLayouter implements Layouter {
 
             // Array bases are aligned by HeapWord size:
             //  https://bugs.openjdk.java.net/browse/JDK-8139457
-            base = MathUtil.align(base, Math.max(model.addressSize(), scale));
+            base = MathUtil.align(base, Math.max(model.arrayBaseAlignment(), scale));
 
             long instanceSize = base + cd.arrayLength() * scale;
             instanceSize = MathUtil.align(instanceSize, model.objectAlignment());

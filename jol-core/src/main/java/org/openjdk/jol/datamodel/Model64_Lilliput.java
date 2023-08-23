@@ -32,16 +32,18 @@ package org.openjdk.jol.datamodel;
 public class Model64_Lilliput implements DataModel {
 
     private final int align;
+    private final int arrayBaseAlign;
     private final boolean compRefs;
     private final boolean target;
 
     public Model64_Lilliput() {
-        this(false, 8, false);
+        this(false, 8, 8, false);
     }
 
-    public Model64_Lilliput(boolean compRefs, int align, boolean target) {
+    public Model64_Lilliput(boolean compRefs, int align, int arrayBaseAlign, boolean target) {
         this.compRefs = compRefs;
         this.align = align;
+        this.arrayBaseAlign = target ? 4 : arrayBaseAlign;
         this.target = target;
     }
 
@@ -96,8 +98,8 @@ public class Model64_Lilliput implements DataModel {
     }
 
     @Override
-    public int addressSize() {
-        return 8;
+    public int arrayBaseAlignment() {
+        return arrayBaseAlign;
     }
 
     @Override

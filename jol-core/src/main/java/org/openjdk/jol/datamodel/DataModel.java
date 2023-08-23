@@ -80,9 +80,9 @@ public interface DataModel {
     int objectAlignment();
 
     /**
-     * Return the address size for this model: the size of the native pointer.
+     * Return the minimal alignment for array bases.
      *
-     * @return address size in bytes
+     * @return minimal array base alignment
      */
-    int addressSize();
+    int arrayBaseAlignment();
 }
