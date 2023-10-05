@@ -101,10 +101,10 @@ public class ClassData {
     private static ClassData parse(Object o, Class klass) {
         // If this is an array, do the array parsing, instead of ordinary class.
         if (klass.isArray()) {
-            return new ClassData(o, ClassUtils.humanReadableName(klass), ClassUtils.humanReadableName(klass.getComponentType()), arrayLength(o));
+            return new ClassData(o, ClassUtils.jvmName(klass), ClassUtils.jvmName(klass.getComponentType()), arrayLength(o));
         }
 
-        ClassData cd = new ClassData(o, ClassUtils.humanReadableName(klass));
+        ClassData cd = new ClassData(o, ClassUtils.jvmName(klass));
         Class superKlass = klass.getSuperclass();
 
         // TODO: Move to an appropriate constructor
