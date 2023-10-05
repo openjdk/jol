@@ -82,7 +82,7 @@ public class ClassUtils {
         return Class.forName(name, true, ClassLoader.getSystemClassLoader());
     }
 
-    public static String getSafeName(Class klass) {
+    public static String humanReadableName(Class<?> klass) {
         // We want a human-readable class name. getName() returns JVM signature.
         // getCanonicalName() returns proper string, unless it is hits the bug.
         // If it fails, then we will fall back to getName()
@@ -95,7 +95,7 @@ public class ClassUtils {
         } catch (Throwable e) {
             // fall-through
         }
-        return klass.getName();
+        return binaryToHuman(klass.getName());
     }
 
     public static String binaryToHuman(String name) {
