@@ -33,33 +33,31 @@ import java.util.TreeMap;
 
 public class Main {
 
-    private static SortedMap<String, Operation> operations = new TreeMap<>();
+    private static final SortedMap<String, Operation> OPERATIONS = new TreeMap<>();
 
     static {
         registerOperation(new ObjectInternals());
         registerOperation(new ObjectExternals());
-        registerOperation(new ObjectEstimates());
+        registerOperation(new ObjectInternalsEstimates());
         registerOperation(new ObjectFootprint());
-        registerOperation(new ObjectShapes());
-        registerOperation(new StringCompress());
         registerOperation(new HeapDumpStats());
         registerOperation(new HeapDumpEstimates());
     }
 
     private static void registerOperation(Operation op) {
-        operations.put(op.label(), op);
+        OPERATIONS.put(op.label(), op);
     }
 
     public static void main(String... args) throws Exception {
-        String mode = (args.length >= 1) ? args[0] : "help";
+        String operation = (args.length >= 1) ? args[0] : "help";
 
-        Operation op = operations.get(mode);
+        Operation op = OPERATIONS.get(operation);
         if (op != null) {
             String[] modeArgs = Arrays.copyOfRange(args, 1, args.length);
             op.run(modeArgs);
         } else {
-            if (!mode.equals("help")) {
-                System.err.println("Unknown mode: " + mode);
+            if (!operation.equals("help")) {
+                System.err.println("Unknown operation: " + operation);
                 System.err.println();
                 printHelp(System.err);
                 System.exit(1);
@@ -71,12 +69,12 @@ public class Main {
     }
 
     private static void printHelp(PrintStream pw) {
-        pw.println("Usage: jol-cli.jar <mode> [optional arguments]*");
+        pw.println("Usage: jol-cli.jar <operation> [optional arguments]*");
         pw.println();
 
-        pw.println("Available modes: ");
-        for (Operation lop : operations.values()) {
-            pw.printf("  %20s: %s%n", lop.label(), lop.description());
+        pw.println("Available operations: ");
+        for (Operation op : OPERATIONS.values()) {
+            pw.printf("  %20s: %s%n", op.label(), op.description());
         }
     }
 

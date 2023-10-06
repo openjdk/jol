@@ -46,12 +46,12 @@ public class HeapDumpStats implements Operation {
 
     @Override
     public String label() {
-        return "heapdumpstats";
+        return "heapdump-stats";
     }
 
     @Override
     public String description() {
-        return "Consume the heap dump and print the most frequent instances.";
+        return "Read a heap dump and print simple statistics";
     }
 
     private int getVMVersion() {

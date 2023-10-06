@@ -28,49 +28,91 @@ import org.openjdk.jol.datamodel.*;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.layouters.HotSpotLayouter;
 import org.openjdk.jol.layouters.Layouter;
-import org.openjdk.jol.layouters.RawLayouter;
+import org.openjdk.jol.util.Multimap;
+import org.openjdk.jol.util.Multiset;
+
+import java.util.*;
 
 import static java.lang.System.out;
 
 /**
  * @author Aleksey Shipilev
  */
-public class ObjectEstimates extends ClasspathedOperation {
+public class ObjectInternalsEstimates extends ClasspathedOperation {
 
     @Override
     public String label() {
-        return "estimates";
+        return "internals-estimates";
     }
 
     @Override
     public String description() {
-        return "Simulate the class layout in different VM modes.";
+        return "Same as 'internals', but simulate class layout in different VM modes";
     }
 
     @Override
     protected void runWith(Class<?> klass) {
+        List<Layouter> layouters = new ArrayList<>();
+
         for (DataModel model : EstimatedModels.MODELS_JDK8) {
-            Layouter l = new HotSpotLayouter(model, 8);
-            out.println("***** " + l);
-            out.println(ClassLayout.parseClass(klass, l).toPrintable());
+            layouters.add(new HotSpotLayouter(model, 8));
         }
 
         for (DataModel model : EstimatedModels.MODELS_JDK8) {
-            Layouter l = new HotSpotLayouter(model, 15);
-            out.println("***** " + l);
-            out.println(ClassLayout.parseClass(klass, l).toPrintable());
+            layouters.add(new HotSpotLayouter(model, 15));
         }
 
         for (DataModel model : EstimatedModels.MODELS_JDK15) {
-            Layouter l = new HotSpotLayouter(model, 15);
-            out.println("***** " + l);
-            out.println(ClassLayout.parseClass(klass, l).toPrintable());
+            layouters.add(new HotSpotLayouter(model, 15));
         }
 
         for (DataModel model : EstimatedModels.MODELS_LILLIPUT) {
-            Layouter l = new HotSpotLayouter(model, 99);
-            out.println("***** " + l);
-            out.println(ClassLayout.parseClass(klass, l).toPrintable());
+            layouters.add(new HotSpotLayouter(model, 99));
+        }
+
+        Multimap<Wrapper, Layouter> outputs = new Multimap<>();
+
+        for (Layouter l : layouters) {
+            ClassLayout cl = ClassLayout.parseClass(klass, l);
+            outputs.put(new Wrapper(cl.toPrintable(), cl.instanceSize()), l);
+        }
+
+        List<Wrapper> sortedWs = new ArrayList<>(outputs.keys());
+        sortedWs.sort(Comparator.comparing(Wrapper::size).reversed());
+
+        for (Wrapper w : sortedWs) {
+            for (Layouter l : outputs.get(w)) {
+                out.println("***** " + l);
+            }
+            out.println();
+            out.println(w.output);
+        }
+    }
+
+    private static class Wrapper {
+        final String output;
+        final long size;
+
+        public Wrapper(String output, long size) {
+            this.output = output;
+            this.size = size;
+        }
+
+        public long size() {
+            return size;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Wrapper wrapper = (Wrapper) o;
+            return Objects.equals(output, wrapper.output);
+        }
+
+        @Override
+        public int hashCode() {
+            return output.hashCode();
         }
     }
 
