@@ -42,6 +42,9 @@ public class Main {
         registerOperation(new ObjectFootprint());
         registerOperation(new HeapDumpStats());
         registerOperation(new HeapDumpEstimates());
+        registerOperation(new HeapDumpDuplicates());
+        registerOperation(new HeapDumpBoxes());
+        registerOperation(new HeapDumpStrings());
     }
 
     private static void registerOperation(Operation op) {

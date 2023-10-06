@@ -24,6 +24,7 @@
  */
 package org.openjdk.jol.info;
 
+import org.openjdk.jol.util.ASCIITable;
 import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.util.Multiset;
 import org.openjdk.jol.util.ObjectUtils;
@@ -332,16 +333,18 @@ public class GraphLayout {
      * @return footprint table
      */
     public String toFootprint() {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        pw.println(description + " footprint:");
-        pw.printf(" %9s %9s %9s   %s%n", "COUNT", "AVG", "SUM", "DESCRIPTION");
+        ASCIITable table = new ASCIITable(
+                true,
+                description + " footprint:",
+                "COUNT", "AVG", "SUM", "DESCRIPTION");
         for (Class<?> key : getClasses()) {
             long count = getClassCounts().count(key);
             long size = getClassSizes().count(key);
-            pw.printf(" %9d %9d %9d   %s%n", count, size / count, size, ClassUtils.humanReadableName(key));
+            table.addLine(ClassUtils.humanReadableName(key), count, size / count, size);
         }
-        pw.printf(" %9d %9s %9d   %s%n", totalCount(), "", totalSize(), "(total)");
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        table.print(pw, 2);
         pw.println();
         pw.close();
         return sw.toString();
