@@ -42,7 +42,7 @@ public class ObjectExternals extends ClasspathedOperation {
 
     @Override
     public String description() {
-        return "Show the object externals: the objects reachable from a given instance.";
+        return "Show object externals: objects reachable from a given instance";
     }
 
     public void runWith(Class<?> klass) throws Exception {

@@ -50,7 +50,7 @@ public class HeapDumpEstimates implements Operation {
 
     @Override
     public String description() {
-        return "Consume the heap dump and simulate the class layout in different VM modes";
+        return "Read a heap dump and estimate footprint in different VM modes";
     }
 
     public void run(String... args) throws Exception {

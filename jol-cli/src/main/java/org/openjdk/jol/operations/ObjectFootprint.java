@@ -42,7 +42,7 @@ public class ObjectFootprint extends ClasspathedOperation {
 
     @Override
     public String description() {
-        return "Estimate the footprint of all objects reachable from a given instance";
+        return "Show the footprint of all objects reachable from a sample instance";
     }
 
     public void runWith(Class<?> klass) throws Exception {

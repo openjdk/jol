@@ -34,6 +34,7 @@ import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.vm.VM;
 
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.lang.System.getProperty;
@@ -45,8 +46,10 @@ public abstract class ClasspathedOperation implements Operation {
         OptionParser parser = new OptionParser();
         parser.formatHelpWith(new OptionFormatter(label()));
 
-        OptionSpec<String> optClassPath = parser.accepts("cp", "Additional classpath entries, where to look for the referenced classes.")
-                .withRequiredArg().ofType(String.class).describedAs("classpath").withValuesSeparatedBy(getProperty("path.separator"));
+        OptionSpec<String> optClassPath = parser.acceptsAll(Arrays.asList("cp", "classpath"),
+                        "Additional classpath entries, where to look for the referenced classes.")
+                .withRequiredArg().ofType(String.class).describedAs("classpath")
+                .withValuesSeparatedBy(getProperty("path.separator"));
 
         OptionSpec<String> optClasses = parser.nonOptions("Class names to work on.");
 
