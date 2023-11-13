@@ -196,15 +196,24 @@ public class HeapDumpReader {
             classDatas.put(klassId, cd);
         }
 
+        // Fix up superclasses for HotspotLayouter to work well.
+        for (Long klassId : classDatas.keySet()) {
+            Long key = classSupers.get(klassId);
+            if (key != null) {
+                ClassData superCd = classDatas.get(key);
+                ClassData thisCd = classDatas.get(klassId);
+                thisCd.addSuperClassData(superCd);
+            }
+        }
+
         // Compute final class counts.
         Multiset<ClassData> finalClassCounts = new Multiset<>();
         for (ClassData cd : arrayCounts.keys()) {
             finalClassCounts.add(cd, arrayCounts.count(cd));
         }
-        for (Long klassId : classDatas.keySet()) {
-            ClassData cd = classDatas.get(klassId);
-            long count = classCounts.count(klassId);
-            finalClassCounts.add(cd, count);
+        for (Long id : classDatas.keySet()) {
+            ClassData cd = classDatas.get(id);
+            finalClassCounts.add(cd, classCounts.count(id));
         }
 
         if (verboseOut != null) {
