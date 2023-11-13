@@ -372,16 +372,6 @@ public class ClassData {
         return length;
     }
 
-    /**
-     * Merge this class data with the super-class class data
-     *
-     * @param superClassData super class data
-     */
-    public void merge(ClassData superClassData) {
-        fields.addAll(superClassData.fields);
-        classNames.addAll(0, superClassData.classNames);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {

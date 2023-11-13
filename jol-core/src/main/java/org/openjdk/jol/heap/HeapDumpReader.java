@@ -27,6 +27,7 @@ package org.openjdk.jol.heap;
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.FieldData;
 import org.openjdk.jol.util.ClassUtils;
+import org.openjdk.jol.util.Multimap;
 import org.openjdk.jol.util.Multiset;
 
 import java.io.*;
@@ -51,8 +52,10 @@ public class HeapDumpReader {
 
     private final Map<Long, String> strings;
     private final Map<Long, String> classNames;
-    private final Multiset<ClassData> classCounts;
-    private final Map<Long, ClassData> classDatas;
+    private final Multimap<Long, FieldData> classFields;
+    private final Multiset<Long> classCounts;
+    private final Multiset<ClassData> arrayCounts;
+    private final Map<Long, Long> classSupers;
     private final File file;
     private final PrintStream verboseOut;
     private final Visitor visitor;
@@ -76,7 +79,9 @@ public class HeapDumpReader {
         this.strings = new HashMap<>();
         this.classNames = new HashMap<>();
         this.classCounts = new Multiset<>();
-        this.classDatas = new HashMap<>();
+        this.classFields = new Multimap<>();
+        this.arrayCounts = new Multiset<>();
+        this.classSupers = new HashMap<>();
         this.buf = new byte[32*1024];
         this.wrapBuf = ByteBuffer.wrap(buf);
     }
@@ -174,11 +179,48 @@ public class HeapDumpReader {
             }
         }
 
+        // Post-process supers: merge all fields datas up the class hierarchy.
+        Map<Long, ClassData> classDatas = new HashMap<>();
+
+        for (Long klassId : classFields.keys()) {
+            ClassData cd = new ClassData(classNames.get(klassId));
+
+            Long id = klassId;
+            while (id != null) {
+                cd.addSuperClass(classNames.get(id));
+                for (FieldData fd : classFields.get(id)) {
+                    cd.addField(fd);
+                }
+                id = classSupers.get(id);
+            }
+            classDatas.put(klassId, cd);
+        }
+
+        // Fix up superclasses for HotspotLayouter to work well.
+        for (Long klassId : classDatas.keySet()) {
+            Long key = classSupers.get(klassId);
+            if (key != null) {
+                ClassData superCd = classDatas.get(key);
+                ClassData thisCd = classDatas.get(klassId);
+                thisCd.addSuperClassData(superCd);
+            }
+        }
+
+        // Compute final class counts.
+        Multiset<ClassData> finalClassCounts = new Multiset<>();
+        for (ClassData cd : arrayCounts.keys()) {
+            finalClassCounts.add(cd, arrayCounts.count(cd));
+        }
+        for (Long id : classDatas.keySet()) {
+            ClassData cd = classDatas.get(id);
+            finalClassCounts.add(cd, classCounts.count(id));
+        }
+
         if (verboseOut != null) {
             verboseOut.println("DONE");
         }
 
-        return classCounts;
+        return finalClassCounts;
     }
 
     private void digestHeapDump() throws HeapDumpException {
@@ -241,7 +283,7 @@ public class HeapDumpReader {
         int typeClass = read_U1();
 
         String typeString = getTypeString(typeClass);
-        classCounts.add(new ClassData(typeString + "[]", typeString, elements));
+        arrayCounts.add(new ClassData(typeString + "[]", typeString, elements));
 
         int len = elements * getSize(typeClass);
         if (visitor != null) {
@@ -263,7 +305,7 @@ public class HeapDumpReader {
 
         // Assume Object as component type, the name of the actual class
         // is what we want for the printouts.
-        classCounts.add(new ClassData(name, "Object", elements));
+        arrayCounts.add(new ClassData(name, "Object", elements));
     }
 
     private void digestInstance() throws HeapDumpException {
@@ -271,7 +313,7 @@ public class HeapDumpReader {
         read_U4(); // stack trace
         long klassID = read_ID();
 
-        classCounts.add(classDatas.get(klassID));
+        classCounts.add(klassID);
 
         int instanceBytes = (int) read_U4(); // always fits
 
@@ -288,15 +330,11 @@ public class HeapDumpReader {
 
         String name = classNames.get(klassID);
 
-        ClassData cd = new ClassData(name);
-        cd.addSuperClass(name);
-
         read_U4(); // stack trace
 
         long superKlassID = read_ID();
-        ClassData superCd = classDatas.get(superKlassID);
-        if (superCd != null) {
-            cd.merge(superCd);
+        if (superKlassID != 0 && classSupers.put(klassID, superKlassID) != null) {
+            throw new HeapDumpException("Format error: duplicate class " + name);
         }
 
         read_ID(); // class loader
@@ -328,14 +366,12 @@ public class HeapDumpReader {
             long index = read_ID();
             int type = read_U1();
 
-            cd.addField(FieldData.create(name, strings.get(index), getTypeString(type)));
+            classFields.put(klassID, FieldData.create(name, strings.get(index), getTypeString(type)));
             if (type == 2) {
                 oopIdx.add(offset);
             }
             offset += getSize(type);
         }
-
-        classDatas.put(klassID, cd);
 
         if (visitor != null) {
             visitor.visitClass(klassID, name, oopIdx, idSize);

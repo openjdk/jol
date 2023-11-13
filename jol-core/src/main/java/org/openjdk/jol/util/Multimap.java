@@ -46,7 +46,11 @@ public class Multimap<K, V> {
     }
 
     public List<V> get(K k) {
-        return Collections.unmodifiableList(map.get(k));
+        if (map.containsKey(k)) {
+            return Collections.unmodifiableList(map.get(k));
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     public Collection<K> keys() {
