@@ -200,9 +200,12 @@ public class HeapDumpReader {
         for (Long klassId : classDatas.keySet()) {
             Long key = classSupers.get(klassId);
             if (key != null) {
+                ClassData cd = classDatas.get(klassId);
                 ClassData superCd = classDatas.get(key);
-                ClassData thisCd = classDatas.get(klassId);
-                thisCd.addSuperClassData(superCd);
+                if (superCd == null) {
+                    throw new IllegalStateException("Parser error: no super class data for " + cd.name() + " (" + key + ")");
+                }
+                cd.addSuperClassData(superCd);
             }
         }
 
@@ -371,6 +374,9 @@ public class HeapDumpReader {
                 oopIdx.add(offset);
             }
             offset += getSize(type);
+        }
+        if (cpInstance == 0) {
+            classFields.putEmpty(klassID);
         }
 
         if (visitor != null) {

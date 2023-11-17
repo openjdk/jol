@@ -45,6 +45,14 @@ public class Multimap<K, V> {
         vs.add(v);
     }
 
+    public void putEmpty(K k) {
+        List<V> vs = map.get(k);
+        if (vs == null) {
+            vs = new ArrayList<>();
+            map.put(k, vs);
+        }
+    }
+
     public List<V> get(K k) {
         if (map.containsKey(k)) {
             return Collections.unmodifiableList(map.get(k));
