@@ -168,6 +168,6 @@ public class FieldData {
 
     @Override
     public String toString() {
-        return name + ": " + type;
+        return klass + "." + name + ": " + type;
     }
 }
