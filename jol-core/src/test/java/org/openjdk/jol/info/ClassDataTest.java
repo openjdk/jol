@@ -11,23 +11,25 @@ public class ClassDataTest {
 
   private final ClassData classData = ClassData.parseClass(Class3.class);
 
+  private static final String PREFIX = "org.openjdk.jol.info.ClassDataTest.Class";
+
   static class Class1 {
-    int c1f1;
-    int c1f2;
-    int c1f3;
+    int f1;
+    int f2;
+    int f3;
   }
 
   static class Class2 extends Class1 {
-    int c2f1;
-    int c2f2;
-    int c2f3;
+    int f1;
+    int f2;
+    int f3;
   }
 
   static class Class3 extends Class2 {
-    int c3f1;
-    int c3f2;
-    int c3f3;
-    Object c3f4;
+    int f1;
+    int f2;
+    int f3;
+    Object f4;
   }
 
   @Test
@@ -42,7 +44,7 @@ public class ClassDataTest {
     String klass3 = Class3.class.getCanonicalName();
 
     assertEquals(4, ownFields.size());
-    assertEquals("[c3f1: int, c3f2: int, c3f3: int, c3f4: java.lang.Object]", ownFields.toString());
+    assertEquals("[" + PREFIX + "3.f1: int, " +  PREFIX + "3.f2: int, " + PREFIX + "3.f3: int, " + PREFIX + "3.f4: java.lang.Object]", ownFields.toString());
   }
 
   @Test
@@ -59,7 +61,7 @@ public class ClassDataTest {
     assertEquals(klass, classFields.get(0).hostClass());
     assertEquals(klass, classFields.get(1).hostClass());
     assertEquals(klass, classFields.get(2).hostClass());
-    assertEquals("[c1f1: int, c1f2: int, c1f3: int]", classFields.toString());
+    assertEquals("[" + PREFIX + "1.f1: int, " + PREFIX + "1.f2: int, " + PREFIX + "1.f3: int]", classFields.toString());
   }
 
   @Test
@@ -70,7 +72,7 @@ public class ClassDataTest {
     assertEquals(klass, classFields.get(0).hostClass());
     assertEquals(klass, classFields.get(1).hostClass());
     assertEquals(klass, classFields.get(2).hostClass());
-    assertEquals("[c2f1: int, c2f2: int, c2f3: int]", classFields.toString());
+    assertEquals("[" + PREFIX + "2.f1: int, " + PREFIX + "2.f2: int, " + PREFIX + "2.f3: int]", classFields.toString());
   }
 
   @Test
@@ -82,7 +84,7 @@ public class ClassDataTest {
     assertEquals(klass, classFields.get(1).hostClass());
     assertEquals(klass, classFields.get(2).hostClass());
     assertEquals(klass, classFields.get(3).hostClass());
-    assertEquals("[c3f1: int, c3f2: int, c3f3: int, c3f4: java.lang.Object]", classFields.toString());
+    assertEquals("[" + PREFIX + "3.f1: int, " +  PREFIX + "3.f2: int, " + PREFIX + "3.f3: int, " + PREFIX + "3.f4: java.lang.Object]", classFields.toString());
   }
 
   @Test
