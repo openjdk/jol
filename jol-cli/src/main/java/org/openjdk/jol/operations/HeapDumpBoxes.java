@@ -58,15 +58,6 @@ public class HeapDumpBoxes implements Operation {
             Double.class
     };
 
-    static final Class<?>[] PRIMITIVE_CACHE_CLASSES = {
-            Short.class,
-            Character.class,
-            Integer.class,
-            Float.class,
-            Long.class,
-            Double.class
-    };
-
     @Override
     public String label() {
         return "heapdump-boxes";
@@ -150,11 +141,6 @@ public class HeapDumpBoxes implements Operation {
         out.println();
 
         for (Class<?> cl : PRIMITIVE_CLASSES) {
-            BoxVisitor v = visitors.get(cl);
-            v.printOut(out);
-        }
-
-        for (Class<?> cl : PRIMITIVE_CACHE_CLASSES) {
             BoxVisitor v = visitors.get(cl);
             v.printOut(out);
         }
