@@ -246,7 +246,7 @@ public class HeapDumpBoxes implements Operation {
             for (int limit : limits) {
                 // Subtract the overhead for larger holding array
                 long sizes = autoBoxSizeWins.count(limit) - arrayMarginalCost*(limit - 128);
-                arrayTable.addLine(cl.getSimpleName() + "[" + limit + "]", autoBoxCountWins.count(limit), sizes);
+                arrayTable.addLine(cl.getSimpleName() + "[-128; " + limit + ")", autoBoxCountWins.count(limit), sizes);
             }
 
             arrayTable.print(ps, -1);

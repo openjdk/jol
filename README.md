@@ -228,9 +228,9 @@ This gets the object footprint estimate, similar to the object externals, but ta
 Read the heap dump and look into high-level stats for it. The tool runs on heap dump in single pass,
 and takes only a little additional memory. This allows processing huge heap dumps on small machines.
 
-    $ java -jar jol-cli.jar heapdump-stats sample-clion.hprof.gz
-    Heap Dump: sample-clion.hprof.gz
-    Read progress: 269M... 538M... 808M... 1077M... 1346M... 1616M... DONE
+    $ java -jar jol-cli.jar heapdump-stats java_pid92614.hprof
+    Heap Dump: java_pid92614.hprof
+    Read progress: DONE
 
     Hotspot Layout Simulation (JDK 17, Current VM: 12-byte object headers, 4-byte references, 8-byte aligned objects, 8-byte aligned array bases)
 
@@ -241,41 +241,40 @@ and takes only a little additional memory. This allows processing huge heap dump
 
            INSTANCES            SIZE        SUM SIZE    CLASS
     ------------------------------------------------------------------------------------------------
-               2.091          65.560     137.085.960    java.lang.Object[16385]
-           1.533.042              40      61.321.680    java.util.WeakHashMap$Entry
-           1.595.624              24      38.294.976    java.lang.String
-               4.627           8.216      38.015.432    java.lang.Object[2049]
-           1.074.313              32      34.378.016    java.util.HashMap$Node
-             758.446              40      30.337.840    com.jetbrains.cidr.lang.symbols.cpp.OCMacroSymbol
-             816.693              32      26.134.176    java.util.concurrent.ConcurrentHashMap$Node
-             591.407              40      23.656.280    com.intellij.util.containers.ConcurrentWeakKeySoftValueHashMap$WeakKey
-             828.635              24      19.887.240    java.util.ArrayList
-             612.098              32      19.587.136    com.jetbrains.cidr.lang.types.OCReferenceTypeSimple
-             598.784              32      19.161.088    com.jetbrains.cidr.lang.symbols.OCSymbolReference$GlobalReference
-             591.328              32      18.922.496    com.intellij.util.containers.ConcurrentWeakKeyWeakValueHashMap$WeakValue
-             203.545              80      16.283.600    com.jetbrains.cidr.lang.symbols.cpp.OCDeclaratorSymbolImpl
-             223.655              72      16.103.160    com.jetbrains.cidr.lang.symbols.cpp.OCFunctionSymbol
-                   1      12.217.040      12.217.040    byte[12217024]
-             234.724              40       9.388.960    com.jetbrains.cidr.lang.types.OCFunctionType
-               1.132           8.208       9.291.456    java.util.WeakHashMap$Entry[2048]
-             229.218              40       9.168.720    com.jetbrains.cidr.lang.types.OCPointerType
-              53.663             152       8.156.776    java.lang.Object[33]
-             143.195              56       8.018.920    java.lang.Object[10]
-               1.612           4.120       6.641.440    java.lang.Object[1025]
-             249.059              24       5.977.416    com.jetbrains.cidr.lang.symbols.OCQualifiedName
-                 160          32.784       5.245.440    byte[32768]
-                 817           6.160       5.032.720    int[1536]
-             194.279              24       4.662.696    java.lang.Object[1]
-               1.081           4.112       4.445.072    java.util.HashMap$Node[1024]
-                   2       2.097.168       4.194.336    java.util.concurrent.ConcurrentHashMap$Node[524288]
-                   1       4.194.320       4.194.320    byte[4194304]
-              65.486              56       3.667.216    com.intellij.psi.impl.source.tree.CompositeElement
-              33.534             104       3.487.536    com.jetbrains.cidr.lang.symbols.cpp.OCStructSymbol
+              17.092              24         410.208    java.lang.String
+               2.189              80         175.120    long[8]
+               4.690              32         150.080    java.util.HashMap$Node
+               4.662              32         149.184    com.sun.tools.javac.util.SharedNameTable$NameImpl
+                   1         131.088         131.088    com.sun.tools.javac.util.SharedNameTable$NameImpl[32768]
+                   1         131.088         131.088    byte[131072]
+               3.457              32         110.624    java.util.concurrent.ConcurrentHashMap$Node
+               2.189              32          70.048    jdk.internal.jimage.ImageReader$Resource
+               2.189              24          52.536    jdk.internal.jimage.ImageLocation
+                   4           8.208          32.832    byte[8192]
+                   2          16.400          32.800    char[8192]
+                 828              32          26.496    java.lang.invoke.MethodType$ConcurrentWeakInternSet$WeakEntry
+                 659              40          26.360    java.lang.invoke.MemberName
+                 651              40          26.040    java.lang.invoke.MethodType
+                 319              80          25.520    java.util.HashMap$Node[16]
+                   3           8.208          24.624    java.util.concurrent.ConcurrentHashMap$Node[2048]
+               1.515              16          24.240    java.lang.Object
+               1.262              16          20.192    java.lang.Integer
+                 420              48          20.160    byte[32]
+                 335              56          18.760    byte[34]
+                 732              24          17.568    java.lang.module.ModuleDescriptor$Exports
+                 413              40          16.520    byte[19]
+                   1          16.400          16.400    java.util.HashMap$Node[4096]
+                 338              48          16.224    java.util.HashMap
+                 285              56          15.960    byte[33]
+                 270              56          15.120    byte[39]
+                 591              24          14.184    byte[3]
+                 215              64          13.760    byte[43]
+                 156              88          13.728    java.lang.reflect.Method
+                 243              56          13.608    byte[35]
                  ...             ...             ...    ...
-           6.783.781      42.772.496     339.519.840    <other>
+              29.038         181.048       1.403.288    <other>
     ------------------------------------------------------------------------------------------------
-          17.426.033      61.411.160     942.478.984    <total>
-
+              74.750         493.480       3.214.360    <total>
 
 #### "heapdump-estimates"
 
@@ -359,13 +358,13 @@ if possible. It would print both the summary report, and more verbose report per
 and takes some memory to store hashes for duplicate objects. This allows processing huge heap dumps without having lots
 of memory. Bump the heap size for the tool if heap dump does not fit.
 
-    $ java -jar jol-cli.jar heapdump-duplicates sample-clion.hprof.gz
-    Heap Dump: sample-clion.hprof.gz
-    Read progress: 269M... 538M... 808M... 1077M... 1346M... 1616M... DONE
+    $ java -jar jol-cli.jar heapdump-duplicates java_pid92614.hprof
+    Heap Dump: java_pid92614.hprof
+    Read progress: DONE
 
     Hotspot Layout Simulation (JDK 17, Current VM: 12-byte object headers, 4-byte references, 8-byte aligned objects, 8-byte aligned array bases)
 
-    Heap dump contains 17.426.033 objects, 942.478.984 bytes in total.
+    Heap dump contains 74.750 objects, 3.214.360 bytes in total.
 
     === Potential Duplication Candidates
 
@@ -374,44 +373,42 @@ of memory. Bump the heap size for the tool if heap dump does not fit.
 
                 DUPS        SUM SIZE    CLASS
     ------------------------------------------------------------------------------------------------
-             449.993     124.302.944    Object[]
-             656.318      31.629.792    byte[]
-             661.645      26.465.800    com.jetbrains.cidr.lang.symbols.cpp.OCMacroSymbol
-             610.393      19.532.576    java.util.HashMap$Node
-             177.670       6.566.216    int[]
-             273.211       6.557.064    java.util.ArrayList
-              93.361       2.987.552    java.util.concurrent.ConcurrentHashMap$Node
-              59.492       1.903.744    com.jetbrains.cidr.lang.types.OCReferenceTypeSimple
-              39.348       1.573.920    com.jetbrains.cidr.lang.types.OCPointerType
-              62.699       1.504.776    java.lang.String
-              32.250       1.290.000    org.languagetool.rules.patterns.PatternToken
-              50.661       1.215.864    com.intellij.openapi.util.Pair
-               7.536       1.033.872    long[]
-              25.407       1.016.280    com.jetbrains.cidr.lang.types.OCIntType
-              63.268       1.012.288    java.util.concurrent.atomic.AtomicReference
-              29.521         944.672    com.intellij.openapi.vfs.newvfs.impl.VirtualFileImpl
-              56.675         906.800    java.lang.Integer
-              21.845         699.040    com.jetbrains.cidr.lang.symbols.OCSymbolReference$GlobalReference
-              42.183         674.928    java.lang.Object
-              27.481         659.544    com.intellij.util.keyFMap.OneElementFMap
-              19.553         625.696    com.jetbrains.cidr.lang.symbols.ComplexTextRange
-              14.071         562.840    com.intellij.reference.SoftReference
-               7.288         524.736    java.lang.reflect.Field
-              21.370         512.880    com.jetbrains.cidr.lang.symbols.OCQualifiedName
-              12.625         505.000    java.lang.ref.SoftReference
-              10.224         490.752    java.util.HashMap
-               2.362         481.664    boolean[]
-               9.355         449.040    com.jetbrains.cidr.lang.preprocessor.OCMacroForeignLeafType
-              17.707         424.968    com.jetbrains.cidr.lang.symbols.cpp.OCIncludeSymbol$IncludePath
-              10.533         421.320    com.jetbrains.cidr.lang.preprocessor.OCMacroReferenceTokenType
+               1.657         107.144    byte[]
+               1.489          49.176    Object[]
+               1.514          24.224    java.lang.Object
+                   2          16.448    char[]
+               1.004          16.064    java.lang.Integer
+                 409          13.088    java.util.HashMap$Node
+                 580          10.224    int[]
+                 516           8.256    java.lang.invoke.ResolvedMethodName
+                 234           7.488    java.lang.module.ModuleDescriptor$Requires
+                 226           5.424    java.lang.module.ModuleDescriptor$Exports
+                 155           3.720    java.lang.String
+                 199           3.184    java.lang.invoke.MethodHandleNatives$CallSiteContext
+                 127           3.048    java.util.ImmutableCollections$Set12
+                 115           2.760    java.util.ArrayList
+                  63           2.016    jdk.internal.jimage.ImageReader$Resource
+                  70           1.680    jdk.internal.jimage.ImageLocation
+                  64           1.536    jdk.internal.module.ServicesCatalog$ServiceProvider
+                  51           1.224    java.util.ImmutableCollections$List12
+                  36           1.152    java.util.concurrent.ConcurrentHashMap$Node
+                  16           1.024    java.util.concurrent.ConcurrentHashMap
+                  55             880    com.sun.tools.javac.util.Context$Key
+                  27             864    com.sun.tools.javac.util.SharedNameTable$NameImpl
+                   4             832    long[]
+                  10             400    java.security.AccessControlContext
+                   6             240    java.lang.invoke.MemberName
+                   3             240    short[]
+                  13             208    java.lang.ref.ReferenceQueue$Lock
+                   6             192    java.util.ResourceBundle$KeyElementReference
+                   4             192    java.util.HashMap
+                   5             160    java.lang.invoke.LambdaForm$Name
                  ...             ...    ...
-             307.252       9.288.760    <other>
+                  38           1.008    <other>
     ------------------------------------------------------------------------------------------------
-           3.873.297     246.765.328    <total>
+               8.698         284.096    <total>
 
-    ...
-
-    === com.jetbrains.cidr.lang.symbols.cpp.OCMacroSymbol Potential Duplicates
+    === byte[] Potential Duplicates
       DUPS: Number of instances with same data
       SIZE: Total size taken by duplicate instances
 
@@ -420,14 +417,22 @@ of memory. Bump the heap size for the tool if heap dump does not fit.
 
                 DUPS            SIZE    VALUE
     ------------------------------------------------------------------------------------------------
-               1.044          41.760    (hash: b3d7653a1b45cdc7)
-               1.044          41.760    (hash: dba02bbacfe63eb7)
-               1.044          41.760    (hash: 31921ef6e494ca97)
-               1.044          41.760    (hash: c2b4fb34818eb9ed)
-               1.044          41.760    (hash: 31f79d3ace1161ca)
-               1.044          41.760    (hash: 13f841d0438614c5)
-               1.044          41.760    (hash: d45cdf077af876ad)
-               1.044          41.760    (hash: 1b27a7c37cafc70e)
+                   2          16.416    byte[8192] { 0, ..., 0 }
+                  10             320    byte[13] (hash: f6ca3f5a7125e6c0)
+                   3             312    byte[82] (hash: 7d82d9f161dd916f)
+                   7             224    byte[13] (hash: f6ca3f5b04a5c512)
+                   1             208    byte[190] (hash: 71b141781c48b4c0)
+                   1             168    byte[148] (hash: d951002a3b1499bb)
+                   1             160    byte[140] (hash: 8236c4418b62023d)
+                   1             152    byte[136] (hash: a354c5ca3e461646)
+                   1             144    byte[124] (hash: ed563ca054ab3627)
+                   1             144    byte[122] (hash: 5011087831e30920)
+                   1             136    byte[120] (hash: 1f3c75b7ebcceac6)
+                   2             128    byte[43] (hash: e07d31ada1c0122)
+                   4             128    byte[16] (hash: e5c5a7766de82562)
+                   2             128    byte[43] (hash: f8e8a02b5ad3decd)
+                   2             128    byte[48] (hash: 905ece899b79bfd)
+
     ...
 
 #### "heapdump-boxes"
@@ -460,16 +465,16 @@ if heap dump does not fit.
 
      SAVED INSTANCES     SAVED BYTES    CACHE SHAPE
     ------------------------------------------------------------------------------------------------
-                   0            -512    Integer[256]
-                   0          -1.536    Integer[512]
-                 999          12.400    Integer[1024]
-               1.004           8.384    Integer[2048]
-               1.004             192    Integer[4096]
-               1.004         -16.192    Integer[8192]
-               1.004         -48.960    Integer[16384]
-               1.004        -114.496    Integer[32768]
-               1.004        -245.568    Integer[65536]
-               1.004        -507.712    Integer[131072]
+                   0            -512    Integer[-128; 256)
+                   0          -1.536    Integer[-128; 512)
+                 999          12.400    Integer[-128; 1024)
+               1.004           8.384    Integer[-128; 2048)
+               1.004             192    Integer[-128; 4096)
+               1.004         -16.192    Integer[-128; 8192)
+               1.004         -48.960    Integer[-128; 16384)
+               1.004        -114.496    Integer[-128; 32768)
+               1.004        -245.568    Integer[-128; 65536)
+               1.004        -507.712    Integer[-128; 131072)
                  ...             ...    ...
     ------------------------------------------------------------------------------------------------
 
