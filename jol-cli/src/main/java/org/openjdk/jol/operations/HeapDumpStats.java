@@ -30,12 +30,10 @@ import org.openjdk.jol.heap.HeapDumpReader;
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.layouters.HotSpotLayouter;
 import org.openjdk.jol.layouters.Layouter;
+import org.openjdk.jol.util.ASCIITable;
 import org.openjdk.jol.util.Multiset;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 import static java.lang.System.out;
 
@@ -71,68 +69,31 @@ public class HeapDumpStats implements Operation {
 
         Layouter layouter = new HotSpotLayouter(new ModelVM(), getVMVersion());
 
-        final int printFirst = Integer.getInteger("printFirst", 30);
-        final String sortBy = System.getProperty("sort", "sum-size");
-
-        final Multiset<String> counts = new Multiset<>();
-        final Multiset<String> sizes = new Multiset<>();
-
-        Comparator<String> sorter;
-        switch (sortBy) {
-            case "sum-size":
-                sorter = (o1, o2) -> Long.compare(sizes.count(o2), sizes.count(o1));
-                break;
-            case "avg-size":
-                sorter = (o1, o2) -> Double.compare(1D * sizes.count(o2) / counts.count(o2),
-                                                    1D * sizes.count(o1) / counts.count(o1));
-                break;
-            case "instances":
-                sorter = (o1, o2) -> Long.compare(counts.count(o2), counts.count(o1));
-                break;
-            default:
-                throw new IllegalArgumentException("Cannot parse: " + sortBy);
-        }
-
         out.println("Heap Dump: " + path);
 
         HeapDumpReader reader = new HeapDumpReader(new File(path), out, null);
         Multiset<ClassData> data = reader.parse();
 
-        for (ClassData cd : data.keys()) {
-            long size = layouter.layout(cd).instanceSize();
-            counts.add(cd.name(), data.count(cd));
-            sizes.add(cd.name(),  data.count(cd) * size);
-        }
-
-        List<String> sorted = new ArrayList<>(sizes.keys());
-        sorted.sort(sorter);
-
         out.println();
         out.println(layouter);
         out.println();
-        out.println("Sorting by " + sortBy + ". Use -Dsort={sum-size,avg-size,instances} to override.");
-        out.println();
-        out.println("Printing first " + printFirst + " lines. Use -DprintFirst=# to override.");
-        out.println();
 
-        int idx = 0;
-        long printedCnt = 0;
-        long printedSize = 0;
-        out.printf(" %13s %13s %13s   %s%n", "INSTANCES", "SUM SIZE", "AVG SIZE", "CLASS");
-        out.println("------------------------------------------------------------------------------------------------");
-        for (String name : sorted) {
-            if (++idx > printFirst) break;
-            long cnt = counts.count(name);
-            long size = sizes.count(name);
-            out.printf(" %13d %13d %13d   %s%n", cnt, size, size / cnt, name);
-            printedCnt += cnt;
-            printedSize += size;
+        ASCIITable table = new ASCIITable(
+                true,
+                "=== Class Histogram",
+                "INSTANCES", "SIZE", "SUM SIZE", "CLASS");
+
+        for (ClassData cd : data.keys()) {
+            long cnt = data.count(cd);
+            if (cnt > 0) {
+                long instanceSize = layouter.layout(cd).instanceSize();
+                table.addLine(cd.prettyName(), cnt, instanceSize, cnt * instanceSize);
+            }
         }
-        if (sorted.size() > printFirst) {
-            out.printf(" %13d %13d %13s   %s%n", counts.size() - printedCnt, sizes.size() - printedSize, "", "(other)");
-        }
-        out.println("------------------------------------------------------------------------------------------------");
-        out.printf(" %13d %13d %13s   %s%n", counts.size(), sizes.size(), "", "(total)");
+
+        table.print(out, 0);
+        table.print(out, 1);
+        table.print(out, 2);
     }
 
 }

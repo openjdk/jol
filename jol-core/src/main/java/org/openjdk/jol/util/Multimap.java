@@ -65,4 +65,11 @@ public class Multimap<K, V> {
         return map.keySet();
     }
 
+    public List<V> remove(K k) {
+        return map.remove(k);
+    }
+
+    public boolean contains(K k) {
+        return map.containsKey(k);
+    }
 }
