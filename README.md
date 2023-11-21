@@ -44,11 +44,11 @@ List the supported commands with `-h`:
     Available operations:
                  externals: Show object externals: objects reachable from a given instance
                  footprint: Show the footprint of all objects reachable from a sample instance
-            heapdump-boxes: Read a heap dump and look for data that looks duplicated, focusing on boxes
-       heapdump-duplicates: Read a heap dump and look for data that looks duplicated
+            heapdump-boxes: Read a heap dump and look for duplicate primitive boxes
+       heapdump-duplicates: Read a heap dump and look for probable duplicates
         heapdump-estimates: Read a heap dump and estimate footprint in different VM modes
             heapdump-stats: Read a heap dump and print simple statistics
-          heapdump-strings: Read a heap dump and look for data that looks duplicated, focusing on Strings
+          heapdump-strings: Read a heap dump and look for duplicate Strings
                  internals: Show object internals: field layout, default contents, object header
        internals-estimates: Same as 'internals', but simulate class layout in different VM modes
 
@@ -85,6 +85,59 @@ This dives into Object layout: field layout within the object, header informatio
      44   4                            (object alignment gap)
     Instance size: 48 bytes
     Space losses: 0 bytes internal + 4 bytes external = 4 bytes total
+
+#### "internals-estimates"
+
+This is like `internals`, but simulate the layout in different VM modes. The tools would group similar layouts together,
+and sort by instance size, descending.
+
+    % java -jar jol-cli/target/jol-cli.jar internals-estimates java.lang.Integer
+    # VM mode: 64 bits
+    # Compressed references (oops): 3-bit shift
+    # Compressed class pointers: 3-bit shift
+    # Object alignment: 8 bytes
+    #                       ref, bool, byte, char, shrt,  int,  flt,  lng,  dbl
+    # Field sizes:            4,    1,    1,    2,    2,    4,    4,    8,    8
+    # Array element sizes:    4,    1,    1,    2,    2,    4,    4,    8,    8
+    # Array base offsets:    16,   16,   16,   16,   16,   16,   16,   16,   16
+
+    ***** Hotspot Layout Simulation (JDK 8, 64-bit model, NO compressed references, NO compressed classes, 8-byte aligned)
+    ***** Hotspot Layout Simulation (JDK 15, 64-bit model, NO compressed references, NO compressed classes, 8-byte aligned)
+
+    java.lang.Integer object internals:
+    OFF  SZ   TYPE DESCRIPTION               VALUE
+      0   8        (object header: mark)     N/A
+      8   8        (object header: class)    N/A
+     16   4    int Integer.value             N/A
+     20   4        (object alignment gap)
+    Instance size: 24 bytes
+    Space losses: 0 bytes internal + 4 bytes external = 4 bytes total
+
+    ***** Hotspot Layout Simulation (JDK 8, 64-bit model, compressed references, compressed classes, 8-byte aligned)
+    ***** Hotspot Layout Simulation (JDK 8, 64-bit model, compressed references, compressed classes, 16-byte aligned)
+    ***** Hotspot Layout Simulation (JDK 15, 64-bit model, compressed references, compressed classes, 8-byte aligned)
+    ***** Hotspot Layout Simulation (JDK 15, 64-bit model, compressed references, compressed classes, 16-byte aligned)
+    ***** Hotspot Layout Simulation (JDK 15, 64-bit model, NO compressed references, compressed classes, 8-byte aligned)
+    ***** Hotspot Layout Simulation (JDK 15, 64-bit model, NO compressed references, compressed classes, 16-byte aligned)
+
+    java.lang.Integer object internals:
+    OFF  SZ   TYPE DESCRIPTION               VALUE
+      0   8        (object header: mark)     N/A
+      8   4        (object header: class)    N/A
+     12   4    int Integer.value             N/A
+    Instance size: 16 bytes
+    Space losses: 0 bytes internal + 0 bytes external = 0 bytes total
+
+    ***** Hotspot Layout Simulation (JDK 99, 64-bit model, Lilliput (ultimate target), NO compressed references, compressed classes, 8-byte aligned)
+    ***** Hotspot Layout Simulation (JDK 99, 64-bit model, Lilliput (ultimate target), compressed references, compressed classes, 8-byte aligned)
+
+    java.lang.Integer object internals:
+    OFF  SZ   TYPE DESCRIPTION               VALUE
+      0   1        (object header: mark)     N/A
+      1   3        (object header: class)    N/A
+      4   4    int Integer.value             N/A
+    Instance size: 8 bytes
+    Space losses: 0 bytes internal + 0 bytes external = 0 bytes total
 
 #### "externals"
 
@@ -512,8 +565,6 @@ Please submit the new bug there:
  * Project: `CODETOOLS`
  * Component: `tools`
  * Sub-component: `jol`
-
-If you don't have the access to JDK Bug System, submit the bug report at [Issues](https://github.com/openjdk/jol/issues) here, and wait for maintainers to pick that up.
 
 ## Development
 

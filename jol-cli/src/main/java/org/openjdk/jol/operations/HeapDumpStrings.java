@@ -54,7 +54,7 @@ public class HeapDumpStrings implements Operation {
 
     @Override
     public String description() {
-        return "Read a heap dump and look for data that looks duplicated, focusing on Strings";
+        return "Read a heap dump and look for duplicate Strings";
     }
 
     private int getVMVersion() {
