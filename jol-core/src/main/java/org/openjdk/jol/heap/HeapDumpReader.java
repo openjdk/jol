@@ -42,8 +42,8 @@ import java.util.zip.GZIPInputStream;
  */
 public class HeapDumpReader {
 
-    private static final int GZIP_BUF_SIZE = 16 * 1024 * 1024;
-    private static final int READ_BUF_SIZE = 16 * 1024 * 1024;
+    private static final int GZIP_BUF_SIZE =       512 * 1024;
+    private static final int READ_BUF_SIZE =  4 * 1024 * 1024;
 
     private final InputStream is;
 
@@ -63,29 +63,6 @@ public class HeapDumpReader {
     private final byte[] buf;
     private final ByteBuffer wrapBuf;
     private String header;
-
-    private static class SrcDstTypes {
-        final ClassData src;
-        final ClassData dst;
-
-        private SrcDstTypes(ClassData src, ClassData dst) {
-            this.src = src;
-            this.dst = dst;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            SrcDstTypes that = (SrcDstTypes) o;
-            return src.equals(that.src) && dst.equals(that.dst);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(src, dst);
-        }
-    }
 
     public HeapDumpReader(File file, PrintStream verboseOut, Visitor visitor) throws IOException {
         this.file = file;

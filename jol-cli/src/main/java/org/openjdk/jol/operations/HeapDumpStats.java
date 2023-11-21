@@ -34,9 +34,6 @@ import org.openjdk.jol.util.ASCIITable;
 import org.openjdk.jol.util.Multiset;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 import static java.lang.System.out;
 

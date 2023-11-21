@@ -406,10 +406,4 @@ public class ClassData {
         return (instance != null) ? instance.get() : null;
     }
 
-    @Override
-    public String toString() {
-        return "ClassData{" +
-                "name='" + name + '\'' +
-                '}';
-    }
 }
