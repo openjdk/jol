@@ -254,15 +254,19 @@ public class HeapDumpDuplicates implements Operation {
                         case 8:
                             sb.append((contents >> 56) & 0xFF);
                             sb.append(", ");
+                        case 7:
                             sb.append((contents >> 48) & 0xFF);
                             sb.append(", ");
+                        case 6:
                             sb.append((contents >> 40) & 0xFF);
                             sb.append(", ");
+                        case 5:
                             sb.append((contents >> 32) & 0xFF);
                             sb.append(", ");
                         case 4:
                             sb.append((contents >> 24) & 0xFF);
                             sb.append(", ");
+                        case 3:
                             sb.append((contents >> 16) & 0xFF);
                             sb.append(", ");
                         case 2:
@@ -277,6 +281,7 @@ public class HeapDumpDuplicates implements Operation {
                         case 4:
                             sb.append((contents >> 48) & 0xFFFF);
                             sb.append(", ");
+                        case 3:
                             sb.append((contents >> 32) & 0xFFFF);
                             sb.append(", ");
                         case 2:
