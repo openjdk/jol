@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,31 +25,36 @@
 package org.openjdk.jol.datamodel;
 
 /**
- * 64 bits, compressed references, compressed class pointers.
+ * 64 bits, Lilliput (Experimental)
  *
  * @author Aleksey Shipilev
  */
-public class Model64_COOPS_CCPS implements DataModel {
+public class Model64_Lilliput implements DataModel {
 
     private final int align;
+    private final int arrayBaseAlign;
+    private final boolean compRefs;
+    private final boolean target;
 
-    public Model64_COOPS_CCPS() {
-        this(8);
+    public Model64_Lilliput() {
+        this(false, 8, 8, false);
     }
 
-    public Model64_COOPS_CCPS(int align) {
+    public Model64_Lilliput(boolean compRefs, int align, int arrayBaseAlign, boolean target) {
+        this.compRefs = compRefs;
         this.align = align;
+        this.arrayBaseAlign = target ? 4 : arrayBaseAlign;
+        this.target = target;
     }
-
 
     @Override
     public int markHeaderSize() {
-        return 8;
+        return target ? 1 : 8;
     }
 
     @Override
     public int classHeaderSize() {
-        return 4;
+        return target ? 3 : 0;
     }
 
     @Override
@@ -83,7 +88,7 @@ public class Model64_COOPS_CCPS implements DataModel {
             case "double":
                 return 8;
             default:
-                return 4;
+                return (compRefs ? 4 : 8);
         }
     }
 
@@ -93,19 +98,24 @@ public class Model64_COOPS_CCPS implements DataModel {
     }
 
     @Override
+    public int arrayBaseAlignment() {
+        return arrayBaseAlign;
+    }
+
+    @Override
     public String toString() {
-        return "64-bit model, compressed references, compressed class pointers, " + align + "-byte aligned";
+        return "64-bit model" +
+                ", Lilliput (" + (target ? "ultimate target" : "current experiment") + ")" +
+                ", " + (compRefs ? "" : "NO ") + "compressed references" +
+                ", compressed classes" +
+                ", " + align + "-byte aligned";
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Model64_COOPS_CCPS that = (Model64_COOPS_CCPS) o;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Model64_Lilliput that = (Model64_Lilliput) o;
         return align == that.align;
     }
 

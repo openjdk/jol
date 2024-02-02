@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,37 +22,35 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol.operations;
 
-import org.openjdk.jol.info.ClassLayout;
+package org.openjdk.jol.info;
 
-import java.lang.reflect.Constructor;
+import org.junit.Assert;
+import org.junit.Test;
 
-import static java.lang.System.out;
+public class GraphLayoutNamesTest {
 
-/**
- * @author Aleksey Shipilev
- */
-public class ObjectInternals extends ClasspathedOperation {
+    static class A {
+        int[] array = new int[10];
+        B[] bs = new B[10];
 
-    @Override
-    public String label() {
-        return "internals";
-    }
+        class B {
 
-    @Override
-    public String description() {
-        return "Show object internals: field layout, default contents, object header";
-    }
-
-    public void runWith(Class<?> klass) throws Exception {
-        try {
-            Object o = tryInstantiate(klass);
-            out.println(ClassLayout.parseInstance(o).toPrintable());
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException e) {
-            out.println("Failed to find matching constructor, falling back to class-only introspection.");
-            out.println();
-            out.println(ClassLayout.parseClass(klass).toPrintable());
         }
     }
+
+    @Test
+    public void testPrintable() {
+        String print = GraphLayout.parseInstance(new A()).toPrintable();
+        Assert.assertTrue(print, print.contains("int[]"));
+        Assert.assertTrue(print, print.contains(".A.B[]"));
+    }
+
+    @Test
+    public void testFootprint() {
+        String print = GraphLayout.parseInstance(new A().new B()).toFootprint();
+        Assert.assertTrue(print, print.contains(".A.B[]"));
+        Assert.assertTrue(print, print.contains(".A.B"));
+    }
+
 }

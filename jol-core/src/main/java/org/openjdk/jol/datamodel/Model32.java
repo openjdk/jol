@@ -94,6 +94,12 @@ public class Model32 implements DataModel {
     }
 
     @Override
+    public int arrayBaseAlignment() {
+        // Can be just address size
+        return 4;
+    }
+
+    @Override
     public String toString() {
         return "32-bit model, " + align + "-byte aligned";
     }

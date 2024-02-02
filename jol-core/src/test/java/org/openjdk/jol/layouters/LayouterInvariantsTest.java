@@ -16,9 +16,9 @@ public class LayouterInvariantsTest {
     private static final DataModel[] MODELS = {
             new ModelVM(),
             new Model32(),
-            new Model64(),
-            new Model64_CCPS(),
-            new Model64_COOPS_CCPS(),
+            new Model64(false, false, 8),
+            new Model64(false, true, 8),
+            new Model64(true, true, 8),
     };
 
     private static final int ITERATIONS = 10000;

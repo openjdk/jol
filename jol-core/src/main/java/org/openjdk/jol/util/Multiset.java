@@ -24,9 +24,7 @@
  */
 package org.openjdk.jol.util;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Naive HashMultiset.
@@ -36,24 +34,24 @@ import java.util.Map;
  */
 public class Multiset<T> {
 
-    private final Map<T, Long> map = new HashMap<>();
+    private final Map<T, Cell> map = new HashMap<>();
 
     public void add(T t) {
         add(t, 1);
     }
 
     public void add(T key, long count) {
-        Long v = map.get(key);
-        if (v == null) {
-            v = 0L;
+        Cell cell = map.get(key);
+        if (cell == null) {
+            cell = new Cell();
+            map.put(key, cell);
         }
-        v += count;
-        map.put(key, v);
+        cell.v += count;
     }
 
     public long count(T key) {
-        Long v = map.get(key);
-        return (v == null) ? 0 : v;
+        Cell c = map.get(key);
+        return (c == null) ? 0 : c.v;
     }
 
     public Collection<T> keys() {
@@ -72,5 +70,32 @@ public class Multiset<T> {
         for (T key : other.keys()) {
             add(key, other.count(key));
         }
+    }
+
+    public void pruneForSize(int targetSize) {
+        if (map.size() < targetSize) {
+            return;
+        }
+
+        long min = Long.MAX_VALUE;
+        for (Cell c : map.values()) {
+            min = Math.min(min, c.v);
+        }
+        long limit = min;
+
+        while (map.size()*2 > targetSize) {
+            Iterator<Map.Entry<T, Cell>> it = map.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<T, Cell> e = it.next();
+                if (e.getValue().v < limit) {
+                    it.remove();
+                }
+            }
+            limit *= 2;
+        }
+    }
+
+    private static class Cell {
+        long v;
     }
 }

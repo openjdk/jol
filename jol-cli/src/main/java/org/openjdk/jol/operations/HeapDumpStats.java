@@ -30,13 +30,10 @@ import org.openjdk.jol.heap.HeapDumpReader;
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.layouters.HotSpotLayouter;
 import org.openjdk.jol.layouters.Layouter;
+import org.openjdk.jol.util.ASCIITable;
 import org.openjdk.jol.util.Multiset;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 import static java.lang.System.out;
 
@@ -47,12 +44,20 @@ public class HeapDumpStats implements Operation {
 
     @Override
     public String label() {
-        return "heapdumpstats";
+        return "heapdump-stats";
     }
 
     @Override
     public String description() {
-        return "Consume the heap dump and print the most frequent instances.";
+        return "Read a heap dump and print simple statistics";
+    }
+
+    private int getVMVersion() {
+        try {
+            return Integer.parseInt(System.getProperty("java.specification.version"));
+        } catch (Exception e) {
+            return 8;
+        }
     }
 
     public void run(String... args) throws Exception {
@@ -62,37 +67,33 @@ public class HeapDumpStats implements Operation {
         }
         String path = args[0];
 
+        Layouter layouter = new HotSpotLayouter(new ModelVM(), getVMVersion());
+
         out.println("Heap Dump: " + path);
 
-        HeapDumpReader reader = new HeapDumpReader(new File(path));
+        HeapDumpReader reader = new HeapDumpReader(new File(path), out, null);
         Multiset<ClassData> data = reader.parse();
 
-        final Multiset<String> counts = new Multiset<>();
-        final Multiset<String> sizes = new Multiset<>();
+        out.println();
+        out.println(layouter);
+        out.println();
 
-        Layouter layouter = new HotSpotLayouter(new ModelVM(), 8);
+        ASCIITable table = new ASCIITable(
+                true,
+                "=== Class Histogram",
+                "INSTANCES", "SIZE", "SUM SIZE", "CLASS");
+
         for (ClassData cd : data.keys()) {
-            long size = layouter.layout(cd).instanceSize();
-            counts.add(cd.name(), data.count(cd));
-            sizes.add(cd.name(),  data.count(cd) * size);
+            long cnt = data.count(cd);
+            if (cnt > 0) {
+                long instanceSize = layouter.layout(cd).instanceSize();
+                table.addLine(cd.prettyName(), cnt, instanceSize, cnt * instanceSize);
+            }
         }
 
-        List<String> sorted = new ArrayList<>(sizes.keys());
-        sorted.sort((o1, o2) -> Long.compare(sizes.count(o2), sizes.count(o1)));
-
-        final int printFirst = Integer.getInteger("printFirst", 30);
-
-        int idx = 0;
-        out.printf(" %10s %10s %10s   %s%n", "COUNT", "AVG", "SIZE", "DESCRIPTION");
-        out.println("-------------------------------------------------------------------------");
-        for (String name : sorted) {
-            if (++idx > printFirst) break;
-            long cnt = counts.count(name);
-            long size = sizes.count(name);
-            out.printf(" %10d %10d %10d   %s%n", cnt, size / cnt, size, name);
-        }
-        out.println("-------------------------------------------------------------------------");
-        out.printf(" %10d %10s %10d   %s%n", counts.size(), "", sizes.size(), "(total)");
+        table.print(out, 0);
+        table.print(out, 1);
+        table.print(out, 2);
     }
 
 }

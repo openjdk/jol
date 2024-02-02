@@ -79,4 +79,10 @@ public interface DataModel {
      */
     int objectAlignment();
 
+    /**
+     * Return the minimal alignment for array bases.
+     *
+     * @return minimal array base alignment
+     */
+    int arrayBaseAlignment();
 }

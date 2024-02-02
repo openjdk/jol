@@ -101,10 +101,10 @@ public class ClassData {
     private static ClassData parse(Object o, Class klass) {
         // If this is an array, do the array parsing, instead of ordinary class.
         if (klass.isArray()) {
-            return new ClassData(o, klass.getName(), klass.getComponentType().getName(), arrayLength(o));
+            return new ClassData(o, ClassUtils.jvmName(klass), ClassUtils.jvmName(klass.getComponentType()), arrayLength(o));
         }
 
-        ClassData cd = new ClassData(o, klass.getName());
+        ClassData cd = new ClassData(o, ClassUtils.jvmName(klass));
         Class superKlass = klass.getSuperclass();
 
         // TODO: Move to an appropriate constructor
@@ -120,7 +120,7 @@ public class ClassData {
                     cd.addField(FieldData.parse(f));
                 }
             }
-            cd.addSuperClass(ClassUtils.getSafeName(klass));
+            cd.addSuperClass(ClassUtils.humanReadableName(klass));
         } while ((klass = klass.getSuperclass()) != null);
 
         return cd;
@@ -309,6 +309,14 @@ public class ClassData {
         return name;
     }
 
+    public String prettyName() {
+        if (isArray) {
+            return name.substring(0, name.length() - 1) + length + "]";
+        } else {
+            return name;
+        }
+    }
+
     /**
      * Is this class data for the array?
      *
@@ -372,58 +380,23 @@ public class ClassData {
         return length;
     }
 
-    /**
-     * Merge this class data with the super-class class data
-     *
-     * @param superClassData super class data
-     */
-    public void merge(ClassData superClassData) {
-        fields.addAll(superClassData.fields);
-        classNames.addAll(0, superClassData.classNames);
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         ClassData classData = (ClassData) o;
-
-        if (isArray != classData.isArray) {
-            return false;
-        }
-        if (length != classData.length) {
-            return false;
-        }
-        if (!Objects.equals(arrayComponentKlass, classData.arrayComponentKlass)) {
-            return false;
-        }
-        if (!Objects.equals(arrayKlass, classData.arrayKlass)) {
-            return false;
-        }
-        if (!Objects.equals(classNames, classData.classNames)) {
-            return false;
-        }
-        if (!Objects.equals(fields, classData.fields)) {
-            return false;
-        }
-
-        return true;
+        return length == classData.length &&
+                isArray == classData.isArray &&
+                name.equals(classData.name) &&
+                Objects.equals(fields, classData.fields) &&
+                Objects.equals(classNames, classData.classNames) &&
+                Objects.equals(arrayKlass, classData.arrayKlass) &&
+                Objects.equals(arrayComponentKlass, classData.arrayComponentKlass);
     }
 
     @Override
     public int hashCode() {
-        int result = fields != null ? fields.hashCode() : 0;
-        result = 31 * result + (classNames != null ? classNames.hashCode() : 0);
-        result = 31 * result + (arrayKlass != null ? arrayKlass.hashCode() : 0);
-        result = 31 * result + (arrayComponentKlass != null ? arrayComponentKlass.hashCode() : 0);
-        result = 31 * result + (int) (length ^ (length >>> 32));
-        result = 31 * result + (isArray ? 1 : 0);
-        return result;
+        return Objects.hash(name, length);
     }
 
     /**
@@ -432,4 +405,5 @@ public class ClassData {
     public Object instance() {
         return (instance != null) ? instance.get() : null;
     }
+
 }

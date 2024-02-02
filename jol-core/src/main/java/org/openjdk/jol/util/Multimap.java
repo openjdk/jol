@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,37 +22,54 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.openjdk.jol.operations;
+package org.openjdk.jol.util;
 
-import org.openjdk.jol.info.ClassLayout;
-
-import java.lang.reflect.Constructor;
-
-import static java.lang.System.out;
+import java.util.*;
 
 /**
- * @author Aleksey Shipilev
+ * Naive HashMultimap.
+ *
+ * @param <K> key type
+ * @param <V> value type
  */
-public class ObjectInternals extends ClasspathedOperation {
+public class Multimap<K, V> {
 
-    @Override
-    public String label() {
-        return "internals";
-    }
+    private final Map<K, List<V>> map = new HashMap<>();
 
-    @Override
-    public String description() {
-        return "Show object internals: field layout, default contents, object header";
-    }
-
-    public void runWith(Class<?> klass) throws Exception {
-        try {
-            Object o = tryInstantiate(klass);
-            out.println(ClassLayout.parseInstance(o).toPrintable());
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException e) {
-            out.println("Failed to find matching constructor, falling back to class-only introspection.");
-            out.println();
-            out.println(ClassLayout.parseClass(klass).toPrintable());
+    public void put(K k, V v) {
+        List<V> vs = map.get(k);
+        if (vs == null) {
+            vs = new ArrayList<>();
+            map.put(k, vs);
         }
+        vs.add(v);
+    }
+
+    public void putEmpty(K k) {
+        List<V> vs = map.get(k);
+        if (vs == null) {
+            vs = new ArrayList<>();
+            map.put(k, vs);
+        }
+    }
+
+    public List<V> get(K k) {
+        if (map.containsKey(k)) {
+            return Collections.unmodifiableList(map.get(k));
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    public Collection<K> keys() {
+        return map.keySet();
+    }
+
+    public List<V> remove(K k) {
+        return map.remove(k);
+    }
+
+    public boolean contains(K k) {
+        return map.containsKey(k);
     }
 }

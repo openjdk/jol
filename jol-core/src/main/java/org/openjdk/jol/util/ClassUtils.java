@@ -82,11 +82,14 @@ public class ClassUtils {
         return Class.forName(name, true, ClassLoader.getSystemClassLoader());
     }
 
-    public static String getSafeName(Class klass) {
+    public static String jvmName(Class<?> klass) {
+        return klass.getName();
+    }
+
+    public static String humanReadableName(Class<?> klass) {
         // We want a human-readable class name. getName() returns JVM signature.
-        // getCanonicalName() returns proper string, unless it is hits the bug.
-        // If it fails, then we will fall back to getName()
-        //   https://bugs.openjdk.java.net/browse/JDK-8057919
+        // getCanonicalName() returns proper string, unless the class does not have any.
+        // If it fails, then we will fall back to getName() and translation to human form.
         try {
             String n = klass.getCanonicalName();
             if (n != null) {
@@ -95,6 +98,56 @@ public class ClassUtils {
         } catch (Throwable e) {
             // fall-through
         }
-        return klass.getName();
+        return binaryToHuman(klass.getName());
+    }
+
+    public static String binaryToHuman(String name) {
+        if (name == null) {
+            return "<null>";
+        }
+
+        int braces = 0;
+        for (int c = 0; c < name.length(); c++) {
+            if (name.charAt(c) == '[') {
+                braces++;
+            } else {
+                break;
+            }
+        }
+
+        if (braces > 0) {
+            name = name.substring(braces);
+        }
+
+        switch (name) {
+            case "Z": name = "boolean"; break;
+            case "B": name = "byte";    break;
+            case "C": name = "char";    break;
+            case "S": name = "short";   break;
+            case "I": name = "int";     break;
+            case "F": name = "float";   break;
+            case "J": name = "long";    break;
+            case "D": name = "double";  break;
+            case "":  name = "<error>"; braces = 0; break;
+            default: {
+                if (name.charAt(name.length() - 1) == ';') {
+                    // Object arrays, cut out the leading "L" and the trailing ";"
+                    name = name.substring(1, name.length() - 1);
+                }
+                name = name.replace('/', '.');
+                break;
+            }
+        }
+
+        if (braces > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(name);
+            for (int b = 0; b < braces; b++) {
+                sb.append("[]");
+            }
+            return sb.toString();
+        } else {
+            return name;
+        }
     }
 }

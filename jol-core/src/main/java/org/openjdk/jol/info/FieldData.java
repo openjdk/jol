@@ -25,9 +25,7 @@
 package org.openjdk.jol.info;
 
 import org.openjdk.jol.util.ClassUtils;
-import org.openjdk.jol.util.ObjectUtils;
 import org.openjdk.jol.vm.ContendedSupport;
-import org.openjdk.jol.vm.VM;
 
 import java.lang.reflect.Field;
 
@@ -73,9 +71,9 @@ public class FieldData {
     public static FieldData parse(Field field) {
         return new FieldData(
                 field,
-                ClassUtils.getSafeName(field.getDeclaringClass()),
+                ClassUtils.humanReadableName(field.getDeclaringClass()),
                 field.getName(),
-                ClassUtils.getSafeName(field.getType()),
+                ClassUtils.humanReadableName(field.getType()),
                 ContendedSupport.isContended(field),
                 ContendedSupport.contendedGroup(field)
         );
@@ -170,6 +168,6 @@ public class FieldData {
 
     @Override
     public String toString() {
-        return name + ": " + type;
+        return klass + "." + name + ": " + type;
     }
 }

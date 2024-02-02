@@ -24,6 +24,8 @@
  */
 package org.openjdk.jol.info;
 
+import org.openjdk.jol.util.ASCIITable;
+import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.util.Multiset;
 import org.openjdk.jol.util.ObjectUtils;
 import org.openjdk.jol.vm.VM;
@@ -82,7 +84,7 @@ public class GraphLayout {
             } else {
                 sb.append(", ");
             }
-            sb.append(String.format("%s@%xd", root.getClass().getName(), System.identityHashCode(root)));
+            sb.append(String.format("%s@%xd", ClassUtils.humanReadableName(root.getClass()), System.identityHashCode(root)));
         }
         this.description = sb.toString();
     }
@@ -331,16 +333,18 @@ public class GraphLayout {
      * @return footprint table
      */
     public String toFootprint() {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        pw.println(description + " footprint:");
-        pw.printf(" %9s %9s %9s   %s%n", "COUNT", "AVG", "SUM", "DESCRIPTION");
+        ASCIITable table = new ASCIITable(
+                true,
+                description + " footprint:",
+                "COUNT", "AVG", "SUM", "DESCRIPTION");
         for (Class<?> key : getClasses()) {
             long count = getClassCounts().count(key);
             long size = getClassSizes().count(key);
-            pw.printf(" %9d %9d %9d   %s%n", count, size / count, size, key.getName());
+            table.addLine(ClassUtils.humanReadableName(key), count, size / count, size);
         }
-        pw.printf(" %9d %9s %9d   %s%n", totalCount(), "", totalSize(), "(total)");
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        table.print(pw, 2);
         pw.println();
         pw.close();
         return sw.toString();
@@ -360,7 +364,7 @@ public class GraphLayout {
         int typeLen = "TYPE".length();
         for (long addr : addresses()) {
             GraphPathRecord r = record(addr);
-            typeLen = Math.max(typeLen, r.klass().getName().length());
+            typeLen = Math.max(typeLen, ClassUtils.humanReadableName(r.klass()).length());
         }
 
         pw.println(description + " object externals:");
@@ -376,7 +380,7 @@ public class GraphLayout {
                 pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", last, addr - last, "**** OVERLAP ****", "**** OVERLAP ****", "**** OVERLAP ****");
             }
 
-            pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", addr, size, record.klass().getName(), record.path(), ObjectUtils.safeToString(record.obj()));
+            pw.printf(" %16x %10d %-" + typeLen + "s %-30s %s%n", addr, size, ClassUtils.humanReadableName(record.klass()), record.path(), ObjectUtils.safeToString(record.obj()));
             last = addr + size;
         }
         pw.println();

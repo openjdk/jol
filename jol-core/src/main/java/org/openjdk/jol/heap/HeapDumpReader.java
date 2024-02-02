@@ -26,21 +26,13 @@ package org.openjdk.jol.heap;
 
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.FieldData;
+import org.openjdk.jol.util.ClassUtils;
+import org.openjdk.jol.util.Multimap;
 import org.openjdk.jol.util.Multiset;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -50,13 +42,20 @@ import java.util.zip.GZIPInputStream;
  */
 public class HeapDumpReader {
 
+    private static final int GZIP_BUF_SIZE =       512 * 1024;
+    private static final int READ_BUF_SIZE =  4 * 1024 * 1024;
+
     private final InputStream is;
 
     private final Map<Long, String> strings;
     private final Map<Long, String> classNames;
-    private final Multiset<ClassData> classCounts;
-    private final Map<Long, ClassData> classDatas;
+    private final Multimap<Long, FieldData> classFields;
+    private final Multiset<Long> classCounts;
+    private final Multiset<ClassData> arrayCounts;
+    private final Map<Long, Long> classSupers;
     private final File file;
+    private final PrintStream verboseOut;
+    private final Visitor visitor;
 
     private int idSize;
     private long readBytes;
@@ -65,17 +64,21 @@ public class HeapDumpReader {
     private final ByteBuffer wrapBuf;
     private String header;
 
-    public HeapDumpReader(File file) throws IOException {
+    public HeapDumpReader(File file, PrintStream verboseOut, Visitor visitor) throws IOException {
         this.file = file;
+        this.verboseOut = verboseOut;
+        this.visitor = visitor;
         if (file.getName().endsWith(".gz")) {
-            this.is = new BufferedInputStream(new GZIPInputStream(new FileInputStream(file)), 16 * 1024 * 1024);
+            this.is = new UnsyncBufferedInputStream(new GZIPInputStream(new FileInputStream(file), GZIP_BUF_SIZE), READ_BUF_SIZE);
         } else {
-            this.is = new BufferedInputStream(new FileInputStream(file), 16 * 1024 * 1024);
+            this.is = new UnsyncBufferedInputStream(new FileInputStream(file), READ_BUF_SIZE);
         }
         this.strings = new HashMap<>();
         this.classNames = new HashMap<>();
         this.classCounts = new Multiset<>();
-        this.classDatas = new HashMap<>();
+        this.classFields = new Multimap<>();
+        this.arrayCounts = new Multiset<>();
+        this.classSupers = new HashMap<>();
         this.buf = new byte[32*1024];
         this.wrapBuf = ByteBuffer.wrap(buf);
     }
@@ -112,7 +115,20 @@ public class HeapDumpReader {
         read_U4(); // timestamp, lo
         read_U4(); // timestamp, hi
 
+        long lastPrint = 0L;
+        final long printEach = 256L * 1024 * 1024;
+
+        if (verboseOut != null) {
+            verboseOut.print("Read progress: ");
+            verboseOut.flush();
+        }
+
         while (true) {
+            if ((verboseOut != null) && (readBytes - lastPrint > printEach)) {
+                verboseOut.print(readBytes / 1000 / 1000 + "M... ");
+                verboseOut.flush();
+                lastPrint = readBytes;
+            }
 
             int tag;
             try {
@@ -141,7 +157,7 @@ public class HeapDumpReader {
                     read_U4(); // stack trace
                     long nameID = read_ID();
 
-                    classNames.put(id, strings.get(nameID));
+                    classNames.put(id, ClassUtils.binaryToHuman(strings.get(nameID)));
                     break;
                 }
 
@@ -152,7 +168,7 @@ public class HeapDumpReader {
                     }
                     break;
                 default:
-                    read_null(len);
+                    skipContents(len);
             }
 
             if (readBytes - lastCount != len) {
@@ -160,7 +176,55 @@ public class HeapDumpReader {
             }
         }
 
-        return classCounts;
+        // Post-process supers: merge all fields datas up the class hierarchy.
+        Map<Long, ClassData> classDatas = new HashMap<>();
+
+        for (Long klassId : classFields.keys()) {
+            String name = classNames.get(klassId);
+            ClassData cd = new ClassData(name);
+
+            Long id = klassId;
+            while (id != null) {
+                cd.addSuperClass(classNames.get(id));
+                for (FieldData fd : classFields.get(id)) {
+                    cd.addField(fd);
+                }
+                id = classSupers.get(id);
+            }
+            classDatas.put(klassId, cd);
+            if (visitor != null) {
+                visitor.visitClassData(name, cd);
+            }
+        }
+
+        // Fix up superclasses for HotspotLayouter to work well.
+        for (Long klassId : classDatas.keySet()) {
+            Long key = classSupers.get(klassId);
+            if (key != null) {
+                ClassData cd = classDatas.get(klassId);
+                ClassData superCd = classDatas.get(key);
+                if (superCd == null) {
+                    throw new IllegalStateException("Parser error: no super class data for " + cd.name() + " (" + key + ")");
+                }
+                cd.addSuperClassData(superCd);
+            }
+        }
+
+        // Compute final class counts.
+        Multiset<ClassData> finalClassCounts = new Multiset<>();
+        for (ClassData cd : arrayCounts.keys()) {
+            finalClassCounts.add(cd, arrayCounts.count(cd));
+        }
+        for (Long id : classDatas.keySet()) {
+            ClassData cd = classDatas.get(id);
+            finalClassCounts.add(cd, classCounts.count(id));
+        }
+
+        if (verboseOut != null) {
+            verboseOut.println("DONE");
+        }
+
+        return finalClassCounts;
     }
 
     private void digestHeapDump() throws HeapDumpException {
@@ -222,25 +286,39 @@ public class HeapDumpReader {
         int elements = (int) read_U4(); // always fits
         int typeClass = read_U1();
 
-        int len = elements * getSize(typeClass);
-        byte[] bytes = read_contents(len);
-
         String typeString = getTypeString(typeClass);
+        ClassData thisCD = new ClassData(typeString + "[]", typeString, elements);
+        arrayCounts.add(thisCD);
 
-        classCounts.add(new ClassData(typeString + "[]", typeString, elements));
-
-        visitPrimArray(id, typeString, elements, bytes);
+        long len = (long) elements * getSize(typeClass);
+        if (visitor != null) {
+            byte[] bytes = readContents(len);
+            visitor.visitArray(id, typeString, elements, bytes);
+        } else {
+            skipContents(len);
+        }
     }
 
     private void digestObjArray() throws HeapDumpException {
-        read_ID(); // array id
+        long id = read_ID(); // array id
         read_U4(); // stack trace
         int elements = (int) read_U4(); // always fits
-        read_ID(); // type class
-        read_null((long) elements * idSize);
+        long klassId = read_ID(); // array class
 
-        // assume Object, we don't care about the exact types here
-        classCounts.add(new ClassData("Object[]", "Object", elements));
+        String name = classNames.get(klassId);
+
+        // Assume Object as component type, the name of the actual class
+        // is what we want for the printouts.
+        ClassData thisCD = new ClassData(name, "Object", elements);
+        arrayCounts.add(new ClassData(name, "Object", elements));
+
+        long len = (long) elements * idSize;
+        if (visitor != null) {
+            byte[] bytes = readContents(len);
+            visitor.visitArray(id, "Object", elements, bytes);
+        } else {
+            skipContents(len);
+        }
     }
 
     private void digestInstance() throws HeapDumpException {
@@ -248,13 +326,17 @@ public class HeapDumpReader {
         read_U4(); // stack trace
         long klassID = read_ID();
 
-        classCounts.add(classDatas.get(klassID));
+        classCounts.add(klassID);
 
         int instanceBytes = (int) read_U4(); // always fits
 
-        byte[] bytes = read_contents(instanceBytes);
-
-        visitInstance(id, klassID, bytes);
+        if (visitor != null) {
+            byte[] bytes = readContents(instanceBytes);
+            String name = classNames.get(klassID);
+            visitor.visitInstance(id, klassID, bytes, name);
+        } else {
+            skipContents(instanceBytes);
+        }
     }
 
     private void digestClass() throws HeapDumpException {
@@ -262,15 +344,11 @@ public class HeapDumpReader {
 
         String name = classNames.get(klassID);
 
-        ClassData cd = new ClassData(name);
-        cd.addSuperClass(name);
-
         read_U4(); // stack trace
 
         long superKlassID = read_ID();
-        ClassData superCd = classDatas.get(superKlassID);
-        if (superCd != null) {
-            cd.merge(superCd);
+        if (superKlassID != 0 && classSupers.put(klassID, superKlassID) != null) {
+            throw new HeapDumpException("Format error: duplicate class " + name);
         }
 
         read_ID(); // class loader
@@ -302,16 +380,19 @@ public class HeapDumpReader {
             long index = read_ID();
             int type = read_U1();
 
-            cd.addField(FieldData.create(name, strings.get(index), getTypeString(type)));
+            classFields.put(klassID, FieldData.create(name, strings.get(index), getTypeString(type)));
             if (type == 2) {
                 oopIdx.add(offset);
             }
             offset += getSize(type);
         }
+        if (cpInstance == 0) {
+            classFields.putEmpty(klassID);
+        }
 
-        classDatas.put(klassID, cd);
-
-        visitClass(klassID, name, oopIdx, idSize);
+        if (visitor != null) {
+            visitor.visitClass(klassID, name, oopIdx, idSize);
+        }
     }
 
     private long readValue(int type) throws HeapDumpException {
@@ -376,9 +457,15 @@ public class HeapDumpReader {
     }
 
     private String getTypeString(int type) throws HeapDumpException {
+        if (type == 2) {
+            return "Object"; // TODO: Read the exact type;
+        }
+
+        return getPrimitiveTypeString(type);
+    }
+
+    private String getPrimitiveTypeString(int type) throws HeapDumpException {
         switch (type) {
-            case 2:
-                return "Object"; // TODO: Read the exact type;
             case 4:
                 return "boolean";
             case 8:
@@ -411,7 +498,7 @@ public class HeapDumpReader {
         throw new HeapDumpException("Unable to read " + idSize + " bytes");
     }
 
-    byte[] read_null(long len) throws HeapDumpException {
+    void skipContents(long len) throws HeapDumpException {
         long rem = len;
         int read;
         do {
@@ -419,10 +506,9 @@ public class HeapDumpReader {
             read = read(buf, toRead);
             rem -= read;
         } while (rem > 0);
-        return new byte[0];
     }
 
-    byte[] read_contents(long len) throws HeapDumpException {
+    byte[] readContents(long len) throws HeapDumpException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         long rem = len;
         int read;
@@ -495,16 +581,73 @@ public class HeapDumpReader {
         return String.format("%s at offset 0x%x in %s (%s)", message, readBytes, file, header);
     }
 
-    protected void visitInstance(long id, long klassID, byte[] bytes) {
+    public static class Visitor {
+        public void visitInstance(long id, long klassID, byte[] bytes, String name) {
+            // Do nothing.
+        }
 
+        public void visitClass(long id, String name, List<Integer> oopIdx, int oopSize) {
+            // Do nothing.
+        }
+
+        public void visitArray(long id, String componentType, int count, byte[] bytes) {
+            // Do nothing.
+        }
+
+        public void visitClassData(String name, ClassData cd) {
+            // Do nothing.
+        }
     }
 
-    protected void visitClass(long id, String name, List<Integer> oopIdx, int oopSize) {
+    public static class MultiplexingVisitor extends Visitor {
+        private final List<Visitor> visitors = new ArrayList<>();
+        public void add(Visitor v) {
+            visitors.add(v);
+        }
 
+        @Override
+        public void visitInstance(long id, long klassID, byte[] bytes, String name) {
+            for (Visitor v : visitors) {
+                v.visitInstance(id, klassID, bytes, name);
+            }
+        }
+
+        @Override
+        public void visitClass(long id, String name, List<Integer> oopIdx, int oopSize) {
+            for (Visitor v : visitors) {
+                v.visitClass(id, name, oopIdx, oopSize);
+            }
+        }
+
+        @Override
+        public void visitArray(long id, String componentType, int count, byte[] bytes) {
+            for (HeapDumpReader.Visitor v : visitors) {
+                v.visitArray(id, componentType, count, bytes);
+            }
+        }
+
+        @Override
+        public void visitClassData(String name, ClassData cd) {
+            for (HeapDumpReader.Visitor v : visitors) {
+                v.visitClassData(name, cd);
+            }
+        }
     }
 
-    protected void visitPrimArray(long id, String componentType, int count, byte[] bytes) {
 
+    static class UnsyncBufferedInputStream extends BufferedInputStream {
+        public UnsyncBufferedInputStream(InputStream in, int bufSize) {
+            super(in, bufSize);
+        }
+
+        @Override
+        public int read() throws IOException {
+            if (pos >= count) {
+                // Let superclass handle buffers
+                return super.read();
+            }
+            return buf[pos++] & 0xFF;
+        }
     }
 
 }
