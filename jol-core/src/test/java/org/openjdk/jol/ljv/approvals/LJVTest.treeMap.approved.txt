@@ -1,0 +1,160 @@
+digraph Java {
+	rankdir="TB";
+	node[shape=plaintext]
+	n1[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='3'>TreeMap</td>
+			</tr>
+			<tr>
+				<td>size: 8</td>
+			</tr>
+			<tr>
+				<td>modCount: 8</td>
+			</tr>
+		</table>
+	>];
+	n2[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Entry</td>
+			</tr>
+			<tr>
+				<td>color: true</td>
+			</tr>
+			<tr>
+				<td>key: four</td>
+			</tr>
+			<tr>
+				<td>value: 4</td>
+			</tr>
+		</table>
+	>,color=black];
+	n3[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Entry</td>
+			</tr>
+			<tr>
+				<td>color: false</td>
+			</tr>
+			<tr>
+				<td>key: G</td>
+			</tr>
+			<tr>
+				<td>value: 4</td>
+			</tr>
+		</table>
+	>,color=red];
+	n4[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Entry</td>
+			</tr>
+			<tr>
+				<td>color: true</td>
+			</tr>
+			<tr>
+				<td>key: F</td>
+			</tr>
+			<tr>
+				<td>value: 4</td>
+			</tr>
+		</table>
+	>,color=black];
+	n4 -> n3[label="parent",fontsize=12];
+	n3 -> n4[label="left",fontsize=12];
+	n5[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Entry</td>
+			</tr>
+			<tr>
+				<td>color: true</td>
+			</tr>
+			<tr>
+				<td>key: H</td>
+			</tr>
+			<tr>
+				<td>value: 4</td>
+			</tr>
+		</table>
+	>,color=black];
+	n6[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Entry</td>
+			</tr>
+			<tr>
+				<td>color: false</td>
+			</tr>
+			<tr>
+				<td>key: J</td>
+			</tr>
+			<tr>
+				<td>value: 4</td>
+			</tr>
+		</table>
+	>,color=red];
+	n6 -> n5[label="parent",fontsize=12];
+	n5 -> n6[label="right",fontsize=12];
+	n5 -> n3[label="parent",fontsize=12];
+	n3 -> n5[label="right",fontsize=12];
+	n3 -> n2[label="parent",fontsize=12];
+	n2 -> n3[label="left",fontsize=12];
+	n7[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Entry</td>
+			</tr>
+			<tr>
+				<td>color: false</td>
+			</tr>
+			<tr>
+				<td>key: three</td>
+			</tr>
+			<tr>
+				<td>value: 3</td>
+			</tr>
+		</table>
+	>,color=red];
+	n8[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Entry</td>
+			</tr>
+			<tr>
+				<td>color: true</td>
+			</tr>
+			<tr>
+				<td>key: one</td>
+			</tr>
+			<tr>
+				<td>value: 1</td>
+			</tr>
+		</table>
+	>,color=black];
+	n8 -> n7[label="parent",fontsize=12];
+	n7 -> n8[label="left",fontsize=12];
+	n9[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td rowspan='4'>Entry</td>
+			</tr>
+			<tr>
+				<td>color: true</td>
+			</tr>
+			<tr>
+				<td>key: two</td>
+			</tr>
+			<tr>
+				<td>value: 2</td>
+			</tr>
+		</table>
+	>,color=black];
+	n9 -> n7[label="parent",fontsize=12];
+	n7 -> n9[label="right",fontsize=12];
+	n7 -> n2[label="parent",fontsize=12];
+	n2 -> n7[label="right",fontsize=12];
+	n1 -> n2[label="root",fontsize=12];
+}

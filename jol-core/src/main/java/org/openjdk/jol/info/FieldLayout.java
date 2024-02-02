@@ -106,7 +106,8 @@ public class FieldLayout implements Comparable<FieldLayout> {
         }
     }
 
-    FieldData data() {
+    // TODO: This is public to let LJV access it. Figure out a cleaner way to do this without extending the API surface.
+    public FieldData data() {
         return f;
     }
 
