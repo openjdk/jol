@@ -4,6 +4,7 @@ digraph Java {
 	n1[label=<
 		<table border='0' cellborder='1' cellspacing='0' cellpadding='9'>
 			<tr>
+				<td>ArrayItem[]</td>
 				<td port="f0"></td>
 			</tr>
 		</table>

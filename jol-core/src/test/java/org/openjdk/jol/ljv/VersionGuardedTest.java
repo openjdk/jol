@@ -27,8 +27,8 @@ package org.openjdk.jol.ljv;
 public class VersionGuardedTest {
     int VERSION = getVersion();
 
-    public boolean is11() {
-        return VERSION == 11;
+    public boolean is8() {
+        return VERSION == 8;
     }
 
     static int getVersion() {

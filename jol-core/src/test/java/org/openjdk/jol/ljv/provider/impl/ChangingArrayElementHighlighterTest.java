@@ -37,7 +37,7 @@ public class ChangingArrayElementHighlighterTest extends VersionGuardedTest {
 
     @Test
     public void checksChangedElements() {
-        assumeTrue(is11());
+        assumeTrue(is8());
         int[] arr = new int[]{1, 2, 3};
         for (int i = 0; i < arr.length; i++) {
 

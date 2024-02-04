@@ -84,8 +84,10 @@ public class GraphvizVisualization implements Visualization {
         } else {
             out.append("\t\t<table border='0' cellborder='1' cellspacing='0' cellpadding='9'>\n");
         }
-
         out.append("\t\t\t<tr>\n");
+        out.append("\t\t\t\t<td>");
+        out.append(arrayNode.getClassName());
+        out.append("</td>\n");
     }
 
     @Override
