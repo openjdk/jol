@@ -4,24 +4,22 @@ digraph Java {
 	n1[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
-				<td rowspan='3'>String</td>
+				<td rowspan='2'>String</td>
 			</tr>
 			<tr>
 				<td>hash: 0</td>
-			</tr>
-			<tr>
-				<td>coder: 0</td>
 			</tr>
 		</table>
 	>];
 	n2[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
-				<td>72</td>
-				<td>101</td>
-				<td>108</td>
-				<td>108</td>
-				<td>111</td>
+				<td>char[]</td>
+				<td>H</td>
+				<td>e</td>
+				<td>l</td>
+				<td>l</td>
+				<td>o</td>
 			</tr>
 		</table>
 	>];

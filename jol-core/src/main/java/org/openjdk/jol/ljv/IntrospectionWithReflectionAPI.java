@@ -59,7 +59,9 @@ public class IntrospectionWithReflectionAPI implements Introspection {
         }
 
         if (obj.getClass().isArray()) {
-            ArrayNode arrayNode = new ArrayNode(obj, name, canTreatObjAsArrayOfPrimitives(obj), getArrayContent(obj));
+            ArrayNode arrayNode = new ArrayNode(obj, name,
+                    getObjClassName(obj, false),
+                    canTreatObjAsArrayOfPrimitives(obj), getArrayContent(obj));
             if (field != null) {
                 arrayNode.setAttributes(ljv.getFieldAttributes(field, obj));
             }
@@ -120,10 +122,16 @@ public class IntrospectionWithReflectionAPI implements Introspection {
     public String getObjClassName(Object obj, boolean useToStringAsClassName) {
         if (obj == null)
             return "";
-
-        Class<?> c = obj.getClass();
         if (useToStringAsClassName && canBeConvertedToString(obj))
             return Quote.quote(obj.toString());
+        else {
+            return getClassName(obj.getClass());
+        }
+    }
+
+    private String getClassName(Class<?> c) {
+        if (c.isArray())
+            return getClassName(c.getComponentType()) + "[]";
         else {
             String name = c.getName();
             if (!ljv.isShowPackageNamesInClasses() || c.getPackage() == ljv.getClass().getPackage()) {

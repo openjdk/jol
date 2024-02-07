@@ -14,25 +14,23 @@ digraph Java {
 	n2[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
-				<td rowspan='3'>String</td>
+				<td rowspan='2'>String</td>
 			</tr>
 			<tr>
 				<td>hash: 0</td>
-			</tr>
-			<tr>
-				<td>coder: 0</td>
 			</tr>
 		</table>
 	>];
 	n3[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
-				<td>65</td>
-				<td>108</td>
-				<td>98</td>
-				<td>101</td>
-				<td>114</td>
-				<td>116</td>
+				<td>char[]</td>
+				<td>A</td>
+				<td>l</td>
+				<td>b</td>
+				<td>e</td>
+				<td>r</td>
+				<td>t</td>
 			</tr>
 		</table>
 	>];
@@ -51,23 +49,21 @@ digraph Java {
 	n5[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
-				<td rowspan='3'>String</td>
+				<td rowspan='2'>String</td>
 			</tr>
 			<tr>
 				<td>hash: 0</td>
-			</tr>
-			<tr>
-				<td>coder: 0</td>
 			</tr>
 		</table>
 	>];
 	n6[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
-				<td>77</td>
-				<td>65</td>
-				<td>76</td>
-				<td>69</td>
+				<td>char[]</td>
+				<td>M</td>
+				<td>A</td>
+				<td>L</td>
+				<td>E</td>
 			</tr>
 		</table>
 	>];

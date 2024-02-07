@@ -34,8 +34,11 @@ public class ArrayNode extends Node {
     private final boolean valuesArePrimitive;
     private final List<Node> content;
 
-    public ArrayNode(Object obj, String name, boolean valuesArePrimitive, List<Node> content) {
+    private final String className;
+
+    public ArrayNode(Object obj, String name, String className, boolean valuesArePrimitive, List<Node> content) {
         super(obj, name);
+        this.className = className;
         this.valuesArePrimitive = valuesArePrimitive;
         this.content = content;
     }
@@ -65,5 +68,9 @@ public class ArrayNode extends Node {
             }
             v.visitArrayElementObjectConnection(getValue(), i, node.getValue());
         }
+    }
+
+    public String getClassName() {
+        return className;
     }
 }

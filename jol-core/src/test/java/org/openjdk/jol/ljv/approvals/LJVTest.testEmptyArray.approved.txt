@@ -1,0 +1,11 @@
+digraph Java {
+	rankdir="TB";
+	node[shape=plaintext]
+	n1[label=<
+		<table border='0' cellborder='1' cellspacing='0'>
+			<tr>
+				<td>int[][]</td>
+			</tr>
+		</table>
+	>];
+}

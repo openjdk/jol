@@ -34,7 +34,7 @@ import static org.openjdk.jol.ljv.provider.impl.NewObjectHighlighter.HIGHLIGHT;
 public class NewObjectHighlighterTest extends VersionGuardedTest {
     @Test
     public void newObjectsAreHighlighted() {
-        assumeTrue(is11());
+        assumeTrue(is8());
         Object o1 = new Object();
         Object o2 = new Object();
         NewObjectHighlighter highlighter = new NewObjectHighlighter();

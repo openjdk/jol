@@ -4,6 +4,7 @@ digraph Java {
 	n1[label=<
 		<table border='0' cellborder='1' cellspacing='0' cellpadding='9'>
 			<tr>
+				<td>Object[]</td>
 				<td port="f0"></td>
 				<td port="f1"></td>
 			</tr>
@@ -12,6 +13,7 @@ digraph Java {
 	n2[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
+				<td>String[]</td>
 				<td>a</td>
 				<td>b</td>
 				<td>c</td>
@@ -22,6 +24,7 @@ digraph Java {
 	n3[label=<
 		<table border='0' cellborder='1' cellspacing='0'>
 			<tr>
+				<td>int[]</td>
 				<td>1</td>
 				<td>2</td>
 				<td>3</td>
