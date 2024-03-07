@@ -45,9 +45,9 @@ public class ObjectExternals extends ClasspathedOperation {
         return "Show object externals: objects reachable from a given instance";
     }
 
-    public void runWith(Class<?> klass) throws Exception {
+    public void runWith(Class<?> factoryClass, Class<?> klass) throws Exception {
         try {
-            Object o = tryInstantiate(klass);
+            Object o = tryInstantiate(factoryClass, klass);
             out.println(GraphLayout.parseInstance(o).toPrintable());
         } catch (NoSuchMethodException | InstantiationException e) {
             throw new IllegalStateException("Instantiation exception, does the class have the default constructor?", e);

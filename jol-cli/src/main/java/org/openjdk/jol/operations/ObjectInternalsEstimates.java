@@ -51,7 +51,7 @@ public class ObjectInternalsEstimates extends ClasspathedOperation {
     }
 
     @Override
-    protected void runWith(Class<?> klass) {
+    protected void runWith(Class<?> factoryClass, Class<?> klass) {
         List<Layouter> layouters = new ArrayList<>();
 
         for (DataModel model : EstimatedModels.MODELS_JDK8) {
