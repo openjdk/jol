@@ -45,9 +45,9 @@ public class ObjectInternals extends ClasspathedOperation {
         return "Show object internals: field layout, default contents, object header";
     }
 
-    public void runWith(Class<?> klass) throws Exception {
+    public void runWith(Class<?> factoryClass, Class<?> klass) throws Exception {
         try {
-            Object o = tryInstantiate(klass);
+            Object o = tryInstantiate(factoryClass, klass);
             out.println(ClassLayout.parseInstance(o).toPrintable());
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException e) {
             out.println("Failed to find matching constructor, falling back to class-only introspection.");

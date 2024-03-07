@@ -34,6 +34,7 @@ import org.openjdk.jol.util.ClassUtils;
 import org.openjdk.jol.vm.VM;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -51,9 +52,14 @@ public abstract class ClasspathedOperation implements Operation {
                 .withRequiredArg().ofType(String.class).describedAs("classpath")
                 .withValuesSeparatedBy(getProperty("path.separator"));
 
+        OptionSpec<String> optFactory = parser.accepts("factory",
+                "Fully-qualified factory class name. Factory must implement a factory method with the signature: public static <T> T newInstance(java.lang.Class<T>)")
+            .withRequiredArg().ofType(String.class).describedAs("factoryClass");
+
         OptionSpec<String> optClasses = parser.nonOptions("Class names to work on.");
 
         List<String> classes;
+        Class<?> factoryClass = null;
         try {
             OptionSet set = parser.parse(args);
             classes = set.valuesOf(optClasses);
@@ -67,6 +73,10 @@ public abstract class ClasspathedOperation implements Operation {
             if (set.has(optClassPath)) {
                 ClassUtils.addClasspathEntries(optClassPath.values(set));
             }
+
+            if (set.has(optFactory)) {
+                factoryClass = ClassUtils.loadClass(optFactory.value(set));
+            }
         } catch (OptionException e) {
             parser.printHelpOn(System.err);
             return;
@@ -76,14 +86,52 @@ public abstract class ClasspathedOperation implements Operation {
 
         for (String klassName : classes) {
             try {
-                runWith(ClassUtils.loadClass(klassName));
+                runWith(factoryClass, ClassUtils.loadClass(klassName));
             } catch (Throwable t) {
                 t.printStackTrace(System.err);
             }
         }
     }
 
-    protected Object tryInstantiate(Class<?> klass) throws Exception {
+    protected Object tryInstantiate(Class<?> factoryClass, Class<?> klass) throws Exception {
+
+        List<Throwable> suppressed = new ArrayList<>();
+
+        if (factoryClass != null) {
+            try {
+                Object o =
+                    factoryClass
+                        .getMethod("newInstance", Class.class)
+                        .invoke(null, klass);
+
+                if (o == null) {
+                    throw new UnsupportedOperationException(
+                        factoryClass.getTypeName()
+                            + "#newInstance(Class) does not support creating "
+                            + klass.getTypeName());
+                }
+
+                if (!o.getClass().equals(klass)) {
+                    throw new ClassCastException(
+                        factoryClass.getTypeName()
+                            + "#newInstance(Class) failed to create "
+                            + klass.getTypeName()
+                            + ". Instead created "
+                            + o.getClass().getTypeName());
+                }
+
+                System.out.println(
+                    "Instantiated the sample instance via "
+                        + factoryClass.getTypeName()
+                        + ".newInstance(Class)");
+                System.out.println();
+                return o;
+            } catch (Exception e) {
+                // Fall-through, let's try something else.
+                suppressed.add(e);
+            }
+        }
+
         // Try to invoke default constructor first.
         try {
             Constructor<?> ctor = klass.getDeclaredConstructor();
@@ -94,6 +142,7 @@ public abstract class ClasspathedOperation implements Operation {
             return o;
         } catch (Exception e) {
             // Fall-through, let's try something else.
+            suppressed.add(e);
         }
 
         // Try to enumerate other constructors and push the default values to them
@@ -114,10 +163,17 @@ public abstract class ClasspathedOperation implements Operation {
                 return o;
             } catch (Exception e) {
                 // no dice, try the next constructor
+                suppressed.add(e);
             }
         }
 
-        throw new InstantiationException("No matching (default) constructor, and no other constructor work.");
+        InstantiationException e = new InstantiationException("No matching (default) constructor, and no other constructor work.");
+
+        for (Throwable t : suppressed) {
+            e.addSuppressed(t);
+        }
+
+        throw e;
     }
 
     private static Object makeDefaultValue(Class<?> type) {
@@ -132,5 +188,5 @@ public abstract class ClasspathedOperation implements Operation {
         return null;
     }
 
-    protected abstract void runWith(Class<?> klass) throws Exception;
+    protected abstract void runWith(Class<?> factoryClass, Class<?> klass) throws Exception;
 }
