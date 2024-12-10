@@ -71,17 +71,6 @@ questions.
                 </configuration>
                 <executions>
                     <execution>
-                        <id>default-test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <forkCount>4</forkCount>
-                            <reuseForks>true</reuseForks>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>tests-1g-minus-coops-minus-ccp</id>
                         <phase>test</phase>
                         <goals>
