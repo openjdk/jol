@@ -24,6 +24,8 @@
  */
 package org.openjdk.jol.datamodel;
 
+import java.util.Objects;
+
 /**
  * 64 bits, Lilliput (Experimental)
  *
@@ -32,29 +34,23 @@ package org.openjdk.jol.datamodel;
 public class Model64_Lilliput implements DataModel {
 
     private final int align;
-    private final int arrayBaseAlign;
     private final boolean compRefs;
-    private final boolean target;
+    private final int version;
 
-    public Model64_Lilliput() {
-        this(false, 8, 8, false);
-    }
-
-    public Model64_Lilliput(boolean compRefs, int align, int arrayBaseAlign, boolean target) {
+    public Model64_Lilliput(boolean compRefs, int align, int version) {
         this.compRefs = compRefs;
         this.align = align;
-        this.arrayBaseAlign = target ? 4 : arrayBaseAlign;
-        this.target = target;
+        this.version = version;
     }
 
     @Override
     public int markHeaderSize() {
-        return target ? 1 : 8;
+        return (version >= 2) ? 1 : 8;
     }
 
     @Override
     public int classHeaderSize() {
-        return target ? 3 : 0;
+        return (version >= 2) ? 3 : 0;
     }
 
     @Override
@@ -98,14 +94,14 @@ public class Model64_Lilliput implements DataModel {
     }
 
     @Override
-    public int arrayBaseAlignment() {
-        return arrayBaseAlign;
+    public int addressSize() {
+        return 8;
     }
 
     @Override
     public String toString() {
         return "64-bit model" +
-                ", Lilliput (" + (target ? "ultimate target" : "current experiment") + ")" +
+                ", Lilliput " + (version >= 2 ? "2 (32-bit headers)" : "1 (64-bit headers)") +
                 ", " + (compRefs ? "" : "NO ") + "compressed references" +
                 ", compressed classes" +
                 ", " + align + "-byte aligned";
@@ -116,11 +112,11 @@ public class Model64_Lilliput implements DataModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Model64_Lilliput that = (Model64_Lilliput) o;
-        return align == that.align;
+        return align == that.align && compRefs == that.compRefs && version == that.version;
     }
 
     @Override
     public int hashCode() {
-        return align;
+        return Objects.hash(align, compRefs, version);
     }
 }

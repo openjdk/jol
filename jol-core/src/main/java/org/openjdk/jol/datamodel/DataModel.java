@@ -80,9 +80,10 @@ public interface DataModel {
     int objectAlignment();
 
     /**
-     * Return the minimal alignment for array bases.
+     * Machine address size.
      *
-     * @return minimal array base alignment
+     * @return machine address size, in bytes
      */
-    int arrayBaseAlignment();
+    int addressSize();
+
 }

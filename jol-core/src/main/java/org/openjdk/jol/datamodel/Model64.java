@@ -43,10 +43,6 @@ public class Model64 implements DataModel {
         this.align = align;
     }
 
-    public Model64(boolean compressedRefs, boolean compressedClasses) {
-        this(compressedRefs, compressedClasses, 8);
-    }
-
     @Override
     public int markHeaderSize() {
         return 8;
@@ -98,7 +94,7 @@ public class Model64 implements DataModel {
     }
 
     @Override
-    public int arrayBaseAlignment() {
+    public int addressSize() {
         return 8;
     }
 
@@ -107,23 +103,21 @@ public class Model64 implements DataModel {
         return "64-bit model" +
                 ", " + (compRefs ? "" : "NO ") + "compressed references" +
                 ", " + (compKlass ? "" : "NO ") + "compressed classes" +
-                ", " + align + "-byte aligned";
+                ", " + align + "-byte aligned objects";
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         Model64 model64 = (Model64) o;
-        return align == model64.align;
+        return align == model64.align &&
+                compRefs == model64.compRefs &&
+                compKlass == model64.compKlass;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(align);
+        return Objects.hash(align, compRefs, compKlass);
     }
 }
