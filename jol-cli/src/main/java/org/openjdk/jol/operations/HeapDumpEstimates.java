@@ -113,7 +113,7 @@ public class HeapDumpEstimates implements Operation {
         out.println("=== Stock 64-bit OpenJDK (JDK < 15)");
         out.println();
 
-        long jdk8_noCoops =         computeWithLayouter(data, new HotSpotLayouter(new Model64(false, false), 8));
+        long jdk8_noCoops =         computeWithLayouter(data, new HotSpotLayouter(new Model64(false, false, 8), 8));
         long jdk8_coops =           computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,   8), 8));
         long jdk8_coops_align16 =   computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  16), 8));
         long jdk8_coops_align32 =   computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  32), 8));
@@ -136,7 +136,7 @@ public class HeapDumpEstimates implements Operation {
         }
         out.println();
 
-        long jdk15_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64(false, true), 15));
+        long jdk15_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64(false, true,  8), 15));
         long jdk15_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,   8), 15));
         long jdk15_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  16), 15));
         long jdk15_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  32), 15));
@@ -144,7 +144,7 @@ public class HeapDumpEstimates implements Operation {
         long jdk15_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 128), 15));
         long jdk15_coops_align256 = computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 256), 15));
 
-        out.println("=== Stock 64-bit OpenJDK (JDK >= 15)");
+        out.println("=== Stock 64-bit OpenJDK (JDK >= 15): Field Layout Improvements");
         out.println();
 
         {
@@ -163,16 +163,16 @@ public class HeapDumpEstimates implements Operation {
         }
         out.println();
 
-        out.println("=== Experimental 64-bit OpenJDK: Lilliput, 64-bit headers");
+        out.println("=== Experimental 64-bit OpenJDK (JDK >= 24): Lilliput 1 (64-bit headers)");
         out.println();
 
-        long jdkLilliput_noCoops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false,  8,   false), 99));
-        long jdkLilliput_coops =            computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,   8,   false), 99));
-        long jdkLilliput_coops_align16 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  16,   false), 99));
-        long jdkLilliput_coops_align32 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  32,   false), 99));
-        long jdkLilliput_coops_align64 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  64,   false), 99));
-        long jdkLilliput_coops_align128 =   computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 128,   false), 99));
-        long jdkLilliput_coops_align256 =   computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 256,   false), 99));
+        long jdkLilliput_noCoops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false,  8,   1), 99));
+        long jdkLilliput_coops =            computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,   8,   1), 99));
+        long jdkLilliput_coops_align16 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  16,   1), 99));
+        long jdkLilliput_coops_align32 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  32,   1), 99));
+        long jdkLilliput_coops_align64 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  64,   1), 99));
+        long jdkLilliput_coops_align128 =   computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 128,   1), 99));
+        long jdkLilliput_coops_align256 =   computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 256,   1), 99));
 
         {
             out.printf("%37s %s%n", "", "Upgrade From:");
@@ -190,21 +190,21 @@ public class HeapDumpEstimates implements Operation {
         }
         out.println();
 
-        out.println("=== Experimental 64-bit OpenJDK: Lilliput, 32-bit headers");
+        out.println("=== Experimental 64-bit OpenJDK (Prototype): Lilliput 2 (32-bit headers)");
         out.println();
 
-        long jdkLilliput32_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false,  8,   true), 99));
-        long jdkLilliput32_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,   8,   true), 99));
-        long jdkLilliput32_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  16,   true), 99));
-        long jdkLilliput32_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  32,   true), 99));
-        long jdkLilliput32_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  64,   true), 99));
-        long jdkLilliput32_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 128,   true), 99));
-        long jdkLilliput32_coops_align256 = computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 256,   true), 99));
+        long jdkLilliput32_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false,  8,   2), 99));
+        long jdkLilliput32_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,   8,   2), 99));
+        long jdkLilliput32_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  16,   2), 99));
+        long jdkLilliput32_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  32,   2), 99));
+        long jdkLilliput32_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  64,   2), 99));
+        long jdkLilliput32_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 128,   2), 99));
+        long jdkLilliput32_coops_align256 = computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 256,   2), 99));
 
         {
             out.printf("%37s %s%n", "", "Upgrade From:");
             out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "Lill-64", "Description"
+                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "Lilliput 1", "Description"
             );
 
             printLine(msg_noCoops_ccp,    rawSize,  jdkLilliput32_noCoops,        jdkLilliput32_coops, jdk8_noCoops,          jdk15_noCoops,          jdkLilliput_noCoops);
@@ -212,7 +212,7 @@ public class HeapDumpEstimates implements Operation {
             printLine(msg_coops_align16,  rawSize,  jdkLilliput32_coops_align16,  jdkLilliput32_coops, jdk8_coops_align16,    jdk15_coops_align16,    jdkLilliput_coops_align16);
             printLine(msg_coops_align32,  rawSize,  jdkLilliput32_coops_align32,  jdkLilliput32_coops, jdk8_coops_align32,    jdk15_coops_align32,    jdkLilliput_coops_align32);
             printLine(msg_coops_align64,  rawSize,  jdkLilliput32_coops_align64,  jdkLilliput32_coops, jdk8_coops_align64,    jdk15_coops_align64,    jdkLilliput_coops_align64);
-            printLine(msg_coops_align128, rawSize,  jdkLilliput32_coops_align128, jdkLilliput32_coops, jdk8_coops_align256,   jdk15_coops_align128,   jdkLilliput_coops_align128);
+            printLine(msg_coops_align128, rawSize,  jdkLilliput32_coops_align128, jdkLilliput32_coops, jdk8_coops_align128,   jdk15_coops_align128,   jdkLilliput_coops_align128);
             printLine(msg_coops_align256, rawSize,  jdkLilliput32_coops_align256, jdkLilliput32_coops, jdk8_coops_align256,   jdk15_coops_align256,   jdkLilliput_coops_align256);
         }
         out.println();

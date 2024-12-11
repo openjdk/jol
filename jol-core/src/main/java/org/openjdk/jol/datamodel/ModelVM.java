@@ -73,34 +73,9 @@ public class ModelVM implements DataModel {
         return VM.current().objectAlignment();
     }
 
-    int arrayBaseAlignment;
-
-    private static int guessArrayBaseAlignment(String type) {
-        int byteOff = VM.current().arrayBaseOffset(type);
-        if ((byteOff % 8) == 0) return 8;
-        if ((byteOff % 4) == 0) return 4;
-        if ((byteOff % 2) == 0) return 2;
-        return 1;
-    }
-
     @Override
-    public int arrayBaseAlignment() {
-        if (arrayBaseAlignment != 0) {
-            return arrayBaseAlignment;
-        }
-        int al = Integer.MAX_VALUE;
-        al = Math.min(al, guessArrayBaseAlignment("boolean"));
-        al = Math.min(al, guessArrayBaseAlignment("byte"));
-        al = Math.min(al, guessArrayBaseAlignment("short"));
-        al = Math.min(al, guessArrayBaseAlignment("char"));
-        al = Math.min(al, guessArrayBaseAlignment("int"));
-        al = Math.min(al, guessArrayBaseAlignment("float"));
-        al = Math.min(al, guessArrayBaseAlignment("long"));
-        al = Math.min(al, guessArrayBaseAlignment("double"));
-        al = Math.min(al, guessArrayBaseAlignment("Object"));
-        arrayBaseAlignment = al;
-
-        return al;
+    public int addressSize() {
+        return VM.current().addressSize();
     }
 
     @Override
@@ -108,8 +83,7 @@ public class ModelVM implements DataModel {
         return "Current VM: " +
                 (headerSize() + "-byte object headers, ") +
                 (sizeOf("java.lang.Object") + "-byte references, ") +
-                (objectAlignment() + "-byte aligned objects, ") +
-                (arrayBaseAlignment() + "-byte aligned array bases");
+                (objectAlignment() + "-byte aligned objects");
     }
 
     @Override
