@@ -81,6 +81,7 @@ public class HeapDumpEstimates implements Operation {
             }
         }
 
+        out.println();
         out.println("=== Overall Statistics");
         out.println();
         out.printf("%10s,     %s%n", MathUtil.inProperUnits(rawCount), "Total objects");
@@ -89,13 +90,12 @@ public class HeapDumpEstimates implements Operation {
         out.println();
 
         final String msg_noCoops =          "64-bit, no comp refs (>32 GB heap, default align)";
-        final String msg_noCoops_ccp =      "64-bit, no comp refs, but comp classes (>32 GB heap, default align)";
+        final String msg_noCoops_ccp =      "64-bit, no comp refs, but comp class ptrs (>32 GB heap, default align)";
         final String msg_coops =            "64-bit, comp refs (<32 GB heap, default align)";
-        final String msg_coops_align16 =    "64-bit, comp refs with large align (   32..64GB heap,  16-byte align)";
-        final String msg_coops_align32 =    "64-bit, comp refs with large align (  64..128GB heap,  32-byte align)";
-        final String msg_coops_align64 =    "64-bit, comp refs with large align ( 128..256GB heap,  64-byte align)";
-        final String msg_coops_align128 =   "64-bit, comp refs with large align ( 256..512GB heap, 128-byte align)";
-        final String msg_coops_align256 =   "64-bit, comp refs with large align (512..1024GB heap, 256-byte align)";
+        final String msg_coops_align16 =    "64-bit, comp refs with large align (  32..64GB heap,  16-byte align)";
+        final String msg_coops_align32 =    "64-bit, comp refs with large align ( 64..128GB heap,  32-byte align)";
+        final String msg_coops_align64 =    "64-bit, comp refs with large align (128..256GB heap,  64-byte align)";
+        final String msg_coops_align128 =   "64-bit, comp refs with large align (256..512GB heap, 128-byte align)";
 
         out.println("=== Stock 32-bit OpenJDK");
         out.println();
@@ -119,7 +119,6 @@ public class HeapDumpEstimates implements Operation {
         long jdk8_coops_align32 =   computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  32), 8));
         long jdk8_coops_align64 =   computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  64), 8));
         long jdk8_coops_align128 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 128), 8));
-        long jdk8_coops_align256 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 256), 8));
 
         {
             out.printf("%10s, %10s, %10s,     %s%n",
@@ -132,7 +131,6 @@ public class HeapDumpEstimates implements Operation {
             printLine(msg_coops_align32,        rawSize,    jdk8_coops_align32,     jdk8_coops);
             printLine(msg_coops_align64,        rawSize,    jdk8_coops_align64,     jdk8_coops);
             printLine(msg_coops_align128,       rawSize,    jdk8_coops_align128,    jdk8_coops);
-            printLine(msg_coops_align256,       rawSize,    jdk8_coops_align256,    jdk8_coops);
         }
         out.println();
 
@@ -142,9 +140,8 @@ public class HeapDumpEstimates implements Operation {
         long jdk15_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  32), 15));
         long jdk15_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  64), 15));
         long jdk15_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 128), 15));
-        long jdk15_coops_align256 = computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 256), 15));
 
-        out.println("=== Stock 64-bit OpenJDK (JDK >= 15): Field Layout Improvements");
+        out.println("=== Stock 64-bit OpenJDK (JDK >= 15): Better Compressed Class Pointers, New Field Layouter");
         out.println();
 
         {
@@ -159,7 +156,6 @@ public class HeapDumpEstimates implements Operation {
             printLine(msg_coops_align32,    rawSize,    jdk15_coops_align32,    jdk15_coops,    jdk8_coops_align32);
             printLine(msg_coops_align64,    rawSize,    jdk15_coops_align64,    jdk15_coops,    jdk8_coops_align64);
             printLine(msg_coops_align128,   rawSize,    jdk15_coops_align128,   jdk15_coops,    jdk8_coops_align128);
-            printLine(msg_coops_align256,   rawSize,    jdk15_coops_align256,   jdk15_coops,    jdk8_coops_align256);
         }
         out.println();
 
@@ -172,7 +168,6 @@ public class HeapDumpEstimates implements Operation {
         long jdkLilliput_coops_align32 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  32,   1), 99));
         long jdkLilliput_coops_align64 =    computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  64,   1), 99));
         long jdkLilliput_coops_align128 =   computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 128,   1), 99));
-        long jdkLilliput_coops_align256 =   computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 256,   1), 99));
 
         {
             out.printf("%37s %s%n", "", "Upgrade From:");
@@ -186,7 +181,6 @@ public class HeapDumpEstimates implements Operation {
             printLine(msg_coops_align32,    rawSize, jdkLilliput_coops_align32,    jdkLilliput_coops, jdk8_coops_align32,     jdk15_coops_align32);
             printLine(msg_coops_align64,    rawSize, jdkLilliput_coops_align64,    jdkLilliput_coops, jdk8_coops_align64,     jdk15_coops_align64);
             printLine(msg_coops_align128,   rawSize, jdkLilliput_coops_align128,   jdkLilliput_coops, jdk8_coops_align128,    jdk15_coops_align128);
-            printLine(msg_coops_align256,   rawSize, jdkLilliput_coops_align256,   jdkLilliput_coops, jdk8_coops_align256,    jdk15_coops_align256);
         }
         out.println();
 
@@ -199,7 +193,6 @@ public class HeapDumpEstimates implements Operation {
         long jdkLilliput32_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  32,   2), 99));
         long jdkLilliput32_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true,  64,   2), 99));
         long jdkLilliput32_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 128,   2), 99));
-        long jdkLilliput32_coops_align256 = computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 256,   2), 99));
 
         {
             out.printf("%37s %s%n", "", "Upgrade From:");
@@ -213,7 +206,6 @@ public class HeapDumpEstimates implements Operation {
             printLine(msg_coops_align32,  rawSize,  jdkLilliput32_coops_align32,  jdkLilliput32_coops, jdk8_coops_align32,    jdk15_coops_align32,    jdkLilliput_coops_align32);
             printLine(msg_coops_align64,  rawSize,  jdkLilliput32_coops_align64,  jdkLilliput32_coops, jdk8_coops_align64,    jdk15_coops_align64,    jdkLilliput_coops_align64);
             printLine(msg_coops_align128, rawSize,  jdkLilliput32_coops_align128, jdkLilliput32_coops, jdk8_coops_align128,   jdk15_coops_align128,   jdkLilliput_coops_align128);
-            printLine(msg_coops_align256, rawSize,  jdkLilliput32_coops_align256, jdkLilliput32_coops, jdk8_coops_align256,   jdk15_coops_align256,   jdkLilliput_coops_align256);
         }
         out.println();
     }
