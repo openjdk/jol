@@ -21,7 +21,7 @@ public class LayouterInvariantsTest {
             new Model64(true, true, 8),
     };
 
-    private static final int ITERATIONS = 3000;
+    private static final int ITERATIONS = 10000;
 
     private static Class<?>[] CLS;
     private static int[] SEEDS;

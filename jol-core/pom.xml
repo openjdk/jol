@@ -77,7 +77,8 @@ questions.
                             <goal>test</goal>
                         </goals>
                         <configuration>
-                            <skip>true</skip>
+                            <forkCount>4</forkCount>
+                            <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
                     <execution>
@@ -88,7 +89,7 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-Xmx1g -XX:-UseCompressedOops -XX:-UseCompressedClassPointers</argLine>
-                            <forkCount>1</forkCount>
+                            <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
@@ -100,7 +101,7 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-Xmx1g -XX:+UseCompressedOops -XX:+UseCompressedClassPointers</argLine>
-                            <forkCount>1</forkCount>
+                            <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
@@ -112,7 +113,7 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-Xmx1g -XX:+UseCompressedOops -XX:-UseCompressedClassPointers</argLine>
-                            <forkCount>1</forkCount>
+                            <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
@@ -124,7 +125,7 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-Xmx1g -XX:-UseCompressedOops -XX:+UseCompressedClassPointers</argLine>
-                            <forkCount>1</forkCount>
+                            <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
@@ -136,7 +137,7 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-Xmx1g -XX:-UseCompressedOops -XX:-UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16</argLine>
-                            <forkCount>1</forkCount>
+                            <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
@@ -148,7 +149,7 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-Xmx1g -XX:+UseCompressedOops -XX:+UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16</argLine>
-                            <forkCount>1</forkCount>
+                            <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
@@ -160,7 +161,7 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-Xmx1g -XX:+UseCompressedOops -XX:-UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16</argLine>
-                            <forkCount>1</forkCount>
+                            <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
@@ -172,7 +173,7 @@ questions.
                         </goals>
                         <configuration>
                             <argLine>-Xmx1g -XX:-UseCompressedOops -XX:+UseCompressedClassPointers -XX:ObjectAlignmentInBytes=16</argLine>
-                            <forkCount>1</forkCount>
+                            <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                         </configuration>
                     </execution>
