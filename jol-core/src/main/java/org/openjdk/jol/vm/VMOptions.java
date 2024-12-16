@@ -57,14 +57,11 @@ class VMOptions {
     }
 
     public static Integer pollObjectAlignment() {
-        if (Boolean.TRUE.equals(pollCompressedOops())) {
-            try {
-                return Integer.valueOf(getString("ObjectAlignmentInBytes"));
-            } catch (Exception exp) {
-                return null;
-            }
+        try {
+            return Integer.valueOf(getString("ObjectAlignmentInBytes"));
+        } catch (Exception exp) {
+            return null;
         }
-        return null;
     }
 
 }
