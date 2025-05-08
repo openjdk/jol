@@ -316,6 +316,89 @@ questions.
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>zgc-tests</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>test-zgc</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-XX:+UseZGC</argLine>
+                                    <forkCount>4</forkCount>
+                                    <reuseForks>true</reuseForks>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>test-zgc-align16</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-XX:+UseZGC -XX:ObjectAlignmentInBytes=16</argLine>
+                                    <forkCount>4</forkCount>
+                                    <reuseForks>true</reuseForks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>generational-zgc-tests</id>
+            <activation>
+                <jdk>21</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>test-generational-zgc</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-XX:+UseZGC -XX:+ZGenerational</argLine>
+                                    <forkCount>4</forkCount>
+                                    <reuseForks>true</reuseForks>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>test-generational-zgc-align16</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-XX:+UseZGC -XX:+ZGenerational -XX:ObjectAlignmentInBytes=16</argLine>
+                                    <forkCount>4</forkCount>
+                                    <reuseForks>true</reuseForks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
