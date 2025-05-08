@@ -67,4 +67,9 @@ class VMOptions {
         return null;
     }
 
+    public static boolean isGenerationalZGCEnabled() {
+        return ManagementFactory.getGarbageCollectorMXBeans().stream()
+                .anyMatch(bean -> "ZGC Minor Cycles".equals(bean.getName()));
+    }
+
 }
