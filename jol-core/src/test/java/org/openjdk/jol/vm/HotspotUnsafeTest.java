@@ -20,6 +20,6 @@ public class HotspotUnsafeTest {
                 .findAny();
         return alignmentProperty
                 .map(alignment -> Integer.parseInt(substringAfter(alignment, "=")))
-                .orElseGet(() -> Integer.parseInt(System.getProperty("sun.arch.data.model")) / Byte.SIZE);
+                .orElse(8);
     }
 }
