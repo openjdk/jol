@@ -12,7 +12,7 @@ class ZGCAddress {
     private static final boolean IS_ARM64 = "aarch64".equals(System.getProperty("os.arch"));
 
     static long uncolorize(long address) {
-        return isAarch ? uncolorizeAarch(address) : uncolorizeNonAarch(address);
+        return IS_ARM64 ? uncolorizeAarch(address) : uncolorizeNonAarch(address);
     }
 
     private static long uncolorizeNonAarch(long address) {
