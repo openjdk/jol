@@ -80,7 +80,7 @@ class HotspotUnsafe implements VirtualMachine {
     private final Sizes sizes;
 
     private final boolean lilliputVM;
-    private final boolean generationalZGCEnabled;
+    private final boolean isZGC;
 
     private volatile boolean mfoInitialized;
     private Object mfoUnsafe;
