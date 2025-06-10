@@ -80,6 +80,7 @@ class HotspotUnsafe implements VirtualMachine {
     private final Sizes sizes;
 
     private final boolean lilliputVM;
+    private final boolean isZGC;
 
     private volatile boolean mfoInitialized;
     private Object mfoUnsafe;
@@ -91,6 +92,8 @@ class HotspotUnsafe implements VirtualMachine {
         U = u;
         instrumentation = inst;
         isAccurate = true;
+
+        isZGC = VMOptions.isGenerationalZGCEnabled();
 
         arrayObjectBase = U.arrayBaseOffset(Object[].class);
 
@@ -118,6 +121,8 @@ class HotspotUnsafe implements VirtualMachine {
         U = u;
         instrumentation = inst;
         isAccurate = false;
+
+        isZGC = VMOptions.isGenerationalZGCEnabled();
 
         arrayObjectBase = U.arrayBaseOffset(Object[].class);
         addressSize = U.addressSize();
@@ -645,7 +650,7 @@ class HotspotUnsafe implements VirtualMachine {
         if (compressedOopsEnabled) {
             return narrowOopBase + (address << narrowOopShift);
         } else {
-            return address;
+            return isZGC ? ZGCAddress.uncolorize(address) : address;
         }
     }
 
@@ -661,7 +666,7 @@ class HotspotUnsafe implements VirtualMachine {
         if (compressedOopsEnabled) {
             return narrowOopBase + (address << narrowOopShift);
         } else {
-            return address;
+            return isZGC ? ZGCAddress.uncolorize(address) : address;
         }
     }
 
@@ -677,7 +682,7 @@ class HotspotUnsafe implements VirtualMachine {
         if (compressedKlassOopsEnabled) {
             return narrowKlassBase + (address << narrowKlassShift);
         } else {
-            return address;
+            return isZGC ? ZGCAddress.uncolorize(address) : address;
         }
     }
 
