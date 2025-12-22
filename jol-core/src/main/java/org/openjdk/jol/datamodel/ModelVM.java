@@ -40,7 +40,7 @@ public class ModelVM implements DataModel {
 
     @Override
     public int markHeaderSize() {
-        return VM.current().addressSize();
+        return VM.current().objectHeaderSize() - classHeaderSize();
     }
 
     @Override
