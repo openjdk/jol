@@ -101,12 +101,16 @@ public class HeapDumpEstimates implements Operation {
         out.println();
 
         long jdk8_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 8));
+        long jdk15_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 15));
+        long jdk23_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 23));
         {
             out.printf("%10s, %10s,     %s%n",
                     "Footprint", "Overhead", "Description"
             );
 
-            printLine("32-bit (<4 GB heap)",              rawSize,    jdk8_32);
+            printLine("32-bit (<4 GB heap), JDK < 15",  rawSize,    jdk8_32);
+            printLine("32-bit (<4 GB heap), JDK < 23",  rawSize,    jdk15_32);
+            printLine("32-bit (<4 GB heap), JDK >= 23", rawSize,    jdk23_32);
         }
         out.println();
 
