@@ -34,6 +34,11 @@ public class HotspotLayouterRealTest {
     }
 
     @Test
+    public void testThreeClasses() throws Exception {
+        tryWithClasses(3, 6, getVersion());
+    }
+
+    @Test
     public void testArrays() {
         int version = getVersion();
         for (int c = 0; c < 128; c++) {
