@@ -152,7 +152,7 @@ public class HeapDumpReader {
                 break;
             }
 
-            read_U4(); // relative time
+            skipContents(4); // relative time
             long len = read_U4();
 
             long lastCount = readBytes;
@@ -249,37 +249,20 @@ public class HeapDumpReader {
         int subTag = read_U1();
         switch (subTag) {
             case 0x01:
-                read_ID();
-                read_ID();
+                skipContents(2 * idSize);
                 return;
             case 0x02:
-                read_ID();
-                read_U4();
-                read_U4();
-                return;
             case 0x03:
-                read_ID();
-                read_U4();
-                read_U4();
+            case 0x08:
+                skipContents(idSize + 2*4);
                 return;
             case 0x04:
-                read_ID();
-                read_U4();
+            case 0x06:
+                skipContents(idSize + 1*4);
                 return;
             case 0x05:
-                read_ID();
-                return;
-            case 0x06:
-                read_ID();
-                read_U4();
-                return;
             case 0x07:
-                read_ID();
-                return;
-            case 0x08:
-                read_ID();
-                read_U4();
-                read_U4();
+                skipContents(idSize);
                 return;
             case 0x20:
                 digestClass();
