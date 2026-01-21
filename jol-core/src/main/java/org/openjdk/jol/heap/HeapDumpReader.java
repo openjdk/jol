@@ -295,8 +295,8 @@ public class HeapDumpReader {
         int typeClass = read_U1();
 
         String typeString = getTypeString(typeClass);
-        ClassData thisCD = new ClassData(typeString + "[]", typeString, elements);
-        arrayCounts.add(thisCD);
+        String typeArrayString = getTypeArrayString(typeClass);
+        arrayCounts.add(new ClassData(typeArrayString, typeString, elements));
 
         long len = (long) elements * getSize(typeClass);
         if (visitor != null) {
@@ -317,8 +317,7 @@ public class HeapDumpReader {
 
         // Assume Object as component type, the name of the actual class
         // is what we want for the printouts.
-        ClassData thisCD = new ClassData(name, "Object", elements);
-        arrayCounts.add(thisCD);
+        arrayCounts.add(new ClassData(name, "Object", elements));
 
         long len = (long) elements * idSize;
         if (visitor != null) {
@@ -464,15 +463,9 @@ public class HeapDumpReader {
     }
 
     private String getTypeString(int type) throws HeapDumpException {
-        if (type == 2) {
-            return "Object"; // TODO: Read the exact type;
-        }
-
-        return getPrimitiveTypeString(type);
-    }
-
-    private String getPrimitiveTypeString(int type) throws HeapDumpException {
         switch (type) {
+            case 2:
+                return "Object"; // TODO: Read the exact type;
             case 4:
                 return "boolean";
             case 8:
@@ -489,6 +482,31 @@ public class HeapDumpReader {
                 return "double";
             case 11:
                 return "long";
+            default:
+                throw new HeapDumpException("Unknown type: " + type);
+        }
+    }
+
+    private String getTypeArrayString(int type) throws HeapDumpException {
+        switch (type) {
+            case 2:
+                return "Object[]"; // TODO: Read the exact type;
+            case 4:
+                return "boolean[]";
+            case 8:
+                return "byte[]";
+            case 9:
+                return "short[]";
+            case 5:
+                return "char[]";
+            case 10:
+                return "int[]";
+            case 6:
+                return "float[]";
+            case 7:
+                return "double[]";
+            case 11:
+                return "long[]";
             default:
                 throw new HeapDumpException("Unknown type: " + type);
         }
