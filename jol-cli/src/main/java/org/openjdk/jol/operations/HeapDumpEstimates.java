@@ -43,6 +43,9 @@ import static java.lang.System.out;
  */
 public class HeapDumpEstimates implements Operation {
 
+    private static final long G = 1024L*1024*1024;
+    private static final long MAX = Long.MAX_VALUE;
+
     @Override
     public String label() {
         return "heapdump-estimates";
@@ -89,18 +92,18 @@ public class HeapDumpEstimates implements Operation {
         out.printf("%10s,     %s%n", String.format("%.2f", 1F * rawSize / rawCount), "Average data per object");
         out.println();
 
-        final String msg_noCoops =          "64-bit, no comp refs (>32 GB heap, default align)";
-        final String msg_noCoops_ccp =      "64-bit, no comp refs, but comp class ptrs (>32 GB heap, default align)";
-        final String msg_coops =            "64-bit, comp refs (<32 GB heap, default align)";
-        final String msg_coops_align16 =    "64-bit, comp refs with large align (  32..64GB heap,  16-byte align)";
-        final String msg_coops_align32 =    "64-bit, comp refs with large align ( 64..128GB heap,  32-byte align)";
-        final String msg_coops_align64 =    "64-bit, comp refs with large align (128..256GB heap,  64-byte align)";
-        final String msg_coops_align128 =   "64-bit, comp refs with large align (256..512GB heap, 128-byte align)";
+        final String msg_noCoops =          "64-bit, no comp refs (>32 GB max heap)";
+        final String msg_noCoops_ccp =      "64-bit, no comp refs, but comp class ptrs (>32 GB max heap)";
+        final String msg_coops =            "64-bit, comp refs (<32 GB max heap)";
+        final String msg_coops_align16 =    "64-bit, comp refs with large align ( <64GB max heap,  16-byte align)";
+        final String msg_coops_align32 =    "64-bit, comp refs with large align (<128GB max heap,  32-byte align)";
+        final String msg_coops_align64 =    "64-bit, comp refs with large align (<256GB max heap,  64-byte align)";
+        final String msg_coops_align128 =   "64-bit, comp refs with large align (<512GB max heap, 128-byte align)";
 
         out.println("=== Stock 32-bit OpenJDK");
         out.println();
 
-        long jdk8_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 8));
+        long jdk8_32 =  computeWithLayouter(data, new HotSpotLayouter(new Model32(), 8));
         long jdk15_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 15));
         long jdk23_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 23));
         {
@@ -108,9 +111,9 @@ public class HeapDumpEstimates implements Operation {
                     "Footprint", "Overhead", "Description"
             );
 
-            printLine("32-bit (<4 GB heap), JDK < 15",  rawSize,    jdk8_32);
-            printLine("32-bit (<4 GB heap), JDK < 23",  rawSize,    jdk15_32);
-            printLine("32-bit (<4 GB heap), JDK >= 23", rawSize,    jdk23_32);
+            printLine("32-bit (<4 GB heap), JDK < 15",  rawSize, 4*G, jdk8_32);
+            printLine("32-bit (<4 GB heap), JDK < 23",  rawSize, 4*G, jdk15_32);
+            printLine("32-bit (<4 GB heap), JDK >= 23", rawSize, 4*G, jdk23_32);
         }
         out.println();
 
@@ -129,12 +132,12 @@ public class HeapDumpEstimates implements Operation {
                     "Footprint", "Overhead", "JVM Mode", "Description"
             );
 
-            printLine(msg_noCoops,              rawSize,    jdk8_noCoops,           jdk8_coops);
-            printLine(msg_coops,                rawSize,    jdk8_coops,             jdk8_coops);
-            printLine(msg_coops_align16,        rawSize,    jdk8_coops_align16,     jdk8_coops);
-            printLine(msg_coops_align32,        rawSize,    jdk8_coops_align32,     jdk8_coops);
-            printLine(msg_coops_align64,        rawSize,    jdk8_coops_align64,     jdk8_coops);
-            printLine(msg_coops_align128,       rawSize,    jdk8_coops_align128,    jdk8_coops);
+            printLine(msg_noCoops,              rawSize, MAX,   jdk8_noCoops,           jdk8_coops);
+            printLine(msg_coops,                rawSize, 32*G,  jdk8_coops,             jdk8_coops);
+            printLine(msg_coops_align16,        rawSize, 64*G,  jdk8_coops_align16,     jdk8_coops);
+            printLine(msg_coops_align32,        rawSize, 128*G, jdk8_coops_align32,     jdk8_coops);
+            printLine(msg_coops_align64,        rawSize, 256*G, jdk8_coops_align64,     jdk8_coops);
+            printLine(msg_coops_align128,       rawSize, 512*G, jdk8_coops_align128,    jdk8_coops);
         }
         out.println();
 
@@ -154,16 +157,16 @@ public class HeapDumpEstimates implements Operation {
                     "Footprint", "Overhead", "JVM Mode", "JDK < 15", "Description"
             );
 
-            printLine(msg_noCoops_ccp,      rawSize,    jdk15_noCoops,          jdk15_coops,    jdk8_noCoops);
-            printLine(msg_coops,            rawSize,    jdk15_coops,            jdk15_coops,    jdk8_coops);
-            printLine(msg_coops_align16,    rawSize,    jdk15_coops_align16,    jdk15_coops,    jdk8_coops_align16);
-            printLine(msg_coops_align32,    rawSize,    jdk15_coops_align32,    jdk15_coops,    jdk8_coops_align32);
-            printLine(msg_coops_align64,    rawSize,    jdk15_coops_align64,    jdk15_coops,    jdk8_coops_align64);
-            printLine(msg_coops_align128,   rawSize,    jdk15_coops_align128,   jdk15_coops,    jdk8_coops_align128);
+            printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdk15_noCoops,          jdk15_coops,    jdk8_noCoops);
+            printLine(msg_coops,            rawSize,    32*G,   jdk15_coops,            jdk15_coops,    jdk8_coops);
+            printLine(msg_coops_align16,    rawSize,    64*G,   jdk15_coops_align16,    jdk15_coops,    jdk8_coops_align16);
+            printLine(msg_coops_align32,    rawSize,    128*G,  jdk15_coops_align32,    jdk15_coops,    jdk8_coops_align32);
+            printLine(msg_coops_align64,    rawSize,    256*G,  jdk15_coops_align64,    jdk15_coops,    jdk8_coops_align64);
+            printLine(msg_coops_align128,   rawSize,    512*G,  jdk15_coops_align128,   jdk15_coops,    jdk8_coops_align128);
         }
         out.println();
 
-        out.println("=== Experimental 64-bit OpenJDK (JDK >= 24): Lilliput 1 (64-bit headers)");
+        out.println("=== Stock 64-bit OpenJDK (JDK >= 24): Lilliput 1 (64-bit headers) Enabled");
         out.println();
 
         long jdkLilliput_noCoops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false,  8,   1), 99));
@@ -179,16 +182,16 @@ public class HeapDumpEstimates implements Operation {
                     "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "Description"
             );
 
-            printLine(msg_noCoops_ccp,      rawSize, jdkLilliput_noCoops,          jdkLilliput_coops, jdk8_noCoops,           jdk15_noCoops);
-            printLine(msg_coops,            rawSize, jdkLilliput_coops,            jdkLilliput_coops, jdk8_coops,             jdk15_coops);
-            printLine(msg_coops_align16,    rawSize, jdkLilliput_coops_align16,    jdkLilliput_coops, jdk8_coops_align16,     jdk15_coops_align16);
-            printLine(msg_coops_align32,    rawSize, jdkLilliput_coops_align32,    jdkLilliput_coops, jdk8_coops_align32,     jdk15_coops_align32);
-            printLine(msg_coops_align64,    rawSize, jdkLilliput_coops_align64,    jdkLilliput_coops, jdk8_coops_align64,     jdk15_coops_align64);
-            printLine(msg_coops_align128,   rawSize, jdkLilliput_coops_align128,   jdkLilliput_coops, jdk8_coops_align128,    jdk15_coops_align128);
+            printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdkLilliput_noCoops,          jdkLilliput_coops, jdk8_noCoops,           jdk15_noCoops);
+            printLine(msg_coops,            rawSize,    32*G,   jdkLilliput_coops,            jdkLilliput_coops, jdk8_coops,             jdk15_coops);
+            printLine(msg_coops_align16,    rawSize,    64*G,   jdkLilliput_coops_align16,    jdkLilliput_coops, jdk8_coops_align16,     jdk15_coops_align16);
+            printLine(msg_coops_align32,    rawSize,    128*G,  jdkLilliput_coops_align32,    jdkLilliput_coops, jdk8_coops_align32,     jdk15_coops_align32);
+            printLine(msg_coops_align64,    rawSize,    256*G,  jdkLilliput_coops_align64,    jdkLilliput_coops, jdk8_coops_align64,     jdk15_coops_align64);
+            printLine(msg_coops_align128,   rawSize,    512*G,  jdkLilliput_coops_align128,   jdkLilliput_coops, jdk8_coops_align128,    jdk15_coops_align128);
         }
         out.println();
 
-        out.println("=== Experimental 64-bit OpenJDK (Prototype): Lilliput 2 (32-bit headers)");
+        out.println("=== Experimental 64-bit OpenJDK (Prototype): Lilliput 2 (32-bit headers) Enabled");
         out.println();
 
         long jdkLilliput32_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false,  8,   2), 99));
@@ -204,20 +207,27 @@ public class HeapDumpEstimates implements Operation {
                     "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "Lilliput 1", "Description"
             );
 
-            printLine(msg_noCoops_ccp,    rawSize,  jdkLilliput32_noCoops,        jdkLilliput32_coops, jdk8_noCoops,          jdk15_noCoops,          jdkLilliput_noCoops);
-            printLine(msg_coops,          rawSize,  jdkLilliput32_coops,          jdkLilliput32_coops, jdk8_coops,            jdk15_coops,            jdkLilliput_coops);
-            printLine(msg_coops_align16,  rawSize,  jdkLilliput32_coops_align16,  jdkLilliput32_coops, jdk8_coops_align16,    jdk15_coops_align16,    jdkLilliput_coops_align16);
-            printLine(msg_coops_align32,  rawSize,  jdkLilliput32_coops_align32,  jdkLilliput32_coops, jdk8_coops_align32,    jdk15_coops_align32,    jdkLilliput_coops_align32);
-            printLine(msg_coops_align64,  rawSize,  jdkLilliput32_coops_align64,  jdkLilliput32_coops, jdk8_coops_align64,    jdk15_coops_align64,    jdkLilliput_coops_align64);
-            printLine(msg_coops_align128, rawSize,  jdkLilliput32_coops_align128, jdkLilliput32_coops, jdk8_coops_align128,   jdk15_coops_align128,   jdkLilliput_coops_align128);
+            printLine(msg_noCoops_ccp,    rawSize,  MAX,    jdkLilliput32_noCoops,        jdkLilliput32_coops, jdk8_noCoops,          jdk15_noCoops,          jdkLilliput_noCoops);
+            printLine(msg_coops,          rawSize,  32*G,   jdkLilliput32_coops,          jdkLilliput32_coops, jdk8_coops,            jdk15_coops,            jdkLilliput_coops);
+            printLine(msg_coops_align16,  rawSize,  64*G,   jdkLilliput32_coops_align16,  jdkLilliput32_coops, jdk8_coops_align16,    jdk15_coops_align16,    jdkLilliput_coops_align16);
+            printLine(msg_coops_align32,  rawSize,  128*G,  jdkLilliput32_coops_align32,  jdkLilliput32_coops, jdk8_coops_align32,    jdk15_coops_align32,    jdkLilliput_coops_align32);
+            printLine(msg_coops_align64,  rawSize,  256*G,  jdkLilliput32_coops_align64,  jdkLilliput32_coops, jdk8_coops_align64,    jdk15_coops_align64,    jdkLilliput_coops_align64);
+            printLine(msg_coops_align128, rawSize,  512*G,  jdkLilliput32_coops_align128, jdkLilliput32_coops, jdk8_coops_align128,   jdk15_coops_align128,   jdkLilliput_coops_align128);
         }
         out.println();
     }
 
-    private static void printLine(String msg, long rawSize, long value, long... bases) {
-        out.printf("%10s, %10s, ", MathUtil.inProperUnits(value), MathUtil.diffPercent(value, rawSize));
-        for (long base : bases) {
-            out.printf("%10s, ", MathUtil.diffPercent(value, base));
+    private static void printLine(String msg, long rawSize, long cap, long value, long... bases) {
+        if (rawSize < cap) {
+            out.printf("%10s, %10s, ", MathUtil.inProperUnits(value), MathUtil.diffPercent(value, rawSize));
+            for (long base : bases) {
+                out.printf("%10s, ", MathUtil.diffPercent(value, base));
+            }
+        } else {
+            out.printf("%10s, %10s, ", "Unfit", "Unfit");
+            for (long base : bases) {
+                out.printf("%10s, ", "Unfit");
+            }
         }
         out.printf("    %s%n", msg);
     }
