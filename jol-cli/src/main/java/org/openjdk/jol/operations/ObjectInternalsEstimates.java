@@ -65,6 +65,7 @@ public class ObjectInternalsEstimates extends ClasspathedOperation {
         for (DataModel model : EstimatedModels.MODELS_JDK15) {
             layouters.add(new HotSpotLayouter(model, 15));
             layouters.add(new HotSpotLayouter(model, 23));
+            layouters.add(new HotSpotLayouter(model, 25));
         }
 
         for (DataModel model : EstimatedModels.MODELS_LILLIPUT) {
