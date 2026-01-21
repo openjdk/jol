@@ -42,6 +42,7 @@ import java.util.zip.GZIPInputStream;
  */
 public class HeapDumpReader {
 
+    private static final int      BUF_SIZE =       128 * 1024;
     private static final int GZIP_BUF_SIZE =       512 * 1024;
     private static final int READ_BUF_SIZE =  4 * 1024 * 1024;
 
@@ -79,7 +80,7 @@ public class HeapDumpReader {
         this.classFields = new Multimap<>();
         this.arrayCounts = new Multiset<>();
         this.classSupers = new HashMap<>();
-        this.buf = new byte[32*1024];
+        this.buf = new byte[BUF_SIZE];
         this.wrapBuf = ByteBuffer.wrap(buf);
     }
 
@@ -97,11 +98,31 @@ public class HeapDumpReader {
         }
     }
 
+    private int read_byte() throws HeapDumpException {
+        try {
+            int read = is.read();
+            readBytes += (read < 0) ? 0 : 1;
+            return read;
+        } catch (IOException e) {
+            throw new HeapDumpException(errorMessage(e.getMessage()));
+        }
+    }
+
     private int read(byte[] b, int size) throws HeapDumpException {
         try {
             int read = is.read(b, 0, size);
             readBytes += read;
             return read;
+        } catch (IOException e) {
+            throw new HeapDumpException(errorMessage(e.getMessage()));
+        }
+    }
+
+    private int skip(int skip) throws HeapDumpException {
+        try {
+            long r = is.skip(skip);
+            readBytes += r;
+            return (int)r;
         } catch (IOException e) {
             throw new HeapDumpException(errorMessage(e.getMessage()));
         }
@@ -116,16 +137,18 @@ public class HeapDumpReader {
         read_U4(); // timestamp, hi
 
         long lastPrint = 0L;
-        final long printEach = 256L * 1024 * 1024;
+        final long printEach = 1024L * 1024 * 1024;
+
+        long start = System.nanoTime();
 
         if (verboseOut != null) {
-            verboseOut.print("Read progress: ");
+            verboseOut.print("Reading: ");
             verboseOut.flush();
         }
 
         while (true) {
             if ((verboseOut != null) && (readBytes - lastPrint > printEach)) {
-                verboseOut.print(readBytes / 1000 / 1000 + "M... ");
+                verboseOut.print(".");
                 verboseOut.flush();
                 lastPrint = readBytes;
             }
@@ -138,7 +161,7 @@ public class HeapDumpReader {
                 break;
             }
 
-            read_U4(); // relative time
+            skipContents(4); // relative time
             long len = read_U4();
 
             long lastCount = readBytes;
@@ -221,7 +244,11 @@ public class HeapDumpReader {
         }
 
         if (verboseOut != null) {
-            verboseOut.println("DONE");
+            long end = System.nanoTime();
+            verboseOut.printf(" done %d MB in %.3f seconds at %.0f MB/sec%n",
+                    readBytes / 1024 / 1024,
+                    1D * (end - start) / 1000 / 1000 / 1000,
+                    1000D * readBytes / (end - start));
         }
 
         return finalClassCounts;
@@ -231,37 +258,20 @@ public class HeapDumpReader {
         int subTag = read_U1();
         switch (subTag) {
             case 0x01:
-                read_ID();
-                read_ID();
+                skipContents(2 * idSize);
                 return;
             case 0x02:
-                read_ID();
-                read_U4();
-                read_U4();
-                return;
             case 0x03:
-                read_ID();
-                read_U4();
-                read_U4();
+            case 0x08:
+                skipContents(idSize + 2*4);
                 return;
             case 0x04:
-                read_ID();
-                read_U4();
+            case 0x06:
+                skipContents(idSize + 1*4);
                 return;
             case 0x05:
-                read_ID();
-                return;
-            case 0x06:
-                read_ID();
-                read_U4();
-                return;
             case 0x07:
-                read_ID();
-                return;
-            case 0x08:
-                read_ID();
-                read_U4();
-                read_U4();
+                skipContents(idSize);
                 return;
             case 0x20:
                 digestClass();
@@ -282,13 +292,13 @@ public class HeapDumpReader {
 
     private void digestPrimArray() throws HeapDumpException {
         long id = read_ID(); // array id
-        read_U4(); // stack trace
+        skipContents(4); // stack trace, ignore
         int elements = (int) read_U4(); // always fits
         int typeClass = read_U1();
 
         String typeString = getTypeString(typeClass);
-        ClassData thisCD = new ClassData(typeString + "[]", typeString, elements);
-        arrayCounts.add(thisCD);
+        String typeArrayString = getTypeArrayString(typeClass);
+        arrayCounts.add(new ClassData(typeArrayString, typeString, elements));
 
         long len = (long) elements * getSize(typeClass);
         if (visitor != null) {
@@ -301,7 +311,7 @@ public class HeapDumpReader {
 
     private void digestObjArray() throws HeapDumpException {
         long id = read_ID(); // array id
-        read_U4(); // stack trace
+        skipContents(4); // stack trace, ignore
         int elements = (int) read_U4(); // always fits
         long klassId = read_ID(); // array class
 
@@ -309,7 +319,6 @@ public class HeapDumpReader {
 
         // Assume Object as component type, the name of the actual class
         // is what we want for the printouts.
-        ClassData thisCD = new ClassData(name, "Object", elements);
         arrayCounts.add(new ClassData(name, "Object", elements));
 
         long len = (long) elements * idSize;
@@ -323,12 +332,11 @@ public class HeapDumpReader {
 
     private void digestInstance() throws HeapDumpException {
         long id = read_ID(); // object id
-        read_U4(); // stack trace
+        skipContents(4); // stack trace, ignore
         long klassID = read_ID();
+        int instanceBytes = (int) read_U4(); // always fits
 
         classCounts.add(klassID);
-
-        int instanceBytes = (int) read_U4(); // always fits
 
         if (visitor != null) {
             byte[] bytes = readContents(instanceBytes);
@@ -344,7 +352,7 @@ public class HeapDumpReader {
 
         String name = classNames.get(klassID);
 
-        read_U4(); // stack trace
+        skipContents(4); // stack trace, ignore
 
         long superKlassID = read_ID();
         if (superKlassID != 0 && classSupers.put(klassID, superKlassID) != null) {
@@ -457,15 +465,9 @@ public class HeapDumpReader {
     }
 
     private String getTypeString(int type) throws HeapDumpException {
-        if (type == 2) {
-            return "Object"; // TODO: Read the exact type;
-        }
-
-        return getPrimitiveTypeString(type);
-    }
-
-    private String getPrimitiveTypeString(int type) throws HeapDumpException {
         switch (type) {
+            case 2:
+                return "Object"; // TODO: Read the exact type;
             case 4:
                 return "boolean";
             case 8:
@@ -487,6 +489,31 @@ public class HeapDumpReader {
         }
     }
 
+    private String getTypeArrayString(int type) throws HeapDumpException {
+        switch (type) {
+            case 2:
+                return "Object[]"; // TODO: Read the exact type;
+            case 4:
+                return "boolean[]";
+            case 8:
+                return "byte[]";
+            case 9:
+                return "short[]";
+            case 5:
+                return "char[]";
+            case 10:
+                return "int[]";
+            case 6:
+                return "float[]";
+            case 7:
+                return "double[]";
+            case 11:
+                return "long[]";
+            default:
+                throw new HeapDumpException("Unknown type: " + type);
+        }
+    }
+
     private long read_ID() throws HeapDumpException {
         int read = read(buf, idSize);
         if (read == 4) {
@@ -503,7 +530,10 @@ public class HeapDumpReader {
         int read;
         do {
             int toRead = (int) Math.min(buf.length, rem); // always fits into buf.length
-            read = read(buf, toRead);
+            read = skip(toRead);
+            if (read == 0) {
+                read = read(buf, toRead);
+            }
             rem -= read;
         } while (rem > 0);
     }
@@ -570,11 +600,11 @@ public class HeapDumpReader {
     }
 
     int read_U1() throws HeapDumpException {
-        int read = read(buf, 1);
-        if (read == 1) {
-            return ((int)wrapBuf.get(0) & 0xFF);
+        int read = read_byte();
+        if (read < 0) {
+            throw new HeapDumpException(errorMessage("Unable to read 1 bytes"));
         }
-        throw new HeapDumpException(errorMessage("Unable to read 1 bytes"));
+        return (int)(read & 0xFF);
     }
 
     private String errorMessage(String message) throws HeapDumpException {
@@ -647,6 +677,27 @@ public class HeapDumpReader {
                 return super.read();
             }
             return buf[pos++] & 0xFF;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            if (pos + len >= count) {
+                // Let superclass handle buffers
+                return super.read(b, off, len);
+            }
+            System.arraycopy(buf, pos, b, off, len);
+            pos += len;
+            return len;
+        }
+
+        @Override
+        public long skip(long skip) throws IOException {
+            if (pos + skip >= count || skip > 1024*1024) {
+                // Let superclass handle buffers
+                return super.skip(skip);
+            }
+            pos += (int)skip;
+            return skip;
         }
     }
 
