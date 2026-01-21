@@ -32,7 +32,9 @@ import org.openjdk.jol.util.Multiset;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -116,16 +118,18 @@ public class HeapDumpReader {
         read_U4(); // timestamp, hi
 
         long lastPrint = 0L;
-        final long printEach = 256L * 1024 * 1024;
+        final long printEach = 1024L * 1024 * 1024;
+
+        long start = System.nanoTime();
 
         if (verboseOut != null) {
-            verboseOut.print("Read progress: ");
+            verboseOut.print("Reading: ");
             verboseOut.flush();
         }
 
         while (true) {
             if ((verboseOut != null) && (readBytes - lastPrint > printEach)) {
-                verboseOut.print(readBytes / 1000 / 1000 + "M... ");
+                verboseOut.print(".");
                 verboseOut.flush();
                 lastPrint = readBytes;
             }
@@ -221,7 +225,11 @@ public class HeapDumpReader {
         }
 
         if (verboseOut != null) {
-            verboseOut.println("DONE");
+            long end = System.nanoTime();
+            verboseOut.printf(" done %d MB in %.3f seconds at %.0f MB/sec%n",
+                    readBytes / 1024 / 1024,
+                    1D * (end - start) / 1000 / 1000 / 1000,
+                    1000D * readBytes / (end - start));
         }
 
         return finalClassCounts;
@@ -647,6 +655,17 @@ public class HeapDumpReader {
                 return super.read();
             }
             return buf[pos++] & 0xFF;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            if (pos + len >= count) {
+                // Let superclass handle buffers
+                return super.read(b, off, len);
+            }
+            System.arraycopy(buf, pos, b, off, len);
+            pos += len;
+            return len;
         }
     }
 
