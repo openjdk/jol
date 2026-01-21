@@ -67,7 +67,7 @@ public class HeapDumpEstimates implements Operation {
         out.println();
 
         out.println("'Overhead' comes from additional metadata, representation and alignment losses.");
-        out.println("'JVM mode' is the relative footprint change compared to the best JVM mode in this JDK.");
+        out.println("'JVM mode' is the relative footprint change compared to the default JVM mode in this JDK.");
         out.println("'Upgrade From' is the relative footprint change against the same mode in other JDKs.");
         out.println();
 
@@ -100,24 +100,28 @@ public class HeapDumpEstimates implements Operation {
         final String msg_coops_align64 =    "64-bit, comp refs with large align (<256GB max heap,  64-byte align)";
         final String msg_coops_align128 =   "64-bit, comp refs with large align (<512GB max heap, 128-byte align)";
 
-        out.println("=== Stock 32-bit OpenJDK");
+        out.println("=== 32-bit JDK, All versions");
         out.println();
 
         long jdk8_32 =  computeWithLayouter(data, new HotSpotLayouter(new Model32(), 8));
-        long jdk15_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 15));
-        long jdk23_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 23));
+        long jdk11_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 11));
+        long jdk17_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 17));
+        long jdk21_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 21));
+        long jdk25_32 = computeWithLayouter(data, new HotSpotLayouter(new Model32(), 25));
         {
             out.printf("%10s, %10s,     %s%n",
                     "Footprint", "Overhead", "Description"
             );
 
-            printLine("32-bit (<4 GB heap), JDK < 15",  rawSize, 4*G, jdk8_32);
-            printLine("32-bit (<4 GB heap), JDK >= 15", rawSize, 4*G, jdk15_32);
-            printLine("32-bit (<4 GB heap), JDK >= 23", rawSize, 4*G, jdk23_32);
+            printLine("32-bit (<4 GB heap), JDK 8",  rawSize, 4*G, jdk8_32);
+            printLine("32-bit (<4 GB heap), JDK 11", rawSize, 4*G, jdk11_32);
+            printLine("32-bit (<4 GB heap), JDK 17", rawSize, 4*G, jdk17_32);
+            printLine("32-bit (<4 GB heap), JDK 21", rawSize, 4*G, jdk21_32);
+            printLine("32-bit (<4 GB heap), JDK 25", rawSize, 4*G, jdk25_32);
         }
         out.println();
 
-        out.println("=== Stock 64-bit OpenJDK (JDK < 15)");
+        out.println("=== 64-bit JDK 8, 11: Basic");
         out.println();
 
         long jdk8_noCoops =         computeWithLayouter(data, new HotSpotLayouter(new Model64(false, false, 8), 8));
@@ -141,57 +145,57 @@ public class HeapDumpEstimates implements Operation {
         }
         out.println();
 
-        long jdk15_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64(false, true,  8), 15));
-        long jdk15_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,   8), 15));
-        long jdk15_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  16), 15));
-        long jdk15_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  32), 15));
-        long jdk15_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  64), 15));
-        long jdk15_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 128), 15));
+        long jdk17_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64(false, true,  8), 17));
+        long jdk17_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,   8), 17));
+        long jdk17_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  16), 17));
+        long jdk17_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  32), 17));
+        long jdk17_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  64), 17));
+        long jdk17_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 128), 17));
 
-        out.println("=== Stock 64-bit OpenJDK (JDK >= 15): Better Compressed Class Pointers, New Field Layouter");
+        out.println("=== 64-bit JDK 17, 21: Better Compressed Class Pointers, New Field Layouter");
         out.println();
 
         {
-            out.printf("%37s %s%n", "", "Upgrade From:");
+            out.printf("%36s %s%n", "", "Upgrade From:");
             out.printf("%10s, %10s, %10s, %10s,     %s%n",
-                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "Description"
+                    "Footprint", "Overhead", "JVM Mode", "JDK 8..11", "Description"
             );
 
-            printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdk15_noCoops,          jdk15_coops,    jdk8_noCoops);
-            printLine(msg_coops,            rawSize,    32*G,   jdk15_coops,            jdk15_coops,    jdk8_coops);
-            printLine(msg_coops_align16,    rawSize,    64*G,   jdk15_coops_align16,    jdk15_coops,    jdk8_coops_align16);
-            printLine(msg_coops_align32,    rawSize,    128*G,  jdk15_coops_align32,    jdk15_coops,    jdk8_coops_align32);
-            printLine(msg_coops_align64,    rawSize,    256*G,  jdk15_coops_align64,    jdk15_coops,    jdk8_coops_align64);
-            printLine(msg_coops_align128,   rawSize,    512*G,  jdk15_coops_align128,   jdk15_coops,    jdk8_coops_align128);
+            printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdk17_noCoops,          jdk17_coops,    jdk8_noCoops);
+            printLine(msg_coops,            rawSize,    32*G,   jdk17_coops,            jdk17_coops,    jdk8_coops);
+            printLine(msg_coops_align16,    rawSize,    64*G,   jdk17_coops_align16,    jdk17_coops,    jdk8_coops_align16);
+            printLine(msg_coops_align32,    rawSize,    128*G,  jdk17_coops_align32,    jdk17_coops,    jdk8_coops_align32);
+            printLine(msg_coops_align64,    rawSize,    256*G,  jdk17_coops_align64,    jdk17_coops,    jdk8_coops_align64);
+            printLine(msg_coops_align128,   rawSize,    512*G,  jdk17_coops_align128,   jdk17_coops,    jdk8_coops_align128);
         }
         out.println();
 
-        long jdk23_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64(false, true,  8), 23));
-        long jdk23_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,   8), 23));
-        long jdk23_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  16), 23));
-        long jdk23_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  32), 23));
-        long jdk23_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  64), 23));
-        long jdk23_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 128), 23));
+        long jdk25_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64(false, true,  8), 25));
+        long jdk25_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,   8), 25));
+        long jdk25_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  16), 25));
+        long jdk25_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  32), 25));
+        long jdk25_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  64), 25));
+        long jdk25_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 128), 25));
 
-        out.println("=== Stock 64-bit OpenJDK (JDK >= 23): Array Base Improvements");
+        out.println("=== 64-bit JDK 25: Array Base Improvements, Reference Fields Ordering");
         out.println();
 
         {
-            out.printf("%37s %s%n", "", "Upgrade From:");
+            out.printf("%36s %s%n", "", "Upgrade From:");
             out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "Description"
+                    "Footprint", "Overhead", "JVM Mode", "JDK 8..11", "JDK 17..21", "Description"
             );
 
-            printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdk23_noCoops,          jdk23_coops,    jdk8_noCoops,           jdk15_noCoops);
-            printLine(msg_coops,            rawSize,    32*G,   jdk23_coops,            jdk23_coops,    jdk8_coops,             jdk15_coops);
-            printLine(msg_coops_align16,    rawSize,    64*G,   jdk23_coops_align16,    jdk23_coops,    jdk8_coops_align16,     jdk15_coops_align16);
-            printLine(msg_coops_align32,    rawSize,    128*G,  jdk23_coops_align32,    jdk23_coops,    jdk8_coops_align32,     jdk15_coops_align32);
-            printLine(msg_coops_align64,    rawSize,    256*G,  jdk23_coops_align64,    jdk23_coops,    jdk8_coops_align64,     jdk15_coops_align64);
-            printLine(msg_coops_align128,   rawSize,    512*G,  jdk23_coops_align128,   jdk23_coops,    jdk8_coops_align128,    jdk15_coops_align128);
+            printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdk25_noCoops,          jdk25_coops,    jdk8_noCoops,           jdk17_noCoops);
+            printLine(msg_coops,            rawSize,    32*G,   jdk25_coops,            jdk25_coops,    jdk8_coops,             jdk17_coops);
+            printLine(msg_coops_align16,    rawSize,    64*G,   jdk25_coops_align16,    jdk25_coops,    jdk8_coops_align16,     jdk17_coops_align16);
+            printLine(msg_coops_align32,    rawSize,    128*G,  jdk25_coops_align32,    jdk25_coops,    jdk8_coops_align32,     jdk17_coops_align32);
+            printLine(msg_coops_align64,    rawSize,    256*G,  jdk25_coops_align64,    jdk25_coops,    jdk8_coops_align64,     jdk17_coops_align64);
+            printLine(msg_coops_align128,   rawSize,    512*G,  jdk25_coops_align128,   jdk25_coops,    jdk8_coops_align128,    jdk17_coops_align128);
         }
         out.println();
 
-        out.println("=== Stock 64-bit OpenJDK (JDK >= 24): Lilliput 1 (64-bit headers) Enabled");
+        out.println("=== 64-bit JDK 25: -XX:+UseCompactObjectHeaders (Lilliput 1, 64-bit headers)");
         out.println();
 
         long jdkLilliput_noCoops =          computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false,  8,   1), 99));
@@ -202,21 +206,21 @@ public class HeapDumpEstimates implements Operation {
         long jdkLilliput_coops_align128 =   computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 128,   1), 99));
 
         {
-            out.printf("%37s %s%n", "", "Upgrade From:");
+            out.printf("%36s %s%n", "", "Upgrade From:");
             out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "JDK >= 23", "Description"
+                    "Footprint", "Overhead", "JVM Mode", "JDK 8..11", "JDK 17..21", "JDK 25", "Description"
             );
 
-            printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdkLilliput_noCoops,          jdkLilliput_coops, jdk8_noCoops,           jdk15_noCoops,         jdk23_noCoops);
-            printLine(msg_coops,            rawSize,    32*G,   jdkLilliput_coops,            jdkLilliput_coops, jdk8_coops,             jdk15_coops,           jdk23_coops);
-            printLine(msg_coops_align16,    rawSize,    64*G,   jdkLilliput_coops_align16,    jdkLilliput_coops, jdk8_coops_align16,     jdk15_coops_align16,   jdk23_coops_align16);
-            printLine(msg_coops_align32,    rawSize,    128*G,  jdkLilliput_coops_align32,    jdkLilliput_coops, jdk8_coops_align32,     jdk15_coops_align32,   jdk23_coops_align32);
-            printLine(msg_coops_align64,    rawSize,    256*G,  jdkLilliput_coops_align64,    jdkLilliput_coops, jdk8_coops_align64,     jdk15_coops_align64,   jdk23_coops_align64);
-            printLine(msg_coops_align128,   rawSize,    512*G,  jdkLilliput_coops_align128,   jdkLilliput_coops, jdk8_coops_align128,    jdk15_coops_align128,  jdk23_coops_align128);
+            printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdkLilliput_noCoops,          jdkLilliput_coops, jdk8_noCoops,           jdk17_noCoops,         jdk25_noCoops);
+            printLine(msg_coops,            rawSize,    32*G,   jdkLilliput_coops,            jdkLilliput_coops, jdk8_coops,             jdk17_coops,           jdk25_coops);
+            printLine(msg_coops_align16,    rawSize,    64*G,   jdkLilliput_coops_align16,    jdkLilliput_coops, jdk8_coops_align16,     jdk17_coops_align16,   jdk25_coops_align16);
+            printLine(msg_coops_align32,    rawSize,    128*G,  jdkLilliput_coops_align32,    jdkLilliput_coops, jdk8_coops_align32,     jdk17_coops_align32,   jdk25_coops_align32);
+            printLine(msg_coops_align64,    rawSize,    256*G,  jdkLilliput_coops_align64,    jdkLilliput_coops, jdk8_coops_align64,     jdk17_coops_align64,   jdk25_coops_align64);
+            printLine(msg_coops_align128,   rawSize,    512*G,  jdkLilliput_coops_align128,   jdkLilliput_coops, jdk8_coops_align128,    jdk17_coops_align128,  jdk25_coops_align128);
         }
         out.println();
 
-        out.println("=== Experimental 64-bit OpenJDK (Prototype): Lilliput 2 (32-bit headers) Enabled");
+        out.println("=== 64-bit Future JDK: -XX:+UseCompactObjectHeaders (Lilliput 2, 32-bit headers)");
         out.println();
 
         long jdkLilliput32_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(false,  8,   2), 99));
@@ -227,17 +231,17 @@ public class HeapDumpEstimates implements Operation {
         long jdkLilliput32_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64_Lilliput(true, 128,   2), 99));
 
         {
-            out.printf("%37s %s%n", "", "Upgrade From:");
+            out.printf("%36s %s%n", "", "Upgrade From:");
             out.printf("%10s, %10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "JDK >= 23", "Lilliput 1", "Description"
+                    "Footprint", "Overhead", "JVM Mode", "JDK 8..11", "JDK 17..21", "JDK 25", "JDK 25 L1", "Description"
             );
 
-            printLine(msg_noCoops_ccp,    rawSize,  MAX,    jdkLilliput32_noCoops,        jdkLilliput32_coops, jdk8_noCoops,          jdk15_noCoops,          jdk23_noCoops,        jdkLilliput_noCoops);
-            printLine(msg_coops,          rawSize,  32*G,   jdkLilliput32_coops,          jdkLilliput32_coops, jdk8_coops,            jdk15_coops,            jdk23_coops,          jdkLilliput_coops);
-            printLine(msg_coops_align16,  rawSize,  64*G,   jdkLilliput32_coops_align16,  jdkLilliput32_coops, jdk8_coops_align16,    jdk15_coops_align16,    jdk23_coops_align16,  jdkLilliput_coops_align16);
-            printLine(msg_coops_align32,  rawSize,  128*G,  jdkLilliput32_coops_align32,  jdkLilliput32_coops, jdk8_coops_align32,    jdk15_coops_align32,    jdk23_coops_align32,  jdkLilliput_coops_align32);
-            printLine(msg_coops_align64,  rawSize,  256*G,  jdkLilliput32_coops_align64,  jdkLilliput32_coops, jdk8_coops_align64,    jdk15_coops_align64,    jdk23_coops_align64,  jdkLilliput_coops_align64);
-            printLine(msg_coops_align128, rawSize,  512*G,  jdkLilliput32_coops_align128, jdkLilliput32_coops, jdk8_coops_align128,   jdk15_coops_align128,   jdk23_coops_align128, jdkLilliput_coops_align128);
+            printLine(msg_noCoops_ccp,    rawSize,  MAX,    jdkLilliput32_noCoops,        jdkLilliput32_coops, jdk8_noCoops,          jdk17_noCoops,          jdk25_noCoops,        jdkLilliput_noCoops);
+            printLine(msg_coops,          rawSize,  32*G,   jdkLilliput32_coops,          jdkLilliput32_coops, jdk8_coops,            jdk17_coops,            jdk25_coops,          jdkLilliput_coops);
+            printLine(msg_coops_align16,  rawSize,  64*G,   jdkLilliput32_coops_align16,  jdkLilliput32_coops, jdk8_coops_align16,    jdk17_coops_align16,    jdk25_coops_align16,  jdkLilliput_coops_align16);
+            printLine(msg_coops_align32,  rawSize,  128*G,  jdkLilliput32_coops_align32,  jdkLilliput32_coops, jdk8_coops_align32,    jdk17_coops_align32,    jdk25_coops_align32,  jdkLilliput_coops_align32);
+            printLine(msg_coops_align64,  rawSize,  256*G,  jdkLilliput32_coops_align64,  jdkLilliput32_coops, jdk8_coops_align64,    jdk17_coops_align64,    jdk25_coops_align64,  jdkLilliput_coops_align64);
+            printLine(msg_coops_align128, rawSize,  512*G,  jdkLilliput32_coops_align128, jdkLilliput32_coops, jdk8_coops_align128,   jdk17_coops_align128,   jdk25_coops_align128, jdkLilliput_coops_align128);
         }
         out.println();
     }
