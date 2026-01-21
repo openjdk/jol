@@ -1,8 +1,16 @@
 package org.openjdk.jol.info;
 
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
+import org.openjdk.jol.TestUtils;
 
 public class ClassLayoutPrivatesTest {
+
+    @Before
+    public void beforeMethod() {
+        Assume.assumeTrue(TestUtils.JDK_VERSION < 25 || (System.getProperty("jol.magicFieldOffset") != null));
+    }
 
     static class A {
 
