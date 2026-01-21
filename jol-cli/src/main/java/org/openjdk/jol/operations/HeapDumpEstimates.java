@@ -92,13 +92,13 @@ public class HeapDumpEstimates implements Operation {
         out.printf("%10s,     %s%n", String.format("%.2f", 1F * rawSize / rawCount), "Average data per object");
         out.println();
 
-        final String msg_noCoops =          "64-bit, no comp refs (>32 GB max heap)";
-        final String msg_noCoops_ccp =      "64-bit, no comp refs, but comp class ptrs (>32 GB max heap)";
-        final String msg_coops =            "64-bit, comp refs (<32 GB max heap)";
-        final String msg_coops_align16 =    "64-bit, comp refs with large align ( <64GB max heap,  16-byte align)";
-        final String msg_coops_align32 =    "64-bit, comp refs with large align (<128GB max heap,  32-byte align)";
-        final String msg_coops_align64 =    "64-bit, comp refs with large align (<256GB max heap,  64-byte align)";
-        final String msg_coops_align128 =   "64-bit, comp refs with large align (<512GB max heap, 128-byte align)";
+        final String msg_noCoops =          "no comp refs (>32 GB max heap)";
+        final String msg_noCoops_ccp =      "no comp refs, but comp class ptrs (>32 GB max heap)";
+        final String msg_coops =            "comp refs (<32 GB max heap)";
+        final String msg_coops_align16 =    "comp refs with large align ( <64GB max heap,  16-byte align)";
+        final String msg_coops_align32 =    "comp refs with large align (<128GB max heap,  32-byte align)";
+        final String msg_coops_align64 =    "comp refs with large align (<256GB max heap,  64-byte align)";
+        final String msg_coops_align128 =   "comp refs with large align (<512GB max heap, 128-byte align)";
 
         out.println("=== 32-bit JDK, All versions");
         out.println();
@@ -113,11 +113,11 @@ public class HeapDumpEstimates implements Operation {
                     "Footprint", "Overhead", "Description"
             );
 
-            printLine("32-bit (<4 GB heap), JDK 8",  rawSize, 4*G, jdk8_32);
-            printLine("32-bit (<4 GB heap), JDK 11", rawSize, 4*G, jdk11_32);
-            printLine("32-bit (<4 GB heap), JDK 17", rawSize, 4*G, jdk17_32);
-            printLine("32-bit (<4 GB heap), JDK 21", rawSize, 4*G, jdk21_32);
-            printLine("32-bit (<4 GB heap), JDK 25", rawSize, 4*G, jdk25_32);
+            printLine("<4 GB max heap, JDK 8",  rawSize, 4*G, jdk8_32);
+            printLine("<4 GB max heap, JDK 11", rawSize, 4*G, jdk11_32);
+            printLine("<4 GB max heap, JDK 17", rawSize, 4*G, jdk17_32);
+            printLine("<4 GB max heap, JDK 21", rawSize, 4*G, jdk21_32);
+            printLine("<4 GB max heap, JDK 25", rawSize, 4*G, jdk25_32);
         }
         out.println();
 
