@@ -112,7 +112,7 @@ public class HeapDumpEstimates implements Operation {
             );
 
             printLine("32-bit (<4 GB heap), JDK < 15",  rawSize, 4*G, jdk8_32);
-            printLine("32-bit (<4 GB heap), JDK < 23",  rawSize, 4*G, jdk15_32);
+            printLine("32-bit (<4 GB heap), JDK >= 15", rawSize, 4*G, jdk15_32);
             printLine("32-bit (<4 GB heap), JDK >= 23", rawSize, 4*G, jdk23_32);
         }
         out.println();
@@ -148,7 +148,7 @@ public class HeapDumpEstimates implements Operation {
         long jdk15_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  64), 15));
         long jdk15_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 128), 15));
 
-        out.println("=== Stock 64-bit OpenJDK (JDK 15..22): Better Compressed Class Pointers, New Field Layouter");
+        out.println("=== Stock 64-bit OpenJDK (JDK >= 15): Better Compressed Class Pointers, New Field Layouter");
         out.println();
 
         {
@@ -179,15 +179,15 @@ public class HeapDumpEstimates implements Operation {
         {
             out.printf("%37s %s%n", "", "Upgrade From:");
             out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK 15..22", "Description"
+                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "Description"
             );
 
-            printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdk23_noCoops,          jdk23_coops,    jdk15_coops,    jdk8_noCoops);
-            printLine(msg_coops,            rawSize,    32*G,   jdk23_coops,            jdk23_coops,    jdk15_coops,    jdk8_coops);
-            printLine(msg_coops_align16,    rawSize,    64*G,   jdk23_coops_align16,    jdk23_coops,    jdk15_coops,    jdk8_coops_align16);
-            printLine(msg_coops_align32,    rawSize,    128*G,  jdk23_coops_align32,    jdk23_coops,    jdk15_coops,    jdk8_coops_align32);
-            printLine(msg_coops_align64,    rawSize,    256*G,  jdk23_coops_align64,    jdk23_coops,    jdk15_coops,    jdk8_coops_align64);
-            printLine(msg_coops_align128,   rawSize,    512*G,  jdk23_coops_align128,   jdk23_coops,    jdk15_coops,    jdk8_coops_align128);
+            printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdk23_noCoops,          jdk23_coops,    jdk8_noCoops,           jdk15_noCoops);
+            printLine(msg_coops,            rawSize,    32*G,   jdk23_coops,            jdk23_coops,    jdk8_coops,             jdk15_coops);
+            printLine(msg_coops_align16,    rawSize,    64*G,   jdk23_coops_align16,    jdk23_coops,    jdk8_coops_align16,     jdk15_coops_align16);
+            printLine(msg_coops_align32,    rawSize,    128*G,  jdk23_coops_align32,    jdk23_coops,    jdk8_coops_align32,     jdk15_coops_align32);
+            printLine(msg_coops_align64,    rawSize,    256*G,  jdk23_coops_align64,    jdk23_coops,    jdk8_coops_align64,     jdk15_coops_align64);
+            printLine(msg_coops_align128,   rawSize,    512*G,  jdk23_coops_align128,   jdk23_coops,    jdk8_coops_align128,    jdk15_coops_align128);
         }
         out.println();
 
@@ -204,7 +204,7 @@ public class HeapDumpEstimates implements Operation {
         {
             out.printf("%37s %s%n", "", "Upgrade From:");
             out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK 15..22", "JDK >= 23", "Description"
+                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "JDK >= 23", "Description"
             );
 
             printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdkLilliput_noCoops,          jdkLilliput_coops, jdk8_noCoops,           jdk15_noCoops,         jdk23_noCoops);
@@ -229,7 +229,7 @@ public class HeapDumpEstimates implements Operation {
         {
             out.printf("%37s %s%n", "", "Upgrade From:");
             out.printf("%10s, %10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK 15..22", "JDK >= 23", "Lilliput 1", "Description"
+                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "JDK >= 23", "Lilliput 1", "Description"
             );
 
             printLine(msg_noCoops_ccp,    rawSize,  MAX,    jdkLilliput32_noCoops,        jdkLilliput32_coops, jdk8_noCoops,          jdk15_noCoops,          jdk23_noCoops,        jdkLilliput_noCoops);
