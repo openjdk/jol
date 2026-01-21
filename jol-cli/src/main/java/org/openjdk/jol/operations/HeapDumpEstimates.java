@@ -148,7 +148,7 @@ public class HeapDumpEstimates implements Operation {
         long jdk15_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  64), 15));
         long jdk15_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 128), 15));
 
-        out.println("=== Stock 64-bit OpenJDK (JDK >= 15): Better Compressed Class Pointers, New Field Layouter");
+        out.println("=== Stock 64-bit OpenJDK (JDK 15..22): Better Compressed Class Pointers, New Field Layouter");
         out.println();
 
         {
@@ -166,6 +166,31 @@ public class HeapDumpEstimates implements Operation {
         }
         out.println();
 
+        long jdk23_noCoops =        computeWithLayouter(data, new HotSpotLayouter(new Model64(false, true,  8), 23));
+        long jdk23_coops =          computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,   8), 23));
+        long jdk23_coops_align16 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  16), 23));
+        long jdk23_coops_align32 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  32), 23));
+        long jdk23_coops_align64 =  computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true,  64), 23));
+        long jdk23_coops_align128 = computeWithLayouter(data, new HotSpotLayouter(new Model64(true, true, 128), 23));
+
+        out.println("=== Stock 64-bit OpenJDK (JDK >= 23): Array Base Improvements");
+        out.println();
+
+        {
+            out.printf("%37s %s%n", "", "Upgrade From:");
+            out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
+                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK 15..22", "Description"
+            );
+
+            printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdk23_noCoops,          jdk23_coops,    jdk15_coops,    jdk8_noCoops);
+            printLine(msg_coops,            rawSize,    32*G,   jdk23_coops,            jdk23_coops,    jdk15_coops,    jdk8_coops);
+            printLine(msg_coops_align16,    rawSize,    64*G,   jdk23_coops_align16,    jdk23_coops,    jdk15_coops,    jdk8_coops_align16);
+            printLine(msg_coops_align32,    rawSize,    128*G,  jdk23_coops_align32,    jdk23_coops,    jdk15_coops,    jdk8_coops_align32);
+            printLine(msg_coops_align64,    rawSize,    256*G,  jdk23_coops_align64,    jdk23_coops,    jdk15_coops,    jdk8_coops_align64);
+            printLine(msg_coops_align128,   rawSize,    512*G,  jdk23_coops_align128,   jdk23_coops,    jdk15_coops,    jdk8_coops_align128);
+        }
+        out.println();
+
         out.println("=== Stock 64-bit OpenJDK (JDK >= 24): Lilliput 1 (64-bit headers) Enabled");
         out.println();
 
@@ -178,16 +203,16 @@ public class HeapDumpEstimates implements Operation {
 
         {
             out.printf("%37s %s%n", "", "Upgrade From:");
-            out.printf("%10s, %10s, %10s, %10s, %10s,     %s%n",
-                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "Description"
+            out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
+                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK 15..22", "JDK >= 23", "Description"
             );
 
-            printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdkLilliput_noCoops,          jdkLilliput_coops, jdk8_noCoops,           jdk15_noCoops);
-            printLine(msg_coops,            rawSize,    32*G,   jdkLilliput_coops,            jdkLilliput_coops, jdk8_coops,             jdk15_coops);
-            printLine(msg_coops_align16,    rawSize,    64*G,   jdkLilliput_coops_align16,    jdkLilliput_coops, jdk8_coops_align16,     jdk15_coops_align16);
-            printLine(msg_coops_align32,    rawSize,    128*G,  jdkLilliput_coops_align32,    jdkLilliput_coops, jdk8_coops_align32,     jdk15_coops_align32);
-            printLine(msg_coops_align64,    rawSize,    256*G,  jdkLilliput_coops_align64,    jdkLilliput_coops, jdk8_coops_align64,     jdk15_coops_align64);
-            printLine(msg_coops_align128,   rawSize,    512*G,  jdkLilliput_coops_align128,   jdkLilliput_coops, jdk8_coops_align128,    jdk15_coops_align128);
+            printLine(msg_noCoops_ccp,      rawSize,    MAX,    jdkLilliput_noCoops,          jdkLilliput_coops, jdk8_noCoops,           jdk15_noCoops,         jdk23_noCoops);
+            printLine(msg_coops,            rawSize,    32*G,   jdkLilliput_coops,            jdkLilliput_coops, jdk8_coops,             jdk15_coops,           jdk23_coops);
+            printLine(msg_coops_align16,    rawSize,    64*G,   jdkLilliput_coops_align16,    jdkLilliput_coops, jdk8_coops_align16,     jdk15_coops_align16,   jdk23_coops_align16);
+            printLine(msg_coops_align32,    rawSize,    128*G,  jdkLilliput_coops_align32,    jdkLilliput_coops, jdk8_coops_align32,     jdk15_coops_align32,   jdk23_coops_align32);
+            printLine(msg_coops_align64,    rawSize,    256*G,  jdkLilliput_coops_align64,    jdkLilliput_coops, jdk8_coops_align64,     jdk15_coops_align64,   jdk23_coops_align64);
+            printLine(msg_coops_align128,   rawSize,    512*G,  jdkLilliput_coops_align128,   jdkLilliput_coops, jdk8_coops_align128,    jdk15_coops_align128,  jdk23_coops_align128);
         }
         out.println();
 
@@ -203,16 +228,16 @@ public class HeapDumpEstimates implements Operation {
 
         {
             out.printf("%37s %s%n", "", "Upgrade From:");
-            out.printf("%10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
-                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK >= 15", "Lilliput 1", "Description"
+            out.printf("%10s, %10s, %10s, %10s, %10s, %10s, %10s,     %s%n",
+                    "Footprint", "Overhead", "JVM Mode", "JDK < 15", "JDK 15..22", "JDK >= 23", "Lilliput 1", "Description"
             );
 
-            printLine(msg_noCoops_ccp,    rawSize,  MAX,    jdkLilliput32_noCoops,        jdkLilliput32_coops, jdk8_noCoops,          jdk15_noCoops,          jdkLilliput_noCoops);
-            printLine(msg_coops,          rawSize,  32*G,   jdkLilliput32_coops,          jdkLilliput32_coops, jdk8_coops,            jdk15_coops,            jdkLilliput_coops);
-            printLine(msg_coops_align16,  rawSize,  64*G,   jdkLilliput32_coops_align16,  jdkLilliput32_coops, jdk8_coops_align16,    jdk15_coops_align16,    jdkLilliput_coops_align16);
-            printLine(msg_coops_align32,  rawSize,  128*G,  jdkLilliput32_coops_align32,  jdkLilliput32_coops, jdk8_coops_align32,    jdk15_coops_align32,    jdkLilliput_coops_align32);
-            printLine(msg_coops_align64,  rawSize,  256*G,  jdkLilliput32_coops_align64,  jdkLilliput32_coops, jdk8_coops_align64,    jdk15_coops_align64,    jdkLilliput_coops_align64);
-            printLine(msg_coops_align128, rawSize,  512*G,  jdkLilliput32_coops_align128, jdkLilliput32_coops, jdk8_coops_align128,   jdk15_coops_align128,   jdkLilliput_coops_align128);
+            printLine(msg_noCoops_ccp,    rawSize,  MAX,    jdkLilliput32_noCoops,        jdkLilliput32_coops, jdk8_noCoops,          jdk15_noCoops,          jdk23_noCoops,        jdkLilliput_noCoops);
+            printLine(msg_coops,          rawSize,  32*G,   jdkLilliput32_coops,          jdkLilliput32_coops, jdk8_coops,            jdk15_coops,            jdk23_coops,          jdkLilliput_coops);
+            printLine(msg_coops_align16,  rawSize,  64*G,   jdkLilliput32_coops_align16,  jdkLilliput32_coops, jdk8_coops_align16,    jdk15_coops_align16,    jdk23_coops_align16,  jdkLilliput_coops_align16);
+            printLine(msg_coops_align32,  rawSize,  128*G,  jdkLilliput32_coops_align32,  jdkLilliput32_coops, jdk8_coops_align32,    jdk15_coops_align32,    jdk23_coops_align32,  jdkLilliput_coops_align32);
+            printLine(msg_coops_align64,  rawSize,  256*G,  jdkLilliput32_coops_align64,  jdkLilliput32_coops, jdk8_coops_align64,    jdk15_coops_align64,    jdk23_coops_align64,  jdkLilliput_coops_align64);
+            printLine(msg_coops_align128, rawSize,  512*G,  jdkLilliput32_coops_align128, jdkLilliput32_coops, jdk8_coops_align128,   jdk15_coops_align128,   jdk23_coops_align128, jdkLilliput_coops_align128);
         }
         out.println();
     }
