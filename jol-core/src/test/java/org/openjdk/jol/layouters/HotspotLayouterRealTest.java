@@ -1,7 +1,9 @@
 package org.openjdk.jol.layouters;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.openjdk.jol.TestUtils;
 import org.openjdk.jol.datamodel.ModelVM;
 import org.openjdk.jol.datamodel.DataModel;
 import org.openjdk.jol.info.ClassData;
@@ -14,44 +16,40 @@ public class HotspotLayouterRealTest {
 
     private static final int ITERATIONS = 20000;
 
-    private int getVersion() {
-        try {
-            return Integer.parseInt(System.getProperty("java.specification.version"));
-        } catch (Exception e) {
-            return -1;
-        }
-    }
-
     @Test
     public void testSingleClass() throws Exception {
-        tryWithClasses(1, 5, getVersion());
+        tryWithClasses(1, 5);
     }
 
     @Test
     public void testTwoClasses() throws Exception {
-        tryWithClasses(2, 5, getVersion());
+        tryWithClasses(2, 5);
+    }
+
+    @Test
+    public void testThreeClasses() throws Exception {
+        tryWithClasses(3, 6);
     }
 
     @Test
     public void testArrays() {
-        int version = getVersion();
         for (int c = 0; c < 128; c++) {
-            tryWithArrays(new boolean[c], version);
-            tryWithArrays(new byte[c],    version);
-            tryWithArrays(new char[c],    version);
-            tryWithArrays(new int[c],     version);
-            tryWithArrays(new float[c],   version);
-            tryWithArrays(new long[c],    version);
-            tryWithArrays(new double[c],  version);
-            tryWithArrays(new Object[c],  version);
+            tryWithArrays(new boolean[c]);
+            tryWithArrays(new byte[c]);
+            tryWithArrays(new char[c]);
+            tryWithArrays(new int[c]);
+            tryWithArrays(new float[c]);
+            tryWithArrays(new long[c]);
+            tryWithArrays(new double[c]);
+            tryWithArrays(new Object[c]);
         }
     }
 
-    public void tryWithArrays(Object array, int jdkVersion) {
+    public void tryWithArrays(Object array) {
         ClassLayout actual = ClassLayout.parseInstance(array);
         ClassData cd = ClassData.parseInstance(array);
 
-        HotSpotLayouter layouter = new HotSpotLayouter(new ModelVM(), jdkVersion);
+        HotSpotLayouter layouter = new HotSpotLayouter(new ModelVM(), TestUtils.JDK_VERSION);
         ClassLayout model = layouter.layout(cd);
 
         System.out.println(actual);
@@ -60,9 +58,9 @@ public class HotspotLayouterRealTest {
         Assert.assertEquals(model, actual);
     }
 
-    public void tryWithClasses(int hierarchyDepth, int fieldsPerClass, int jdkVersion) throws Exception {
+    public void tryWithClasses(int hierarchyDepth, int fieldsPerClass) throws Exception {
         Random seeder = new Random();
-        HotSpotLayouter layouter = new HotSpotLayouter(new ModelVM(), jdkVersion);
+        HotSpotLayouter layouter = new HotSpotLayouter(new ModelVM(), TestUtils.JDK_VERSION);
 
         for (int c = 0; c < ITERATIONS; c++) {
             int seed = seeder.nextInt();

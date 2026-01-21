@@ -9,6 +9,8 @@ import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.util.ClassGenerator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class LayouterInvariantsTest {
@@ -62,27 +64,18 @@ public class LayouterInvariantsTest {
     }
 
     @Test
-    public void testHotspot_Old() {
-        for (int c = 0; c < ITERATIONS; c++) {
-            ClassData cd = ClassData.parseClass(CLS[c]);
-            try {
-                for (DataModel model : MODELS) {
-                    HotSpotLayouter layouter = new HotSpotLayouter(model, 8);
-                    layouter.layout(cd);
-                }
-            } catch (Exception e) {
-                Assert.fail("Failed. Seed = " + SEEDS[c]);
-            }
+    public void testHotspot() {
+        List<Layouter> layouters = new ArrayList<>();
+        for (DataModel model : MODELS) {
+            layouters.add(new HotSpotLayouter(model, 8));
+            layouters.add(new HotSpotLayouter(model, 15));
+            layouters.add(new HotSpotLayouter(model, 23));
+            layouters.add(new HotSpotLayouter(model, 25));
         }
-    }
-
-    @Test
-    public void testHotspot_New() {
         for (int c = 0; c < ITERATIONS; c++) {
             ClassData cd = ClassData.parseClass(CLS[c]);
             try {
-                for (DataModel model : MODELS) {
-                    HotSpotLayouter layouter = new HotSpotLayouter(model, 15);
+                for (Layouter layouter : layouters) {
                     layouter.layout(cd);
                 }
             } catch (Exception e) {
