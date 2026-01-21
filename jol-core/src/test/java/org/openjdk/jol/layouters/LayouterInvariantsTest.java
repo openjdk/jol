@@ -77,12 +77,42 @@ public class LayouterInvariantsTest {
     }
 
     @Test
-    public void testHotspot_New() {
+    public void testHotspot_15() {
         for (int c = 0; c < ITERATIONS; c++) {
             ClassData cd = ClassData.parseClass(CLS[c]);
             try {
                 for (DataModel model : MODELS) {
                     HotSpotLayouter layouter = new HotSpotLayouter(model, 15);
+                    layouter.layout(cd);
+                }
+            } catch (Exception e) {
+                Assert.fail("Failed. Seed = " + SEEDS[c]);
+            }
+        }
+    }
+
+    @Test
+    public void testHotspot_23() {
+        for (int c = 0; c < ITERATIONS; c++) {
+            ClassData cd = ClassData.parseClass(CLS[c]);
+            try {
+                for (DataModel model : MODELS) {
+                    HotSpotLayouter layouter = new HotSpotLayouter(model, 23);
+                    layouter.layout(cd);
+                }
+            } catch (Exception e) {
+                Assert.fail("Failed. Seed = " + SEEDS[c]);
+            }
+        }
+    }
+
+    @Test
+    public void testHotspot_25() {
+        for (int c = 0; c < ITERATIONS; c++) {
+            ClassData cd = ClassData.parseClass(CLS[c]);
+            try {
+                for (DataModel model : MODELS) {
+                    HotSpotLayouter layouter = new HotSpotLayouter(model, 25);
                     layouter.layout(cd);
                 }
             } catch (Exception e) {

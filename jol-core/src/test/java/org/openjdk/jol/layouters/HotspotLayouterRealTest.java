@@ -1,6 +1,7 @@
 package org.openjdk.jol.layouters;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openjdk.jol.datamodel.ModelVM;
 import org.openjdk.jol.datamodel.DataModel;

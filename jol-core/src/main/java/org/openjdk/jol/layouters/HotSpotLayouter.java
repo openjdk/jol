@@ -107,46 +107,42 @@ public class HotSpotLayouter implements Layouter {
         BitSet claimed = new BitSet();
         claimed.set(0, model.headerSize());
 
+        // Ref fields are clustered together in more modern JDKs:
+        //  https://bugs.openjdk.org/browse/JDK-8353273
+        boolean clusterOops = (jdkVersion >= 25);
+
         for (String k : hierarchy) {
+            boolean refsFirst = false;
+            if (clusterOops && !result.isEmpty()) {
+                refsFirst = !result.last().data().isPrimitive();
+            }
+
             Collection<FieldData> fields = cd.fieldsFor(k);
-
-            SortedSet<FieldLayout> current = new TreeSet<>();
-            for (int size : new int[]{8, 4, 2, 1}) {
-                for (FieldData f : fields) {
-                    if (!f.isPrimitive()) continue;
-                    int fSize = model.sizeOf(f.typeClass());
-                    if (fSize != size) continue;
-
-                    for (int t = 0; t < Integer.MAX_VALUE; t++) {
-                        if (claimed.get(t * size, (t + 1) * size).isEmpty()) {
-                            claimed.set(t * size, (t + 1) * size);
-                            current.add(new FieldLayout(f, t * size, size));
-                            break;
-                        }
-                    }
-                }
-            }
-            for (int size : new int[]{8, 4, 2, 1}) {
-                for (FieldData f : fields) {
-                    if (f.isPrimitive()) continue;
-                    int fSize = model.sizeOf(f.typeClass());
-                    if (fSize != size) continue;
-
-                    for (int t = 0; t < Integer.MAX_VALUE; t++) {
-                        if (claimed.get(t * size, (t + 1) * size).isEmpty()) {
-                            claimed.set(t * size, (t + 1) * size);
-                            current.add(new FieldLayout(f, t * size, size));
-                            break;
-                        }
-                    }
-                }
-            }
-            result.addAll(current);
+            newLayouterWork(fields, claimed, result,  refsFirst);
+            newLayouterWork(fields, claimed, result, !refsFirst);
         }
 
         int instanceSize = MathUtil.align(claimed.length(), model.objectAlignment());
 
         return ClassLayout.create(cd, result, model, instanceSize, true);
+    }
+
+    private void newLayouterWork(Collection<FieldData> fields, BitSet claimed, SortedSet<FieldLayout> result, boolean doRefs) {
+        for (int size : new int[]{8, 4, 2, 1}) {
+            for (FieldData f : fields) {
+                if ( doRefs  && f.isPrimitive()) continue;
+                if (!doRefs && !f.isPrimitive()) continue;
+                int fSize = model.sizeOf(f.typeClass());
+                if (fSize != size) continue;
+                for (int t = 0; t < Integer.MAX_VALUE; t++) {
+                    if (claimed.get(t * size, (t + 1) * size).isEmpty()) {
+                        claimed.set(t * size, (t + 1) * size);
+                        result.add(new FieldLayout(f, t * size, size));
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private ClassLayout oldLayouter(ClassData cd) {
