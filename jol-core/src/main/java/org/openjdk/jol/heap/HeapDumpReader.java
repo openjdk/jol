@@ -290,7 +290,7 @@ public class HeapDumpReader {
 
     private void digestPrimArray() throws HeapDumpException {
         long id = read_ID(); // array id
-        read_U4(); // stack trace
+        skipContents(4); // stack trace, ignore
         int elements = (int) read_U4(); // always fits
         int typeClass = read_U1();
 
@@ -309,7 +309,7 @@ public class HeapDumpReader {
 
     private void digestObjArray() throws HeapDumpException {
         long id = read_ID(); // array id
-        read_U4(); // stack trace
+        skipContents(4); // stack trace, ignore
         int elements = (int) read_U4(); // always fits
         long klassId = read_ID(); // array class
 
@@ -331,12 +331,11 @@ public class HeapDumpReader {
 
     private void digestInstance() throws HeapDumpException {
         long id = read_ID(); // object id
-        read_U4(); // stack trace
+        skipContents(4); // stack trace, ignore
         long klassID = read_ID();
+        int instanceBytes = (int) read_U4(); // always fits
 
         classCounts.add(klassID);
-
-        int instanceBytes = (int) read_U4(); // always fits
 
         if (visitor != null) {
             byte[] bytes = readContents(instanceBytes);
@@ -352,7 +351,7 @@ public class HeapDumpReader {
 
         String name = classNames.get(klassID);
 
-        read_U4(); // stack trace
+        skipContents(4); // stack trace, ignore
 
         long superKlassID = read_ID();
         if (superKlassID != 0 && classSupers.put(klassID, superKlassID) != null) {
