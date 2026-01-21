@@ -32,9 +32,7 @@ import org.openjdk.jol.util.Multiset;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -44,6 +42,7 @@ import java.util.zip.GZIPInputStream;
  */
 public class HeapDumpReader {
 
+    private static final int      BUF_SIZE =       128 * 1024;
     private static final int GZIP_BUF_SIZE =       512 * 1024;
     private static final int READ_BUF_SIZE =  4 * 1024 * 1024;
 
@@ -81,7 +80,7 @@ public class HeapDumpReader {
         this.classFields = new Multimap<>();
         this.arrayCounts = new Multiset<>();
         this.classSupers = new HashMap<>();
-        this.buf = new byte[32*1024];
+        this.buf = new byte[BUF_SIZE];
         this.wrapBuf = ByteBuffer.wrap(buf);
     }
 
