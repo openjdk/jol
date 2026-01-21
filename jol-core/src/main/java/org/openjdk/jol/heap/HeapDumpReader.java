@@ -99,6 +99,16 @@ public class HeapDumpReader {
         }
     }
 
+    private int read_byte() throws HeapDumpException {
+        try {
+            int read = is.read();
+            readBytes += (read < 0) ? 0 : 1;
+            return read;
+        } catch (IOException e) {
+            throw new HeapDumpException(errorMessage(e.getMessage()));
+        }
+    }
+
     private int read(byte[] b, int size) throws HeapDumpException {
         try {
             int read = is.read(b, 0, size);
@@ -591,11 +601,11 @@ public class HeapDumpReader {
     }
 
     int read_U1() throws HeapDumpException {
-        int read = read(buf, 1);
-        if (read == 1) {
-            return ((int)wrapBuf.get(0) & 0xFF);
+        int read = read_byte();
+        if (read < 0) {
+            throw new HeapDumpException(errorMessage("Unable to read 1 bytes"));
         }
-        throw new HeapDumpException(errorMessage("Unable to read 1 bytes"));
+        return (int)(read & 0xFF);
     }
 
     private String errorMessage(String message) throws HeapDumpException {
