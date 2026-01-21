@@ -318,7 +318,7 @@ public class HeapDumpReader {
         // Assume Object as component type, the name of the actual class
         // is what we want for the printouts.
         ClassData thisCD = new ClassData(name, "Object", elements);
-        arrayCounts.add(new ClassData(name, "Object", elements));
+        arrayCounts.add(thisCD);
 
         long len = (long) elements * idSize;
         if (visitor != null) {
