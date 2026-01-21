@@ -130,8 +130,7 @@ public class HotSpotLayouter implements Layouter {
     private void newLayouterWork(Collection<FieldData> fields, BitSet claimed, SortedSet<FieldLayout> result, boolean doRefs) {
         for (int size : new int[]{8, 4, 2, 1}) {
             for (FieldData f : fields) {
-                if ( doRefs  && f.isPrimitive()) continue;
-                if (!doRefs && !f.isPrimitive()) continue;
+                if (doRefs == f.isPrimitive()) continue;
                 int fSize = model.sizeOf(f.typeClass());
                 if (fSize != size) continue;
                 for (int t = 0; t < Integer.MAX_VALUE; t++) {

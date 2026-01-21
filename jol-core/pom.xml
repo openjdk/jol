@@ -409,6 +409,118 @@ questions.
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>lilliput-tests</id>
+            <activation>
+                <jdk>[25,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>tests-1g-minus-coops-plus-ucoh</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-Xmx1g -XX:-UseCompressedOops -XX:+UseCompactObjectHeaders</argLine>
+                                    <forkCount>4</forkCount>
+                                    <reuseForks>true</reuseForks>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>tests-1g-minus-coops-plus-ucoh-align16</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-Xmx1g -XX:-UseCompressedOops -XX:ObjectAlignmentInBytes=16 -XX:+UseCompactObjectHeaders</argLine>
+                                    <forkCount>4</forkCount>
+                                    <reuseForks>true</reuseForks>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>tests-1g-plus-coops-plus-ucoh</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-Xmx1g -XX:+UseCompressedOops -XX:+UseCompactObjectHeaders</argLine>
+                                    <forkCount>4</forkCount>
+                                    <reuseForks>true</reuseForks>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>tests-1g-plus-coops-plus-ucoh-align16</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-Xmx1g -XX:+UseCompressedOops -XX:ObjectAlignmentInBytes=16 -XX:+UseCompactObjectHeaders</argLine>
+                                    <forkCount>4</forkCount>
+                                    <reuseForks>true</reuseForks>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>tests-4g-minus-coops-plus-ucoh</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-Xmx4g -XX:-UseCompressedOops -XX:+UseCompactObjectHeaders</argLine>
+                                    <forkCount>1</forkCount>
+                                    <reuseForks>true</reuseForks>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>tests-4g-minus-coops-plus-ucoh-align16</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-Xmx4g -XX:-UseCompressedOops -XX:ObjectAlignmentInBytes=16 -XX:+UseCompactObjectHeaders</argLine>
+                                    <forkCount>1</forkCount>
+                                    <reuseForks>true</reuseForks>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>tests-4g-plus-coops-plus-ucoh</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-Xmx4g -XX:+UseCompressedOops -XX:+UseCompactObjectHeaders</argLine>
+                                    <forkCount>1</forkCount>
+                                    <reuseForks>true</reuseForks>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>tests-4g-plus-coops-plus-ucoh-align16</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-Xmx4g -XX:+UseCompressedOops -XX:ObjectAlignmentInBytes=16 -XX:+UseCompactObjectHeaders</argLine>
+                                    <forkCount>1</forkCount>
+                                    <reuseForks>true</reuseForks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <dependencies>

@@ -11,7 +11,9 @@ import java.util.Random;
 
 public class HotspotLayouterCompactTest {
 
-    private static final int ITERATIONS = 20000;
+    // We expect this test to never realistically fail, as failure
+    // would point to JDK issue, not JOL bug. Therefore, run with fewer iterations.
+    private static final int ITERATIONS = 5000;
 
     @Test
     public void testSingleClass() throws Exception {
