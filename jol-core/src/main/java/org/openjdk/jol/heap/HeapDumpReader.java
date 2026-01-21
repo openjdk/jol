@@ -109,6 +109,16 @@ public class HeapDumpReader {
         }
     }
 
+    private int skip(int skip) throws HeapDumpException {
+        try {
+            long r = is.skip(skip);
+            readBytes += r;
+            return (int)r;
+        } catch (IOException e) {
+            throw new HeapDumpException(errorMessage(e.getMessage()));
+        }
+    }
+
     public Multiset<ClassData> parse() throws IOException, HeapDumpException {
         header = readNullTerminated();
 
@@ -528,7 +538,10 @@ public class HeapDumpReader {
         int read;
         do {
             int toRead = (int) Math.min(buf.length, rem); // always fits into buf.length
-            read = read(buf, toRead);
+            read = skip(toRead);
+            if (read == 0) {
+                read = read(buf, toRead);
+            }
             rem -= read;
         } while (rem > 0);
     }
@@ -683,6 +696,16 @@ public class HeapDumpReader {
             System.arraycopy(buf, pos, b, off, len);
             pos += len;
             return len;
+        }
+
+        @Override
+        public long skip(long skip) throws IOException {
+            if (pos + skip >= count || skip > 1024*1024) {
+                // Let superclass handle buffers
+                return super.skip(skip);
+            }
+            pos += (int)skip;
+            return skip;
         }
     }
 
